@@ -113,13 +113,14 @@ import Layout from '../layouts/Layout.astro';
             <!-- Data rows -->
             <div id="result-data" class="bg-p-panel px-5 py-4 space-y-3 font-ui text-xs"></div>
             <!-- Footer -->
-            <div id="result-footer" class="px-5 py-3 border-t border-p-teal/20 bg-p-canvas">
-              <p id="result-verdict" class="font-display text-xs tracking-widest text-p-teal text-center mb-3">
+            <div id="result-footer" class="px-5 py-4 border-t border-p-teal/20 bg-p-canvas">
+              <p id="result-verdict" class="font-display text-xs tracking-widest text-p-teal text-center mb-4">
                 ACCESS GRANTED
               </p>
               <!-- Unlock link (hidden by default, shown on verified scan) -->
               <a id="unlock-link" href="/unlocked"
-                 class="hidden w-full mb-3 py-3 bg-p-unlock/20 border border-p-unlock text-p-unlock font-display text-xs tracking-widest hover:bg-p-unlock/30 transition-all text-center animate-pulse-unlock">
+                 class="hidden block w-full mb-4 py-3 bg-p-unlock/20 border-2 border-p-unlock text-p-unlock font-display text-sm tracking-widest hover:bg-p-unlock/30 transition-all text-center animate-pulse-unlock"
+                 style="text-decoration: none;">
                 VIEW CLASSIFIED FILES →
               </a>
               <div class="flex gap-3">
@@ -128,7 +129,8 @@ import Layout from '../layouts/Layout.astro';
                   SCAN ANOTHER INMATE
                 </button>
                 <a href="/avatar"
-                   class="flex-1 py-2 border border-p-dim/40 text-p-dim font-display text-xs tracking-widest hover:border-p-dim hover:text-p-text transition-all text-center">
+                   class="flex-1 py-2 border border-p-dim/40 text-p-dim font-display text-xs tracking-widest hover:border-p-dim hover:text-p-text transition-all text-center"
+                   style="text-decoration: none;">
                   GO TO INTAKE
                 </a>
               </div>
@@ -207,10 +209,27 @@ import Layout from '../layouts/Layout.astro';
     display: flex;
     gap: 1rem;
     align-items: baseline;
-    padding: 0.4rem 0;
+    padding: 0.6rem 0;
     border-bottom: 1px solid rgba(26,224,194,0.08);
+    perspective: 600px;
+    opacity: 0;
   }
   :global(.data-row:last-child) { border-bottom: none; }
+  :global(.data-row-inner) {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+    width: 100%;
+    transform: rotateX(90deg);
+    transform-origin: top center;
+    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), color 0.6s ease;
+  }
+  :global(.data-row.flip-in) {
+    opacity: 1;
+  }
+  :global(.data-row.flip-in .data-row-inner) {
+    transform: rotateX(0deg);
+  }
   :global(.data-label) {
     color: #5c576f;
     letter-spacing: 0.15em;
@@ -218,8 +237,15 @@ import Layout from '../layouts/Layout.astro';
     flex-shrink: 0;
   }
   :global(.data-value) {
-    color: #d6d6e0;
     letter-spacing: 0.08em;
+    transition: color 0.6s ease, text-shadow 0.6s ease;
+  }
+  :global(.data-value.white-start) {
+    color: #ffffff;
+  }
+  :global(.data-value.glow-green) {
+    color: #1ae0c2;
+    text-shadow: 0 0 8px rgba(26, 224, 194, 0.5);
   }
   :global(.data-value.accent) { color: #1ae0c2; }
   :global(.data-value.dim)    { color: #5c576f; }
@@ -444,7 +470,7 @@ import Layout from '../layouts/Layout.astro';
       { label: 'REGISTRY', value: 'PANOPTICON INTAKE SYSTEM', cls: '' },
       { label: 'TOKEN',    value: (data.tok || '—').toUpperCase(), cls: 'dim' },
     ];
-    buildDataRows(rows);
+    buildDataRows(rows, true);
 
     imgBadgeIcon.textContent = '✓';
     imgBadgeText.textContent = 'IDENTITY CONFIRMED';
@@ -496,13 +522,34 @@ import Layout from '../layouts/Layout.astro';
     if (unlockLink) unlockLink.classList.add('hidden');
   }
 
-  function buildDataRows(rows) {
+  function buildDataRows(rows, animated = false) {
     resultData.innerHTML = '';
-    for (const r of rows) {
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
       const div = document.createElement('div');
       div.className = 'data-row';
-      div.innerHTML = `<span class="data-label">${r.label}:</span><span class="data-value ${r.cls}">${r.value}</span>`;
+      const inner = document.createElement('div');
+      inner.className = 'data-row-inner';
+      inner.innerHTML = `<span class="data-label">${r.label}:</span><span class="data-value ${animated ? 'white-start' : r.cls}" data-final-cls="${r.cls}">${r.value}</span>`;
+      div.appendChild(inner);
       resultData.appendChild(div);
+
+      if (animated) {
+        const delay = 300 + i * 350;
+        setTimeout(() => {
+          div.classList.add('flip-in');
+          // After flip completes, transition white → green glow
+          setTimeout(() => {
+            const val = div.querySelector('.data-value');
+            if (val) {
+              val.classList.remove('white-start');
+              val.classList.add('glow-green');
+            }
+          }, 500);
+        }, delay);
+      } else {
+        div.classList.add('flip-in');
+      }
     }
   }
 
