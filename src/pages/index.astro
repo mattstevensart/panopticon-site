@@ -16,18 +16,20 @@ import Layout from '../layouts/Layout.astro';
         <div class="absolute top-4 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-p-red/30 blur-lg animate-pulse"></div>
       </div>
 
+      <!-- Ticker (horizontal scroll) -->
+      <div class="w-screen border-y border-p-accent/15 bg-p-canvas py-3 overflow-hidden">
+        <div class="flex gap-12 animate-[scroll_25s_linear_infinite] whitespace-nowrap">
+          {Array(4).fill(null).map(() => (
+            <span class="font-ui text-p-dim/50 text-xs tracking-widest">
+              ⊗ &nbsp; CLASSIFIED &nbsp; ⊗ &nbsp; ALL MOVEMENT LOGGED &nbsp; ⊗ &nbsp; FACILITY SECURITY LEVEL: MAXIMUM &nbsp; ⊗ &nbsp; DO NOT DISCUSS ESCAPE ROUTES &nbsp; ⊗ &nbsp; REPORT SUSPICIOUS ACTIVITY &nbsp; &nbsp;
+            </span>
+          ))}
+        </div>
+      </div>
+
       <div class="space-y-2">
         <p class="font-display text-p-text text-lg md:text-2xl tracking-wide">Welcome to the Panopticon | 63rd.</p>
         <p class="font-ui text-p-teal text-sm tracking-[0.3em]">Surveillance is mandatory.</p>
-      </div>
-
-      <div class="flex flex-col sm:flex-row gap-4 mt-4">
-        <a href="/read" class="px-8 py-3 bg-p-accent text-p-root font-display text-sm tracking-widest hover:bg-p-accent/80 transition-all shadow-accent-glow animate-pulse-accent">
-          READ NOW
-        </a>
-        <a href="/avatar" class="px-8 py-3 border border-p-teal text-p-teal font-display text-sm tracking-widest hover:bg-p-teal/10 transition-all">
-          INTAKE PROCESSING
-        </a>
       </div>
 
       <div class="flex flex-col items-center gap-1 text-p-dim/40 text-xs font-ui mt-8">
@@ -36,17 +38,6 @@ import Layout from '../layouts/Layout.astro';
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
         </svg>
       </div>
-    </div>
-  </section>
-
-  <!-- Ticker -->
-  <section class="border-y border-p-accent/15 bg-p-canvas py-3 overflow-hidden">
-    <div class="flex gap-12 animate-[scroll_25s_linear_infinite] whitespace-nowrap">
-      {Array(4).fill(null).map(() => (
-        <span class="font-ui text-p-dim/50 text-xs tracking-widest">
-          ⊗ &nbsp; CLASSIFIED &nbsp; ⊗ &nbsp; ALL MOVEMENT LOGGED &nbsp; ⊗ &nbsp; FACILITY SECURITY LEVEL: MAXIMUM &nbsp; ⊗ &nbsp; DO NOT DISCUSS ESCAPE ROUTES &nbsp; ⊗ &nbsp; REPORT SUSPICIOUS ACTIVITY &nbsp; &nbsp;
-        </span>
-      ))}
     </div>
   </section>
 
