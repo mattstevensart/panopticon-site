@@ -1,0 +1,69 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Add your issues here as you publish them
+const chapters = [
+  {
+    id: '01', title: 'ISSUE 01',
+    description: 'Arrival. A new inmate is processed into Facility 7.',
+    coverImage: '/images/covers/issue-01.jpg',
+    href: '/read/issue-01', status: 'AVAILABLE',
+  },
+  {
+    id: '02', title: 'ISSUE 02',
+    description: 'Block D. The unwritten rules of the facility become clear.',
+    coverImage: '/images/covers/issue-02.jpg',
+    href: '/read/issue-02', status: 'AVAILABLE',
+  },
+  {
+    id: '03', title: 'ISSUE 03',
+    description: 'Coming soon.',
+    coverImage: null,
+    href: '#', status: 'COMING SOON',
+  },
+];
+---
+
+<Layout title="READ">
+  <div class="max-w-6xl mx-auto px-4 py-16">
+    <div class="mb-12 border-b border-p-accent/20 pb-8">
+      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-3">RESTRICTED ACCESS — LEVEL 2</p>
+      <h1 class="font-display text-3xl md:text-4xl text-p-text tracking-wide">READ PANOPTICON</h1>
+      <div class="w-16 h-px bg-p-accent mt-4"></div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {chapters.map(ch => (
+        <a href={ch.status === 'AVAILABLE' ? ch.href : '#'} class:list={[
+          'group bg-p-panel border transition-all overflow-hidden',
+          ch.status === 'AVAILABLE'
+            ? 'border-p-accent/20 hover:border-p-accent/60 hover:shadow-accent-glow cursor-pointer'
+            : 'border-p-dim/20 opacity-50 cursor-not-allowed',
+        ]}>
+          <div class="aspect-[3/4] bg-p-root overflow-hidden relative">
+            {ch.coverImage ? (
+              <img src={ch.coverImage} alt={ch.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            ) : (
+              <div class="w-full h-full flex items-center justify-center">
+                <span class="font-display text-p-dim/30 text-4xl">{ch.id}</span>
+              </div>
+            )}
+            <div class:list={[
+              'absolute top-3 right-3 px-2 py-1 text-xs font-display tracking-widest',
+              ch.status === 'AVAILABLE'
+                ? 'bg-p-accent/20 text-p-accent border border-p-accent/40'
+                : 'bg-p-dim/20 text-p-dim border border-p-dim/30',
+            ]}>
+              {ch.status}
+            </div>
+          </div>
+          <div class="p-4">
+            <p class="font-ui text-p-dim text-xs tracking-widest mb-1">ISSUE {ch.id}</p>
+            <h3 class="font-display text-sm text-p-text tracking-wide mb-2">{ch.title}</h3>
+            <p class="font-comic text-p-dim text-xs leading-relaxed">{ch.description}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</Layout>

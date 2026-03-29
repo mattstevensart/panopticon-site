@@ -1,0 +1,77 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="CLASSIFIED">
+  <div id="gate-wrapper">
+
+    <!-- Shown by default; hidden if access granted -->
+    <div id="access-denied" class="min-h-[80vh] flex flex-col items-center justify-center px-4">
+      <div class="border border-p-red/50 bg-p-panel p-10 text-center max-w-md shadow-red-glow">
+        <div class="text-p-red text-5xl font-display mb-4">⊗</div>
+        <h1 class="font-display text-xl tracking-widest text-p-red mb-4">ACCESS DENIED</h1>
+        <p class="font-ui text-p-dim text-sm mb-6">
+          INMATE PROFILE NOT ON FILE.<br/>
+          COMPLETE INTAKE PROCESSING TO CONTINUE.
+        </p>
+        <a href="/avatar" class="inline-block px-8 py-3 border border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all">
+          GO TO INTAKE →
+        </a>
+      </div>
+    </div>
+
+    <!-- Hidden by default; shown if access granted -->
+    <div id="access-granted" class="hidden">
+      <div class="max-w-6xl mx-auto px-4 py-16">
+        <div class="mb-12 border-b border-p-unlock/30 pb-8">
+          <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">CLEARANCE: LEVEL 5 — EYES ONLY</p>
+          <h1 class="font-display text-3xl md:text-4xl tracking-wide text-p-unlock">CLASSIFIED FILES</h1>
+          <p class="font-body text-p-dim text-sm mt-2">Intake confirmed. You now have access to restricted content.</p>
+          <div class="w-16 h-px bg-p-unlock mt-4"></div>
+        </div>
+
+        <!-- Classified file cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[
+            { id: '001', title: 'FACILITY 7: BLUEPRINTS',  body: 'Concept art and architectural layouts for Facility 7.' },
+            { id: '002', title: 'INMATE DOSSIERS',         body: 'Character profiles, backstories, and classified personnel records.' },
+            { id: '003', title: 'SCRIPT EXTRACTS',         body: 'Unproduced scenes, alternative endings, and development notes.' },
+            { id: '004', title: 'THE TOWER',               body: 'What really happens in the tower? Lore drops and world-building extras.' },
+          ].map(file => (
+            <div class="bg-p-panel border border-p-unlock/20 p-6 hover:border-p-unlock/40 transition-all">
+              <p class="font-ui text-p-unlock text-xs tracking-widest mb-3">FILE {file.id}</p>
+              <h3 class="font-display text-sm text-p-text tracking-wide mb-3">{file.title}</h3>
+              <p class="font-body text-p-dim text-sm">{file.body}</p>
+            </div>
+          ))}
+        </div>
+
+        <!-- Bottom nav -->
+        <div class="mt-12 pt-8 border-t border-p-unlock/10 flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <p class="font-ui text-p-dim/40 text-xs tracking-widest">
+            ALL CLASSIFIED MATERIAL IS MONITORED
+          </p>
+          <div class="flex gap-3">
+            <a href="/scan"
+               class="px-6 py-2 border border-p-teal/40 text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all">
+              SCANNER
+            </a>
+            <a href="/avatar"
+               class="px-6 py-2 border border-p-dim/30 text-p-dim font-display text-xs tracking-widest hover:border-p-dim hover:text-p-text transition-all">
+              INTAKE
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</Layout>
+
+<script>
+  const isComplete = localStorage.getItem('panopticon_intake_complete') === 'true';
+  if (isComplete) {
+    document.getElementById('access-denied')?.classList.add('hidden');
+    document.getElementById('access-granted')?.classList.remove('hidden');
+  }
+</script>

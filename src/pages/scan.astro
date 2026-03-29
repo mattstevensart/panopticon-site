@@ -1,0 +1,554 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="IDENTITY SCANNER">
+  <div class="max-w-5xl mx-auto px-4 py-12">
+
+    <!-- ── Page header ── -->
+    <div class="mb-8 border-b border-p-teal/20 pb-6">
+      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">FACILITY 7 — BIOMETRIC VERIFICATION UNIT</p>
+      <h1 class="font-display text-2xl md:text-3xl text-p-teal tracking-wide">PANOPTICON IDENTITY SCANNER</h1>
+      <p class="font-ui text-p-dim text-sm mt-2 max-w-xl">
+        AUTHORIZED PERSONNEL ONLY  ·  ALL SCANS ARE LOGGED AND MONITORED
+      </p>
+      <div class="w-16 h-px bg-p-teal mt-4"></div>
+    </div>
+
+    <!-- ── Status bar ── -->
+    <div class="bg-p-panel border border-p-teal/30 p-3 mb-6 flex items-center gap-3">
+      <span id="status-dot" class="w-2 h-2 rounded-full bg-p-teal animate-pulse flex-shrink-0"></span>
+      <span id="status-text" class="font-ui text-p-teal text-xs tracking-widest">
+        SCANNER ONLINE  ·  AWAITING INPUT FILE...
+      </span>
+    </div>
+
+    <!-- ── IDLE: Upload / drop zone ── -->
+    <div id="upload-zone"
+         class="relative border-2 border-dashed border-p-teal/40 bg-p-canvas hover:border-p-teal/70 transition-all cursor-pointer group overflow-hidden">
+
+      <!-- Scanlines + grid -->
+      <div class="absolute inset-0 bg-scanline opacity-20 pointer-events-none"></div>
+      <div class="absolute inset-0 bg-grid-subtle bg-grid opacity-60 pointer-events-none"></div>
+
+      <!-- Corner brackets -->
+      <div class="absolute top-3 left-3  w-7 h-7 border-t-2 border-l-2 border-p-teal/70 z-10"></div>
+      <div class="absolute top-3 right-3 w-7 h-7 border-t-2 border-r-2 border-p-teal/70 z-10"></div>
+      <div class="absolute bottom-3 left-3  w-7 h-7 border-b-2 border-l-2 border-p-teal/70 z-10"></div>
+      <div class="absolute bottom-3 right-3 w-7 h-7 border-b-2 border-r-2 border-p-teal/70 z-10"></div>
+
+      <!-- Drag-over highlight overlay (hidden by default) -->
+      <div id="drag-overlay" class="absolute inset-0 bg-p-teal/8 opacity-0 transition-opacity pointer-events-none z-20"></div>
+
+      <div class="relative z-10 flex flex-col items-center justify-center py-24 px-8 text-center">
+        <!-- Upload icon -->
+        <div class="scanner-upload-icon text-p-teal/50 text-7xl mb-6 font-display group-hover:text-p-teal/80 transition-all select-none leading-none">
+          ▲
+        </div>
+        <p class="font-display text-p-teal text-sm tracking-[0.35em] mb-3">DROP INMATE FILE HERE</p>
+        <p class="font-ui text-p-dim text-xs tracking-widest mb-8">OR CLICK TO BROWSE FILES</p>
+
+        <div class="w-32 h-px bg-p-teal/20 mb-6"></div>
+
+        <div class="space-y-1">
+          <p class="font-ui text-p-dim/60 text-xs tracking-[0.2em]">ACCEPTED FORMAT: .PNG</p>
+          <p class="font-ui text-p-dim/40 text-xs tracking-widest">PANOPTICON INTAKE AVATARS CARRY EMBEDDED IDENTITY MARKERS</p>
+        </div>
+      </div>
+
+      <input type="file" id="file-input" accept=".png,image/png" class="hidden" />
+    </div>
+
+    <!-- ── SCANNING + RESULT view (hidden until file selected) ── -->
+    <div id="scan-view" style="display:none;">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+
+        <!-- ── Left: Avatar image + scan line ── -->
+        <div class="relative" id="img-panel">
+          <!-- Teal corner brackets (swap color after result) -->
+          <div class="img-corner absolute top-0 left-0  w-7 h-7 border-t-2 border-l-2 border-p-teal z-20 transition-colors"></div>
+          <div class="img-corner absolute top-0 right-0 w-7 h-7 border-t-2 border-r-2 border-p-teal z-20 transition-colors"></div>
+          <div class="img-corner absolute bottom-0 left-0  w-7 h-7 border-b-2 border-l-2 border-p-teal z-20 transition-colors"></div>
+          <div class="img-corner absolute bottom-0 right-0 w-7 h-7 border-b-2 border-r-2 border-p-teal z-20 transition-colors"></div>
+
+          <!-- Horizontal scan beam -->
+          <div id="scan-beam"
+               class="absolute left-0 right-0 h-1 z-30 pointer-events-none"
+               style="top:0; opacity:0; background:linear-gradient(90deg,transparent 0%,#1ae0c2 40%,#1ae0c2 60%,transparent 100%); box-shadow:0 0 18px 6px rgba(26,224,194,0.5);"></div>
+
+          <!-- Scanlines overlay on image -->
+          <div class="absolute inset-0 bg-scanline opacity-25 pointer-events-none z-10"></div>
+
+          <!-- The avatar image -->
+          <img id="scan-img" class="w-full h-auto block bg-p-panel" src="" alt="Inmate avatar" />
+
+          <!-- Status badge overlaid on image bottom -->
+          <div id="img-badge"
+               class="absolute bottom-0 left-0 right-0 py-2 flex justify-center items-center gap-2 font-display text-xs tracking-widest z-20"
+               style="opacity:0; background:rgba(10,10,15,0.85);">
+            <span id="img-badge-icon" class="text-base">●</span>
+            <span id="img-badge-text">SCANNING...</span>
+          </div>
+        </div>
+
+        <!-- ── Right: Terminal log + result card ── -->
+        <div class="flex flex-col gap-5">
+
+          <!-- Terminal log -->
+          <div class="bg-p-panel border border-p-teal/30 p-5">
+            <p class="font-ui text-p-teal/40 text-xs tracking-widest mb-4 border-b border-p-teal/10 pb-3">
+              [ PANOPTICON BIOMETRIC ANALYSIS SYSTEM  v1.0 ]
+            </p>
+            <div id="terminal-log" class="font-ui text-xs space-y-1 text-p-dim min-h-32"></div>
+          </div>
+
+          <!-- Result card (hidden until scan done) -->
+          <div id="result-card" style="display:none;" class="border-2 border-p-teal">
+            <!-- Header -->
+            <div id="result-header" class="flex items-center gap-3 px-5 py-4 border-b-2 border-p-teal bg-p-canvas">
+              <span id="result-icon" class="text-xl font-display text-p-teal">✓</span>
+              <span id="result-title" class="font-display text-sm tracking-widest text-p-teal">IDENTITY CONFIRMED</span>
+            </div>
+            <!-- Data rows -->
+            <div id="result-data" class="bg-p-panel px-5 py-4 space-y-3 font-ui text-xs"></div>
+            <!-- Footer -->
+            <div id="result-footer" class="px-5 py-3 border-t border-p-teal/20 bg-p-canvas">
+              <p id="result-verdict" class="font-display text-xs tracking-widest text-p-teal text-center mb-3">
+                ACCESS GRANTED
+              </p>
+              <!-- Unlock link (hidden by default, shown on verified scan) -->
+              <a id="unlock-link" href="/unlocked"
+                 class="hidden w-full mb-3 py-3 bg-p-unlock/20 border border-p-unlock text-p-unlock font-display text-xs tracking-widest hover:bg-p-unlock/30 transition-all text-center animate-pulse-unlock">
+                VIEW CLASSIFIED FILES →
+              </a>
+              <div class="flex gap-3">
+                <button id="scan-again-btn"
+                        class="flex-1 py-2 border border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all">
+                  SCAN ANOTHER INMATE
+                </button>
+                <a href="/avatar"
+                   class="flex-1 py-2 border border-p-dim/40 text-p-dim font-display text-xs tracking-widest hover:border-p-dim hover:text-p-text transition-all text-center">
+                  GO TO INTAKE
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Footer note ── -->
+    <p class="font-ui text-p-dim/30 text-xs tracking-widest text-center mt-12">
+      PANOPTICON BIOMETRIC REGISTRY  ·  FACILITY 7  ·  ALL SCANS ARCHIVED
+    </p>
+
+  </div>
+</Layout>
+
+
+<style>
+  /* ── Upload icon breathing pulse ── */
+  .scanner-upload-icon {
+    animation: icon-breathe 3s ease-in-out infinite;
+  }
+  @keyframes icon-breathe {
+    0%, 100% { transform: translateY(0px);   opacity: 0.50; }
+    50%       { transform: translateY(-6px);  opacity: 0.85; }
+  }
+
+  /* ── Scan beam sweep down the avatar ── */
+  @keyframes scan-sweep {
+    0%   { top: 0%;   opacity: 1;   }
+    85%  { top: 100%; opacity: 0.8; }
+    100% { top: 100%; opacity: 0;   }
+  }
+  .scanning .scan-beam-anim {
+    animation: scan-sweep 1.6s linear forwards;
+  }
+
+  /* ── Drag-over state ── */
+  #upload-zone.drag-active {
+    border-color: rgba(26,224,194,0.90);
+    box-shadow: 0 0 24px 4px rgba(26,224,194,0.25);
+  }
+  #upload-zone.drag-active #drag-overlay {
+    opacity: 1;
+  }
+
+  /* ── Terminal text typewriter ── */
+  .log-line {
+    transition: opacity 0.25s;
+  }
+
+  /* ── Result card color variants ── */
+  .result-verified #result-card   { border-color: #1ae0c2; }
+  .result-verified #result-header { border-color: #1ae0c2; }
+  .result-verified .img-corner    { border-color: #1ae0c2; }
+  .result-verified #img-badge-icon,
+  .result-verified #img-badge-text { color: #1ae0c2; }
+
+  .result-denied #result-card   { border-color: #e6261a; }
+  .result-denied #result-header { border-color: #e6261a; }
+  .result-denied .img-corner    { border-color: #e6261a; }
+  .result-denied #result-icon,
+  .result-denied #result-title,
+  .result-denied #result-verdict { color: #e6261a; }
+  .result-denied #img-badge-icon,
+  .result-denied #img-badge-text { color: #e6261a; }
+  .result-denied #scan-again-btn { border-color: #e6261a; color: #e6261a; }
+  .result-denied #scan-again-btn:hover { background: rgba(230,38,26,0.10); }
+
+  /* ── Result data rows ── */
+  /* :global() because these elements are created dynamically in JS and
+     Astro's scoped styles don't reach them without this wrapper. */
+  :global(.data-row) {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(26,224,194,0.08);
+  }
+  :global(.data-row:last-child) { border-bottom: none; }
+  :global(.data-label) {
+    color: #5c576f;
+    letter-spacing: 0.15em;
+    min-width: 8rem;
+    flex-shrink: 0;
+  }
+  :global(.data-value) {
+    color: #d6d6e0;
+    letter-spacing: 0.08em;
+  }
+  :global(.data-value.accent) { color: #1ae0c2; }
+  :global(.data-value.dim)    { color: #5c576f; }
+
+  /* ── Status dot red state ── */
+  .dot-red   { background: #e6261a !important; }
+  .dot-green { background: #1ae0c2 !important; }
+</style>
+
+
+<script>
+  /* ────────────────────────────────────────────────────────────────────────────
+   * PANOPTICON IDENTITY SCANNER — client-side logic
+   * Decodes LSB steganography from red-channel of uploaded Panopticon PNG.
+   * Matches the GDScript _lsb_encode() algorithm in PanopticonAvatarCreator.gd.
+   * ────────────────────────────────────────────────────────────────────────── */
+
+  const TERMINATOR      = '|||END|||';
+  const MAX_SCAN_PIXELS = 16000;  // covers payloads up to ~2000 chars
+
+  const uploadZone   = document.getElementById('upload-zone');
+  const fileInput    = document.getElementById('file-input');
+  const scanView     = document.getElementById('scan-view');
+  const scanImg      = document.getElementById('scan-img');
+  const scanBeam     = document.getElementById('scan-beam');
+  const terminalLog  = document.getElementById('terminal-log');
+  const resultCard   = document.getElementById('result-card');
+  const resultHeader = document.getElementById('result-header');
+  const resultIcon   = document.getElementById('result-icon');
+  const resultTitle  = document.getElementById('result-title');
+  const resultData   = document.getElementById('result-data');
+  const resultFooter = document.getElementById('result-footer');
+  const resultVerdict = document.getElementById('result-verdict');
+  const imgBadge     = document.getElementById('img-badge');
+  const imgBadgeIcon = document.getElementById('img-badge-icon');
+  const imgBadgeText = document.getElementById('img-badge-text');
+  const statusDot    = document.getElementById('status-dot');
+  const statusText   = document.getElementById('status-text');
+  const scanAgainBtn = document.getElementById('scan-again-btn');
+  const imgPanel     = document.getElementById('img-panel');
+  const scanViewEl   = document.getElementById('scan-view');
+
+  /* ── Helpers ── */
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  function setStatus(msg, dotClass = '') {
+    statusText.textContent = msg;
+    statusDot.className = 'w-2 h-2 rounded-full flex-shrink-0 ' +
+      (dotClass || 'bg-p-teal animate-pulse');
+  }
+
+  async function appendLog(msg, color = '') {
+    const el = document.createElement('p');
+    el.className = 'log-line font-ui text-xs';
+    el.style.color = color || '#5c576f';
+    el.textContent = '';
+    terminalLog.appendChild(el);
+    // Type each character
+    for (const ch of msg) {
+      el.textContent += ch;
+      await sleep(18 + Math.random() * 22);
+    }
+  }
+
+  /* ── LSB decode ── */
+  async function lsbDecode(file) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width  = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0);
+
+        // Only read as many rows as needed to cover MAX_SCAN_PIXELS
+        const rowsToRead = Math.min(
+          img.naturalHeight,
+          Math.ceil(MAX_SCAN_PIXELS / img.naturalWidth) + 1
+        );
+        const imageData = ctx.getImageData(0, 0, img.naturalWidth, rowsToRead);
+        const data = imageData.data; // flat RGBA
+
+        // Extract red-channel LSBs
+        const bits = [];
+        const pixelLimit = Math.min(img.naturalWidth * rowsToRead, MAX_SCAN_PIXELS);
+        for (let i = 0; i < pixelLimit; i++) {
+          bits.push(data[i * 4] & 1);   // red channel = data[i*4]
+        }
+
+        // Pack bits → bytes, decode UTF-8 incrementally
+        const bytes = [];
+        for (let i = 0; i + 7 < bits.length; i += 8) {
+          let byte = 0;
+          for (let b = 0; b < 8; b++) byte = (byte << 1) | bits[i + b];
+          bytes.push(byte);
+
+          // Check for terminator every 16 bytes (avoid frequent TextDecoder calls)
+          if (bytes.length % 16 === 0 || i + 16 >= bits.length) {
+            let text;
+            try { text = new TextDecoder('utf-8', { fatal: false }).decode(new Uint8Array(bytes)); }
+            catch { continue; }
+            const endIdx = text.indexOf(TERMINATOR);
+            if (endIdx !== -1) {
+              const payload = text.substring(0, endIdx);
+              try { resolve(JSON.parse(payload)); }
+              catch { resolve({ _raw: payload }); }
+              URL.revokeObjectURL(objectUrl);
+              return;
+            }
+          }
+        }
+        resolve(null);
+        URL.revokeObjectURL(objectUrl);
+      };
+      img.onerror = () => { resolve(null); URL.revokeObjectURL(objectUrl); };
+      img.src = objectUrl;
+    });
+  }
+
+  /* ── Scan beam animation (N sweeps) ── */
+  async function runScanBeam(sweeps = 3) {
+    const imgEl = scanImg;
+    for (let i = 0; i < sweeps; i++) {
+      // Reset to top
+      scanBeam.style.top     = '0px';
+      scanBeam.style.opacity = '1';
+      // Animate down
+      const duration = 900 + Math.random() * 300;
+      scanBeam.style.transition = `top ${duration}ms linear, opacity 0.15s`;
+      await sleep(30);
+      const h = imgEl.offsetHeight || 400;
+      scanBeam.style.top = h + 'px';
+      await sleep(duration);
+      scanBeam.style.opacity = '0';
+      await sleep(200);
+    }
+  }
+
+  /* ── Main scan sequence ── */
+  async function runScan(file) {
+    // Prep UI
+    uploadZone.style.display = 'none';
+    scanView.style.display   = 'block';
+    terminalLog.innerHTML    = '';
+    resultCard.style.display = 'none';
+    imgBadge.style.opacity   = '0';
+    scanBeam.style.opacity   = '0';
+
+    // Show image immediately
+    const objectUrl = URL.createObjectURL(file);
+    scanImg.src = objectUrl;
+    await new Promise(r => { scanImg.onload = r; scanImg.onerror = r; });
+
+    setStatus('SCANNING  ·  DO NOT MOVE...');
+
+    // Fire decode in background (resolves fast for small payloads)
+    const decodePromise = lsbDecode(file);
+
+    // Parallel: scan animation + terminal log
+    const scanAnim = runScanBeam(3);
+
+    const logSteps = [
+      { msg: '▸  LOADING IMAGE DATA...',              delay: 400,  color: '#5c576f' },
+      { msg: '▸  ANALYZING PIXEL LAYER...',           delay: 600,  color: '#5c576f' },
+      { msg: '▸  READING IDENTITY ENCODING...',       delay: 800,  color: '#5c576f' },
+      { msg: '▸  CROSS-REFERENCING REGISTRY...',      delay: 700,  color: '#5c576f' },
+      { msg: '▸  DECRYPTING PAYLOAD...',              delay: 500,  color: '#5c576f' },
+    ];
+
+    for (const step of logSteps) {
+      await sleep(step.delay);
+      await appendLog(step.msg, step.color);
+    }
+
+    // Wait for both decode and animation to finish
+    const [decoded] = await Promise.all([decodePromise, scanAnim]);
+
+    // Evaluate result
+    const verified = decoded && decoded.build === 'PANOPTICON';
+
+    // Terminal final line
+    await sleep(250);
+    if (verified) {
+      await appendLog('▸  VERIFICATION COMPLETE.', '#1ae0c2');
+    } else {
+      await appendLog('▸  VERIFICATION FAILED.', '#e6261a');
+    }
+
+    await sleep(300);
+
+    // Show result
+    if (verified) {
+      showVerified(decoded);
+    } else {
+      showDenied(decoded);
+    }
+
+    URL.revokeObjectURL(objectUrl);
+  }
+
+  /* ── Show verified result ── */
+  function showVerified(data) {
+    const wrap = document.querySelector('.max-w-5xl');
+    wrap.classList.remove('result-denied');
+    wrap.classList.add('result-verified');
+
+    // ── GATE UNLOCK: set localStorage so /unlocked page grants access ──
+    localStorage.setItem('panopticon_intake_complete', 'true');
+
+    setStatus('IDENTITY CONFIRMED  ·  INMATE ON FILE', 'bg-p-teal dot-green');
+
+    resultIcon.textContent  = '✓';
+    resultTitle.textContent = 'IDENTITY CONFIRMED';
+    resultVerdict.textContent = 'ACCESS GRANTED';
+
+    const rows = [
+      { label: 'INMATE',   value: (data.name || '—').toUpperCase(), cls: 'accent' },
+      { label: 'ID CODE',  value: '#' + (data.id || '—').toUpperCase(), cls: 'accent' },
+      { label: 'STATUS',   value: '● REGISTERED · ACTIVE', cls: '' },
+      { label: 'REGISTRY', value: 'PANOPTICON INTAKE SYSTEM', cls: '' },
+      { label: 'TOKEN',    value: (data.tok || '—').toUpperCase(), cls: 'dim' },
+    ];
+    buildDataRows(rows);
+
+    imgBadgeIcon.textContent = '✓';
+    imgBadgeText.textContent = 'IDENTITY CONFIRMED';
+    imgBadge.style.transition = 'opacity 0.4s';
+    imgBadge.style.opacity    = '1';
+
+    resultCard.style.display = 'block';
+
+    // Show the classified files link
+    const unlockLink = document.getElementById('unlock-link');
+    if (unlockLink) unlockLink.classList.remove('hidden');
+  }
+
+  /* ── Show denied result ── */
+  function showDenied(data) {
+    const wrap = document.querySelector('.max-w-5xl');
+    wrap.classList.remove('result-verified');
+    wrap.classList.add('result-denied');
+
+    setStatus('IDENTITY NOT FOUND  ·  UNREGISTERED FILE', 'dot-red');
+
+    resultIcon.textContent  = '⊗';
+    resultTitle.textContent = 'IDENTITY NOT FOUND';
+    resultVerdict.textContent = 'ACCESS DENIED';
+
+    const isWrongBuild = data && data.build && data.build !== 'PANOPTICON';
+    const rows = isWrongBuild
+      ? [
+          { label: 'REGISTRY', value: data.build || '—',       cls: '' },
+          { label: 'REASON',   value: 'FOREIGN REGISTRY',      cls: '' },
+          { label: 'ACTION',   value: 'REPORT TO PROCESSING',  cls: '' },
+        ]
+      : [
+          { label: 'REASON',  value: 'NO BIOMETRIC SIGNATURE DETECTED', cls: '' },
+          { label: 'CAUSE',   value: 'FILE NOT A PANOPTICON AVATAR',    cls: '' },
+          { label: 'ACTION',  value: 'COMPLETE INTAKE PROCESSING',      cls: '' },
+        ];
+    buildDataRows(rows);
+
+    imgBadgeIcon.textContent = '⊗';
+    imgBadgeText.textContent = 'IDENTITY NOT FOUND';
+    imgBadge.style.transition = 'opacity 0.4s';
+    imgBadge.style.opacity    = '1';
+
+    resultCard.style.display = 'block';
+
+    // Hide the classified files link on denied
+    const unlockLink = document.getElementById('unlock-link');
+    if (unlockLink) unlockLink.classList.add('hidden');
+  }
+
+  function buildDataRows(rows) {
+    resultData.innerHTML = '';
+    for (const r of rows) {
+      const div = document.createElement('div');
+      div.className = 'data-row';
+      div.innerHTML = `<span class="data-label">${r.label}:</span><span class="data-value ${r.cls}">${r.value}</span>`;
+      resultData.appendChild(div);
+    }
+  }
+
+  /* ── Reset to idle ── */
+  function resetScanner() {
+    const wrap = document.querySelector('.max-w-5xl');
+    wrap.classList.remove('result-verified', 'result-denied');
+    scanView.style.display   = 'none';
+    uploadZone.style.display = 'block';
+    terminalLog.innerHTML    = '';
+    resultCard.style.display = 'none';
+    scanImg.src              = '';
+    fileInput.value          = '';
+    setStatus('SCANNER ONLINE  ·  AWAITING INPUT FILE...');
+  }
+
+  /* ── Event: upload zone click ── */
+  uploadZone.addEventListener('click', () => fileInput.click());
+
+  /* ── Event: file input change ── */
+  fileInput.addEventListener('change', (e) => {
+    const f = e.target.files?.[0];
+    if (f) runScan(f);
+  });
+
+  /* ── Drag and drop ── */
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('drag-active');
+  });
+  uploadZone.addEventListener('dragleave', (e) => {
+    if (!uploadZone.contains(e.relatedTarget)) {
+      uploadZone.classList.remove('drag-active');
+    }
+  });
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-active');
+    const f = e.dataTransfer?.files?.[0];
+    if (f && (f.type === 'image/png' || f.name.toLowerCase().endsWith('.png'))) {
+      runScan(f);
+    } else if (f) {
+      setStatus('ERROR  ·  ONLY .PNG FILES ACCEPTED', 'dot-red');
+    }
+  });
+
+  /* ── Event: scan again button ── */
+  scanAgainBtn.addEventListener('click', resetScanner);
+</script>

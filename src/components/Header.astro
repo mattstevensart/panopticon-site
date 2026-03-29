@@ -1,0 +1,70 @@
+---
+const navLinks = [
+  { href: '/',           label: 'HOME' },
+  { href: '/read',       label: 'READ' },
+  { href: '/characters', label: 'CHARACTERS' },
+  { href: '/about',      label: 'ABOUT' },
+  { href: '/avatar',     label: 'INTAKE' },
+  { href: '/scan',       label: 'SCAN' },
+];
+const pathname = Astro.url.pathname;
+---
+
+<header class="sticky top-0 z-50 bg-p-canvas/95 backdrop-blur border-b border-p-accent/20">
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+
+    <a href="/" class="flex items-center gap-3 group">
+      <img src="/images/panopticon-title.png" alt="PANOPTICON" class="h-8 w-auto opacity-90 group-hover:opacity-100 transition-opacity" />
+    </a>
+
+    <nav class="hidden md:flex items-center gap-1">
+      {navLinks.map(link => {
+        const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+        const isScan   = link.href === '/scan';
+        return (
+          <a href={link.href} class:list={[
+            'px-4 py-2 text-xs font-display tracking-widest transition-all duration-200',
+            isActive && !isScan  ? 'text-p-accent border-b-2 border-p-accent' :
+            isActive &&  isScan  ? 'text-p-teal  border-b-2 border-p-teal'   :
+            isScan               ? 'text-p-teal/60 hover:text-p-teal'         :
+                                   'text-p-dim hover:text-p-accent/80',
+          ]}>
+            {link.label}
+          </a>
+        );
+      })}
+    </nav>
+
+    <div class="hidden md:flex items-center gap-2 text-xs font-ui text-p-dim">
+      <span class="w-2 h-2 rounded-full bg-p-teal animate-pulse"></span>
+      <span>MONITORING ACTIVE</span>
+    </div>
+
+    <button id="mobile-menu-btn" class="md:hidden text-p-dim hover:text-p-accent transition-colors p-2" aria-label="Toggle navigation">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+        <rect y="3" width="20" height="2" rx="1"/>
+        <rect y="9" width="20" height="2" rx="1"/>
+        <rect y="15" width="20" height="2" rx="1"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="mobile-nav" class="md:hidden hidden border-t border-p-accent/20 bg-p-canvas">
+    {navLinks.map(link => (
+      <a href={link.href} class:list={[
+        'block px-6 py-3 text-sm font-display tracking-widest transition-all',
+        link.href === '/scan'
+          ? 'text-p-teal/70 hover:text-p-teal hover:bg-p-panel'
+          : 'text-p-dim hover:text-p-accent hover:bg-p-panel',
+      ]}>
+        {link.label}
+      </a>
+    ))}
+  </div>
+</header>
+
+<script>
+  document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+    document.getElementById('mobile-nav')?.classList.toggle('hidden');
+  });
+</script>

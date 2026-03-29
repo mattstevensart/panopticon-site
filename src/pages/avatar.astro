@@ -1,0 +1,186 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="INTAKE PROCESSING">
+  <div class="max-w-6xl mx-auto px-4 py-12">
+
+    <div class="mb-8 border-b border-p-teal/20 pb-6">
+      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">FACILITY 7 — PROCESSING UNIT</p>
+      <h1 class="font-display text-2xl md:text-3xl text-p-text tracking-wide">INMATE INTAKE</h1>
+      <p class="font-comic text-p-dim text-sm mt-2 max-w-xl">
+        All new arrivals must be photographed and catalogued. Build your inmate profile to continue.
+        Completion of intake processing will grant access to restricted facility files.
+      </p>
+      <div class="w-16 h-px bg-p-teal mt-4"></div>
+    </div>
+
+    <div id="status-bar" class="bg-p-panel border border-p-teal/30 p-3 mb-6 flex items-center gap-3">
+      <span class="w-2 h-2 rounded-full bg-p-teal animate-pulse flex-shrink-0"></span>
+      <span class="font-ui text-p-teal text-xs tracking-widest" id="status-text">AWAITING INMATE PROCESSING...</span>
+    </div>
+
+    <!-- ── Avatar maker embed ──────────────────────────────────────────────────
+         The iframe tries to load the Godot HTML5 export from /avatar-maker/.
+         A preflight fetch detects whether the export is deployed:
+           • Not deployed → shows the DESKTOP APP state (styled instructions)
+           • Deployed     → hides the overlay and shows the live game
+         To deploy: Godot → Project → Export → Web → export to /public/avatar-maker/
+         Note: the desktop app uses OS.execute() + local filesystem paths that
+         won't work in-browser without a separate web-safe build.
+    ──────────────────────────────────────────────────────────────────────── -->
+    <div class="relative border border-p-teal/30 bg-p-canvas overflow-hidden" style="aspect-ratio: 1280/768; min-height: 420px;">
+
+      <!-- Scanlines + grid texture on the container -->
+      <div class="absolute inset-0 bg-scanline opacity-20 pointer-events-none z-0"></div>
+      <div class="absolute inset-0 bg-grid-subtle bg-grid opacity-40 pointer-events-none z-0"></div>
+
+      <!-- Corner bracket decorations -->
+      <div class="absolute top-4 left-4   w-8 h-8 border-t-2 border-l-2 border-p-teal/50 z-20 pointer-events-none"></div>
+      <div class="absolute top-4 right-4  w-8 h-8 border-t-2 border-r-2 border-p-teal/50 z-20 pointer-events-none"></div>
+      <div class="absolute bottom-4 left-4  w-8 h-8 border-b-2 border-l-2 border-p-teal/50 z-20 pointer-events-none"></div>
+      <div class="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-p-teal/50 z-20 pointer-events-none"></div>
+
+      <!-- ── LOADING state (shown briefly while fetch checks for deploy) ── -->
+      <div id="maker-loading"
+           class="absolute inset-0 flex flex-col items-center justify-center bg-p-canvas z-10">
+        <div class="flex flex-col items-center gap-4">
+          <div class="w-8 h-8 border-2 border-p-teal border-t-transparent rounded-full animate-spin"></div>
+          <p class="font-display text-p-teal text-xs tracking-widest">INITIALIZING INTAKE TERMINAL...</p>
+        </div>
+      </div>
+
+      <!-- ── DESKTOP APP state (shown when web export is not deployed) ── -->
+      <div id="maker-desktop"
+           class="absolute inset-0 flex flex-col items-center justify-center bg-p-canvas z-10 hidden px-8">
+        <div class="max-w-xl w-full text-center">
+
+          <!-- Icon -->
+          <div class="font-display text-p-teal/30 text-6xl mb-6 leading-none select-none">◈</div>
+
+          <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-3">FACILITY 7 — PROCESSING UNIT</p>
+          <h2 class="font-display text-p-text text-lg tracking-wide mb-2">PANOPTICON AVATAR CREATOR</h2>
+          <p class="font-ui text-p-teal text-xs tracking-widest mb-6">DESKTOP APPLICATION REQUIRED</p>
+
+          <div class="w-24 h-px bg-p-teal/30 mx-auto mb-6"></div>
+
+          <p class="font-ui text-p-dim text-sm mb-8 leading-relaxed">
+            The avatar creator runs as a standalone desktop application. Open it from your
+            computer, build your inmate, save your PNG — then return here to confirm intake.
+          </p>
+
+          <!-- Step list -->
+          <div class="text-left space-y-3 mb-8 border border-p-teal/20 bg-p-panel p-5">
+            <p class="font-ui text-p-dim/50 text-xs tracking-widest mb-3">INTAKE PROCEDURE</p>
+            {[
+              '01  Open the Panopticon Avatar Creator desktop app',
+              '02  Build your inmate — choose head, clothing, ID, features',
+              '03  Click SAVE PNG — your avatar is saved to your Desktop',
+              '04  Go to the SCANNER and upload your avatar PNG',
+              '05  Successful scan unlocks CLASSIFIED facility files',
+            ].map(step => (
+              <div class="flex gap-3 items-start">
+                <span class="font-display text-p-teal text-xs mt-0.5 flex-shrink-0">▸</span>
+                <span class="font-ui text-p-dim text-xs leading-relaxed">{step}</span>
+              </div>
+            ))}
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="/scan"
+               class="px-6 py-2 bg-p-teal/10 border border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/20 transition-all">
+              GO TO SCANNER →
+            </a>
+            <button id="complete-btn-inline"
+                    class="px-6 py-2 bg-p-unlock/20 border border-p-unlock text-p-unlock font-display text-xs tracking-widest hover:bg-p-unlock/30 transition-all animate-pulse-unlock">
+              SKIP TO CLASSIFIED FILES →
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── LIVE iframe (shown when web export IS deployed at /avatar-maker/) ── -->
+      <iframe
+        id="avatar-frame"
+        src=""
+        class="absolute inset-0 w-full h-full border-0 z-5 hidden"
+        title="Panopticon Avatar Creator"
+        allow="fullscreen"
+      ></iframe>
+    </div>
+
+    <!-- Below-frame row (always shown) -->
+    <div class="mt-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <p class="font-ui text-p-dim text-xs max-w-md">
+        Avatar built? Head to the Scanner to verify your identity and unlock classified files.
+      </p>
+      <div class="flex gap-3">
+        <a href="/scan"
+           class="px-6 py-3 border border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all"
+           id="scan-link-bar">
+          GO TO SCANNER →
+        </a>
+        <button id="complete-btn"
+                class="px-6 py-3 bg-p-unlock/20 border border-p-unlock text-p-unlock font-display text-xs tracking-widest hover:bg-p-unlock/30 transition-all animate-pulse-unlock hidden">
+          SKIP TO CLASSIFIED →
+        </button>
+      </div>
+    </div>
+
+  </div>
+</Layout>
+
+<script>
+  const statusText      = document.getElementById('status-text') as HTMLElement;
+  const makerLoading    = document.getElementById('maker-loading') as HTMLElement;
+  const makerDesktop    = document.getElementById('maker-desktop') as HTMLElement;
+  const avatarFrame     = document.getElementById('avatar-frame') as HTMLIFrameElement;
+  const completeBtnBar  = document.getElementById('complete-btn') as HTMLButtonElement;
+  const completeBtnInline = document.getElementById('complete-btn-inline') as HTMLButtonElement;
+
+  // ── Restore intake-complete state ─────────────────────────────────────────
+  if (localStorage.getItem('panopticon_intake_complete') === 'true') {
+    if (statusText) statusText.textContent = 'INTAKE COMPLETE — ACCESS GRANTED';
+    [completeBtnBar, completeBtnInline].forEach(btn => {
+      if (btn) {
+        btn.textContent = 'VIEW CLASSIFIED FILES →';
+        btn.classList.remove('hidden');
+      }
+    });
+  }
+
+  // ── Confirm intake handler ────────────────────────────────────────────────
+  function doConfirmIntake(btn: HTMLButtonElement) {
+    localStorage.setItem('panopticon_intake_complete', 'true');
+    if (statusText) statusText.textContent = 'INTAKE COMPLETE — REDIRECTING...';
+    btn.disabled = true;
+    setTimeout(() => { window.location.href = '/unlocked'; }, 1200);
+  }
+  completeBtnBar?.addEventListener('click', () => doConfirmIntake(completeBtnBar));
+  completeBtnInline?.addEventListener('click', () => doConfirmIntake(completeBtnInline));
+
+  // ── Preflight: check whether the HTML5 export is deployed ────────────────
+  // If /avatar-maker/index.html returns 200, load the iframe.
+  // If it returns 404 (or network error), show the desktop app instructions.
+  (async () => {
+    try {
+      const res = await fetch('/avatar-maker/index.html', { method: 'HEAD' });
+      if (res.ok) {
+        // Web export is available — load the iframe
+        avatarFrame.src = '/avatar-maker/index.html';
+        avatarFrame.addEventListener('load', () => {
+          makerLoading.classList.add('hidden');
+          avatarFrame.classList.remove('hidden');
+          completeBtnBar.classList.remove('hidden');
+        });
+      } else {
+        throw new Error('not deployed');
+      }
+    } catch {
+      // No web export — show desktop app instructions
+      makerLoading.classList.add('hidden');
+      makerDesktop.classList.remove('hidden');
+    }
+  })();
+</script>

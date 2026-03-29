@@ -1,0 +1,126 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="HOME">
+
+  <!-- Hero -->
+  <section class="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 bg-grid-subtle bg-grid opacity-100 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-scanline opacity-40 pointer-events-none"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-p-accent/5 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative z-10 flex flex-col items-center text-center px-4 gap-8">
+      <div class="relative">
+        <img src="/images/panopticon-title.png" alt="PANOPTICON" class="w-full max-w-lg md:max-w-2xl opacity-95" />
+        <div class="absolute top-4 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-p-red/30 blur-lg animate-pulse"></div>
+      </div>
+
+      <div class="space-y-2">
+        <p class="font-display text-p-text text-lg md:text-2xl tracking-wide">Welcome to the Panopticon | 63rd.</p>
+        <p class="font-ui text-p-teal text-sm tracking-[0.3em]">Surveillance is mandatory.</p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-4 mt-4">
+        <a href="/read" class="px-8 py-3 bg-p-accent text-p-root font-display text-sm tracking-widest hover:bg-p-accent/80 transition-all shadow-accent-glow animate-pulse-accent">
+          READ NOW
+        </a>
+        <a href="/avatar" class="px-8 py-3 border border-p-teal text-p-teal font-display text-sm tracking-widest hover:bg-p-teal/10 transition-all">
+          INTAKE PROCESSING
+        </a>
+      </div>
+
+      <div class="flex flex-col items-center gap-1 text-p-dim/40 text-xs font-ui mt-8">
+        <span class="tracking-widest">SCROLL</span>
+        <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ticker -->
+  <section class="border-y border-p-accent/15 bg-p-canvas py-3 overflow-hidden">
+    <div class="flex gap-12 animate-[scroll_25s_linear_infinite] whitespace-nowrap">
+      {Array(4).fill(null).map(() => (
+        <span class="font-ui text-p-dim/50 text-xs tracking-widest">
+          ⊗ &nbsp; CLASSIFIED &nbsp; ⊗ &nbsp; ALL MOVEMENT LOGGED &nbsp; ⊗ &nbsp; FACILITY SECURITY LEVEL: MAXIMUM &nbsp; ⊗ &nbsp; DO NOT DISCUSS ESCAPE ROUTES &nbsp; ⊗ &nbsp; REPORT SUSPICIOUS ACTIVITY &nbsp; &nbsp;
+        </span>
+      ))}
+    </div>
+  </section>
+
+  <!-- Cards -->
+  <section class="max-w-6xl mx-auto px-4 py-20">
+    <div class="text-center mb-12">
+      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">CLASSIFIED CONTENT</p>
+      <h2 class="font-display text-2xl md:text-3xl text-p-text tracking-wide">WHAT AWAITS YOU</h2>
+      <div class="w-24 h-px bg-p-accent mx-auto mt-4"></div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <a href="/read" class="group bg-p-panel border border-p-accent/20 hover:border-p-accent/60 p-6 transition-all hover:shadow-accent-glow">
+        <div class="text-p-accent text-3xl mb-4 font-display">01</div>
+        <h3 class="font-display text-sm tracking-widest text-p-text mb-2">THE COMIC</h3>
+        <p class="font-comic text-p-dim text-sm leading-relaxed">Read Panopticon chapter by chapter. New pages drop regularly.</p>
+        <p class="font-ui text-p-accent text-xs tracking-widest mt-4 group-hover:tracking-[0.3em] transition-all">READ →</p>
+      </a>
+      <a href="/avatar" class="group bg-p-panel border border-p-teal/20 hover:border-p-teal/60 p-6 transition-all hover:shadow-teal-glow">
+        <div class="text-p-teal text-3xl mb-4 font-display">02</div>
+        <h3 class="font-display text-sm tracking-widest text-p-text mb-2">INTAKE PROCESSING</h3>
+        <p class="font-comic text-p-dim text-sm leading-relaxed">Build your inmate avatar. Every prisoner must be processed and catalogued.</p>
+        <p class="font-ui text-p-teal text-xs tracking-widest mt-4 group-hover:tracking-[0.3em] transition-all">PROCESS →</p>
+      </a>
+      <a href="/avatar" class="group bg-p-panel border border-p-unlock/20 hover:border-p-unlock/60 p-6 transition-all hover:shadow-unlock-glow opacity-70 hover:opacity-100">
+        <div class="text-p-unlock text-3xl mb-4 font-display">??</div>
+        <h3 class="font-display text-sm tracking-widest text-p-text mb-2">CLASSIFIED FILE</h3>
+        <p class="font-comic text-p-dim text-sm leading-relaxed">Complete your intake to unlock a restricted-access section of the facility.</p>
+        <p class="font-ui text-p-unlock text-xs tracking-widest mt-4 group-hover:tracking-[0.3em] transition-all">LOCKED →</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Facility Map -------------------------------------------------------- -->
+  <section class="max-w-6xl mx-auto px-4 py-20">
+    <div class="text-center mb-10">
+      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">RESTRICTED DOCUMENT — FACILITY LAYOUT</p>
+      <h2 class="font-display text-2xl md:text-3xl text-p-text tracking-wide">THE WORLD</h2>
+      <div class="w-24 h-px bg-p-teal mx-auto mt-4"></div>
+    </div>
+
+    <div class="relative group border border-p-teal/30 hover:border-p-teal/60 transition-all duration-500 shadow-teal-glow overflow-hidden">
+      <!-- Scanline overlay -->
+      <div class="absolute inset-0 bg-scanline opacity-20 pointer-events-none z-10"></div>
+
+      <!-- Corner brackets -->
+      <div class="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-p-teal/70 z-20"></div>
+      <div class="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-p-teal/70 z-20"></div>
+      <div class="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-p-teal/70 z-20"></div>
+      <div class="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-p-teal/70 z-20"></div>
+
+      <!-- Classification stamp -->
+      <div class="absolute top-4 right-12 z-20 opacity-60 group-hover:opacity-80 transition-opacity">
+        <div class="border-2 border-p-red/70 px-3 py-1 rotate-[-8deg]">
+          <span class="font-display text-p-red text-xs tracking-widest">CLASSIFIED</span>
+        </div>
+      </div>
+
+      <img
+        src="/images/panopticon-map.jpg"
+        alt="Map of the Panopticon facility and surrounding regions"
+        class="w-full h-auto block"
+      />
+    </div>
+
+    <p class="text-center font-ui text-p-dim/50 text-xs tracking-widest mt-4">
+      THE PANOPTICON &nbsp;·&nbsp; THE HOLLOWS &nbsp;·&nbsp; THE VELDT &nbsp;·&nbsp; THE CHASM &nbsp;·&nbsp; THE PRAIRIE
+    </p>
+  </section>
+
+</Layout>
+
+<style>
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+</style>

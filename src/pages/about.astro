@@ -1,0 +1,95 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="ABOUT">
+  <div class="max-w-4xl mx-auto px-4 py-16">
+    <div class="mb-12 border-b border-p-accent/20 pb-8">
+      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-3">FILE: CLASSIFICATION ALPHA</p>
+      <h1 class="font-display text-3xl md:text-4xl text-p-text tracking-wide">ABOUT THE PROJECT</h1>
+      <div class="w-16 h-px bg-p-accent mt-4"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div class="md:col-span-2 space-y-8 font-comic text-p-text leading-relaxed">
+        <div class="bg-p-panel border-l-2 border-p-accent p-6">
+          <p class="font-ui text-p-dim text-xs tracking-widest mb-3">SYNOPSIS — AUTHORIZED RELEASE</p>
+          <p class="text-base">
+            A new inmate joins the Panopticon — a timeless, single-chamber prison where prisoners
+            don't know when, or even if, they are being watched. As he navigates the strict codes
+            of his fellow convicts, he must unravel the mysteries of the facility, its unseen wardens,
+            and the chilling possibility that to stay may be more deadly than escape.
+          </p>
+          <p class="text-base mt-4 text-p-dim italic">
+            Graphic. Psychological. Multi-layered.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display text-sm tracking-widest text-p-accent mb-4">THEMES</h2>
+          <div class="space-y-2">
+            {[
+              'The unreliability of memory',
+              'The price of loyalty',
+              'The psychology of oppressive surveillance',
+            ].map(theme => (
+              <div class="flex items-start gap-3">
+                <span class="text-p-teal mt-1">⊗</span>
+                <span class="font-comic text-p-dim text-sm">{theme}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h2 class="font-display text-sm tracking-widest text-p-accent mb-4">THE CREATOR</h2>
+          <p class="text-p-dim">
+            Matt Stevens is an illustrator, comic book artist and a high school art teacher.
+            He is the author and artist for Panopticon and the artist on the series{' '}
+            <a href="https://thedigitalpools.com" target="_blank" rel="noopener noreferrer"
+               class="text-p-accent hover:text-p-teal transition-colors underline underline-offset-2">
+              Digital Pools
+            </a>{' '}
+            with collaborator Alex Robnett. Visit{' '}
+            <a href="https://thedarkwebcomics.com" target="_blank" rel="noopener noreferrer"
+               class="text-p-accent hover:text-p-teal transition-colors underline underline-offset-2">
+              thedarkwebcomics.com
+            </a>{' '}
+            for more.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="font-display text-sm tracking-widest text-p-accent mb-4">UPDATE SCHEDULE</h2>
+          <p class="text-p-dim">New pages post regularly. Follow on social media for updates.</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="bg-p-panel border border-p-accent/20 p-4">
+          <p class="font-ui text-p-dim text-xs tracking-widest mb-4">PROJECT DOSSIER</p>
+          <div class="space-y-3">
+            {[
+              { label: 'STATUS',  value: 'ONGOING' },
+              { label: 'GENRE',   value: 'SCI-FI / PRISON' },
+              { label: 'FORMAT',  value: 'WEBCOMIC' },
+              { label: 'RATING',  value: 'MATURE' },
+            ].map(item => (
+              <div class="flex justify-between items-center border-b border-p-accent/10 pb-2">
+                <span class="font-ui text-p-dim text-xs tracking-widest">{item.label}</span>
+                <span class="font-display text-p-accent text-xs">{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div class="bg-p-panel border border-p-teal/20 p-4">
+          <p class="font-ui text-p-teal text-xs tracking-widest mb-3">SOCIAL / CONTACT</p>
+          <div class="space-y-2 text-xs font-ui text-p-dim">
+            <p>→ Instagram: @panopticoncomic</p>
+            <p>→ Bluesky: @panopticoncomic</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

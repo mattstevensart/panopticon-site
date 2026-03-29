@@ -1,0 +1,92 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const characters = [
+  {
+    name: 'ARCIN',
+    image: '/images/char-arcin.jpg',
+    accent: '#d966d6',   // pink/mauve — matches his sheet border
+  },
+  {
+    name: 'MARUK',
+    image: '/images/char-maruk.jpg',
+    accent: '#e6261a',   // red — matches his sheet
+  },
+  {
+    name: 'ITSAHK',
+    image: '/images/char-itsahk.jpg',
+    accent: '#d4aa30',   // gold — matches his sheet
+  },
+  {
+    name: 'DONKEY',
+    image: '/images/char-donkey.jpg',
+    accent: '#8c78cc',   // purple — matches his sheet
+  },
+];
+---
+
+<Layout title="CHARACTERS" description="Meet the inmates of the Panopticon — Arcin, Maruk, Itsahk, and Donkey.">
+
+  <div class="max-w-6xl mx-auto px-4 py-16">
+
+    <!-- Header -->
+    <div class="mb-14 border-b border-p-accent/20 pb-8">
+      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-3">INMATE REGISTRY — BLOCK D</p>
+      <h1 class="font-display text-3xl md:text-4xl text-p-text tracking-wide">CHARACTERS</h1>
+      <div class="w-16 h-px bg-p-accent mt-4"></div>
+    </div>
+
+    <!-- Character sheets -->
+    <div class="space-y-20">
+      {characters.map((char, i) => (
+        <div class:list={[
+          'grid grid-cols-1 lg:grid-cols-2 gap-8 items-start',
+          i % 2 === 1 ? 'lg:grid-flow-dense' : '',
+        ]}>
+
+          <!-- Image -->
+          <div class:list={[
+            'relative group overflow-hidden border',
+            i % 2 === 1 ? 'lg:col-start-2' : '',
+          ]}
+          style={`border-color: ${char.accent}33; box-shadow: 0 0 20px 2px ${char.accent}18;`}
+          >
+            <!-- Corner brackets -->
+            <div class="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 z-10 transition-all duration-300 group-hover:w-8 group-hover:h-8" style={`border-color: ${char.accent}99;`}></div>
+            <div class="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 z-10 transition-all duration-300 group-hover:w-8 group-hover:h-8" style={`border-color: ${char.accent}99;`}></div>
+            <div class="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 z-10 transition-all duration-300 group-hover:w-8 group-hover:h-8" style={`border-color: ${char.accent}99;`}></div>
+            <div class="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 z-10 transition-all duration-300 group-hover:w-8 group-hover:h-8" style={`border-color: ${char.accent}99;`}></div>
+
+            <img
+              src={char.image}
+              alt={`Character sheet for ${char.name}`}
+              class="w-full h-auto block group-hover:scale-[1.02] transition-transform duration-500"
+            />
+          </div>
+
+          <!-- Name plate -->
+          <div class:list={[
+            'flex flex-col justify-center py-4',
+            i % 2 === 1 ? 'lg:col-start-1 lg:row-start-1' : '',
+          ]}>
+            <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-4">INMATE FILE</p>
+            <h2
+              class="font-display text-5xl md:text-6xl tracking-widest mb-6"
+              style={`color: ${char.accent};`}
+            >
+              {char.name}
+            </h2>
+            <div class="w-12 h-px mb-6" style={`background: ${char.accent};`}></div>
+            <p class="font-comic text-p-dim text-sm leading-relaxed">
+              <!-- Add character description here -->
+              Details classified. Complete intake processing to access full inmate dossier.
+            </p>
+          </div>
+
+        </div>
+      ))}
+    </div>
+
+  </div>
+
+</Layout>
