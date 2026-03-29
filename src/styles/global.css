@@ -60,3 +60,8 @@ body {
 .animate-pulse-accent  { animation: pulse-accent 2.4s ease-in-out infinite; }
 .animate-pulse-teal    { animation: pulse-teal 2.4s ease-in-out infinite; }
 .animate-pulse-unlock  { animation: pulse-unlock 2s ease-in-out infinite; }
+
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}

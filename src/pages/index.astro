@@ -16,17 +16,6 @@ import Layout from '../layouts/Layout.astro';
         <div class="absolute top-4 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-p-red/30 blur-lg animate-pulse"></div>
       </div>
 
-      <!-- Ticker (horizontal scroll) -->
-      <div class="w-screen border-y border-p-accent/15 bg-p-canvas py-3 overflow-hidden">
-        <div class="flex gap-12 animate-[scroll_25s_linear_infinite] whitespace-nowrap">
-          {Array(4).fill(null).map(() => (
-            <span class="font-ui text-p-dim/50 text-xs tracking-widest">
-              ⊗ &nbsp; CLASSIFIED &nbsp; ⊗ &nbsp; ALL MOVEMENT LOGGED &nbsp; ⊗ &nbsp; FACILITY SECURITY LEVEL: MAXIMUM &nbsp; ⊗ &nbsp; DO NOT DISCUSS ESCAPE ROUTES &nbsp; ⊗ &nbsp; REPORT SUSPICIOUS ACTIVITY &nbsp; &nbsp;
-            </span>
-          ))}
-        </div>
-      </div>
-
       <div class="space-y-2">
         <p class="font-display text-p-text text-lg md:text-2xl tracking-wide">Welcome to the Panopticon | 63rd.</p>
         <p class="font-ui text-p-teal text-sm tracking-[0.3em]">Surveillance is mandatory.</p>
@@ -49,17 +38,17 @@ import Layout from '../layouts/Layout.astro';
       <div class="w-24 h-px bg-p-accent mx-auto mt-4"></div>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <a href="/read" class="group bg-p-panel border border-p-accent/20 hover:border-p-accent/60 p-6 transition-all hover:shadow-accent-glow">
-        <div class="text-p-accent text-3xl mb-4 font-display">01</div>
-        <h3 class="font-display text-sm tracking-widest text-p-text mb-2">THE COMIC</h3>
-        <p class="font-comic text-p-dim text-sm leading-relaxed">Read Panopticon chapter by chapter. New pages drop regularly.</p>
-        <p class="font-ui text-p-accent text-xs tracking-widest mt-4 group-hover:tracking-[0.3em] transition-all">READ →</p>
-      </a>
       <a href="/avatar" class="group bg-p-panel border border-p-teal/20 hover:border-p-teal/60 p-6 transition-all hover:shadow-teal-glow">
-        <div class="text-p-teal text-3xl mb-4 font-display">02</div>
+        <div class="text-p-teal text-3xl mb-4 font-display">01</div>
         <h3 class="font-display text-sm tracking-widest text-p-text mb-2">INTAKE PROCESSING</h3>
         <p class="font-comic text-p-dim text-sm leading-relaxed">Build your inmate avatar. Every prisoner must be processed and catalogued.</p>
         <p class="font-ui text-p-teal text-xs tracking-widest mt-4 group-hover:tracking-[0.3em] transition-all">PROCESS →</p>
+      </a>
+      <a href="/read" class="group bg-p-panel border border-p-accent/20 hover:border-p-accent/60 p-6 transition-all hover:shadow-accent-glow">
+        <div class="text-p-accent text-3xl mb-4 font-display">02</div>
+        <h3 class="font-display text-sm tracking-widest text-p-text mb-2">THE COMIC</h3>
+        <p class="font-comic text-p-dim text-sm leading-relaxed">Read excerpts from Act 1 and see sneak peeks from Act 2.</p>
+        <p class="font-ui text-p-accent text-xs tracking-widest mt-4 group-hover:tracking-[0.3em] transition-all">READ →</p>
       </a>
       <a href="/avatar" class="group bg-p-panel border border-p-unlock/20 hover:border-p-unlock/60 p-6 transition-all hover:shadow-unlock-glow opacity-70 hover:opacity-100">
         <div class="text-p-unlock text-3xl mb-4 font-display">??</div>
@@ -108,10 +97,3 @@ import Layout from '../layouts/Layout.astro';
   </section>
 
 </Layout>
-
-<style>
-@keyframes scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-</style>

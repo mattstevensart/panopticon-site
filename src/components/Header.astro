@@ -23,7 +23,7 @@ const pathname = Astro.url.pathname;
         const isScan   = link.href === '/scan';
         return (
           <a href={link.href} class:list={[
-            'px-4 py-2 text-xs font-display tracking-widest transition-all duration-200',
+            'px-3 py-2 text-xs font-display tracking-widest transition-all duration-200 text-center leading-tight max-w-[10rem]',
             isActive && !isScan  ? 'text-p-accent border-b-2 border-p-accent' :
             isActive &&  isScan  ? 'text-p-teal  border-b-2 border-p-teal'   :
             isScan               ? 'text-p-teal/60 hover:text-p-teal'         :
