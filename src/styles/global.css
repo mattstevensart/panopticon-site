@@ -61,6 +61,12 @@ body {
 .animate-pulse-teal    { animation: pulse-teal 2.4s ease-in-out infinite; }
 .animate-pulse-unlock  { animation: pulse-unlock 2s ease-in-out infinite; }
 
+@keyframes pulse-teal-text {
+  0%, 100% { opacity: 0.6; text-shadow: 0 0 4px rgba(26,224,194,0.3); }
+  50%       { opacity: 1;   text-shadow: 0 0 12px rgba(26,224,194,0.7), 0 0 24px rgba(26,224,194,0.3); }
+}
+.animate-pulse-teal-text { animation: pulse-teal-text 3s ease-in-out infinite; }
+
 @keyframes scroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }

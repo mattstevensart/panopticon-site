@@ -6,7 +6,7 @@ import Layout from '../layouts/Layout.astro';
   <div id="avatar-creator-container" class="w-full bg-p-root">
     <!-- Main creator viewport -->
     <div id="creator-main" class="flex justify-center items-start py-8 px-4">
-      <div id="creator-viewport" style="width: 1280px; height: 768px; transform-origin: top center; position: relative;">
+      <div id="creator-viewport" style="width: 1280px; height: 824px; transform-origin: top center; position: relative;">
 
         <!-- Title bar -->
         <div id="title-bar" style="position: absolute; top: 0; left: 0; width: 100%; height: 84px; background: rgb(15, 15, 23); border-left: 5px solid rgb(230, 38, 26); border-right: 5px solid rgb(26, 224, 194); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-sizing: border-box; z-index: 10;">
@@ -22,7 +22,7 @@ import Layout from '../layouts/Layout.astro';
 
           <!-- Canvas area (left) -->
           <div id="canvas-wrapper" style="position: relative; width: 700px; height: 100%; background: rgb(10, 10, 15); border: 2px solid rgb(56, 140, 255); overflow: hidden;">
-            <canvas id="preview-canvas" width="700" height="684" style="display: block; width: 100%; height: auto;"></canvas>
+            <canvas id="preview-canvas" width="700" height="700" style="display: block; width: 100%; height: 100%;"></canvas>
 
             <!-- Intro overlay -->
             <div id="intro-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.95); display: flex; align-items: center; justify-content: center; z-index: 1000;">
@@ -56,6 +56,29 @@ import Layout from '../layouts/Layout.astro';
           <button id="id-btn" class="action-button action-button-glow" style="display: none;">GENERATE ID</button>
           <button id="save-btn" class="action-button action-button-glow" style="display: none;">SAVE PNG</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Mobile creator (stacked layout, hidden on desktop) -->
+    <div id="mobile-creator" style="display: none; width: 100%; background: rgb(10, 10, 15);">
+      <!-- Mobile canvas -->
+      <div style="width: 100%; position: relative; border-bottom: 2px solid rgb(56, 140, 255);">
+        <canvas id="mobile-canvas" width="700" height="700" style="display: block; width: 100%; height: auto; background: rgb(10, 10, 15);"></canvas>
+      </div>
+      <!-- Mobile categories (horizontal scroll) -->
+      <div id="mobile-categories" style="display: flex; overflow-x: auto; background: rgb(15, 15, 23); border-bottom: 1px solid rgb(56, 140, 255); padding: 4px 0; gap: 0; -webkit-overflow-scrolling: touch;">
+        <!-- Injected by JS -->
+      </div>
+      <!-- Mobile item grid -->
+      <div id="mobile-items" style="padding: 8px; background: rgb(23, 23, 33); min-height: 200px;">
+        <!-- Injected by JS -->
+      </div>
+      <!-- Mobile action bar -->
+      <div id="mobile-action-bar" style="padding: 8px; background: rgb(23, 23, 33); border-top: 1px solid rgb(56, 140, 255); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+        <button id="mobile-reset-btn" class="action-button">RESET</button>
+        <button id="mobile-name-btn" class="action-button action-button-glow" style="display: none;">NAME INMATE</button>
+        <button id="mobile-id-btn" class="action-button action-button-glow" style="display: none;">GENERATE ID</button>
+        <button id="mobile-save-btn" class="action-button action-button-glow" style="display: none;">SAVE PNG</button>
       </div>
     </div>
 
@@ -313,6 +336,69 @@ import Layout from '../layouts/Layout.astro';
         transform: translateY(0);
       }
     }
+
+    /* Mobile category tabs */
+    .mobile-cat-btn {
+      flex: 0 0 auto;
+      padding: 10px 14px;
+      background: rgb(51, 51, 66);
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: rgb(92, 87, 111);
+      font-family: 'Orbitron';
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .mobile-cat-btn:hover:not(.locked) {
+      background: rgb(56, 56, 71);
+      color: rgb(214, 214, 224);
+    }
+
+    .mobile-cat-btn.active {
+      background: rgb(56, 140, 255);
+      color: rgb(10, 10, 15);
+      border-bottom-color: rgb(26, 224, 194);
+    }
+
+    .mobile-cat-btn.locked {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .mobile-cat-btn.has-selection {
+      color: rgb(56, 140, 255);
+    }
+
+    .mobile-cat-btn.active.has-selection {
+      color: rgb(10, 10, 15);
+    }
+
+    /* Mobile item grid — 3 columns for smaller screens */
+    #mobile-items .item-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    /* Mobile scrollbar */
+    #mobile-categories {
+      scrollbar-width: none;
+    }
+    #mobile-categories::-webkit-scrollbar {
+      display: none;
+    }
+
+    #mobile-items {
+      scrollbar-width: thin;
+      scrollbar-color: rgb(56, 140, 255) rgb(23, 23, 33);
+      max-height: 50vh;
+      overflow-y: auto;
+    }
   </style>
 
   <script>
@@ -347,27 +433,123 @@ import Layout from '../layouts/Layout.astro';
 
     function init() {
       buildCategoryList();
+      buildMobileCategories();
       initCanvas();
       startIntro();
       setupEventListeners();
+      setupMobileEvents();
       handleResize();
       window.addEventListener('resize', handleResize);
     }
 
+    function buildMobileCategories() {
+      const container = document.getElementById('mobile-categories');
+      if (!container) return;
+      container.innerHTML = '';
+      CATEGORIES.forEach((cat, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'mobile-cat-btn';
+        btn.textContent = cat.name;
+        btn.dataset.index = idx;
+        btn.addEventListener('click', () => {
+          if (CATEGORIES[idx].unlockStage > currentUnlockStage) return;
+          selectCategory(idx);
+          syncMobileItems();
+          // Highlight active
+          container.querySelectorAll('.mobile-cat-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+        if (cat.unlockStage > currentUnlockStage) btn.classList.add('locked');
+        container.appendChild(btn);
+      });
+    }
+
+    function syncMobileItems() {
+      const mobileItems = document.getElementById('mobile-items');
+      const desktopItems = document.getElementById('item-grid-area');
+      if (!mobileItems || !desktopItems) return;
+      mobileItems.innerHTML = desktopItems.innerHTML;
+      // Re-attach click handlers to mobile clones
+      mobileItems.querySelectorAll('.item-thumbnail').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = btn.dataset.index;
+          const thumbPath = btn.dataset.thumbPath;
+          // Find matching button in desktop grid and click it
+          const desktopBtn = desktopItems.querySelector(`[data-index="${idx}"][data-thumb-path="${CSS.escape(thumbPath || '')}"]`) ||
+                            desktopItems.querySelector(`[data-index="${idx}"]`);
+          if (desktopBtn) desktopBtn.click();
+          // Sync after selection
+          setTimeout(() => { syncMobileCanvas(); syncMobileItems(); }, 100);
+        });
+      });
+    }
+
+    function syncMobileCanvas() {
+      const mCanvas = document.getElementById('mobile-canvas');
+      const dCanvas = document.getElementById('preview-canvas');
+      if (!mCanvas || !dCanvas) return;
+      const mCtx = mCanvas.getContext('2d');
+      mCanvas.width = dCanvas.width;
+      mCanvas.height = dCanvas.height;
+      mCtx.drawImage(dCanvas, 0, 0);
+    }
+
+    function setupMobileEvents() {
+      // Mobile reset
+      document.getElementById('mobile-reset-btn')?.addEventListener('click', () => {
+        document.getElementById('reset-btn')?.click();
+        setTimeout(() => { syncMobileCanvas(); syncMobileItems(); }, 200);
+      });
+      // Mobile name
+      document.getElementById('mobile-name-btn')?.addEventListener('click', () => {
+        document.getElementById('name-btn')?.click();
+      });
+      // Mobile ID
+      document.getElementById('mobile-id-btn')?.addEventListener('click', () => {
+        document.getElementById('id-btn')?.click();
+        setTimeout(syncMobileCanvas, 500);
+      });
+      // Mobile save
+      document.getElementById('mobile-save-btn')?.addEventListener('click', () => {
+        document.getElementById('save-btn')?.click();
+      });
+    }
+
     function handleResize() {
       const viewport = document.getElementById('creator-viewport');
+      const mobileView = document.getElementById('mobile-creator');
       if (!viewport) return;
-      const containerWidth = viewport.parentElement.clientWidth;
-      const targetWidth = 1280;
-      if (containerWidth < targetWidth) {
-        const scale = containerWidth / targetWidth;
-        viewport.style.transform = `scale(${scale})`;
-        viewport.style.height = (768 * scale) + 'px';
-        viewport.parentElement.style.height = (768 * scale + 64) + 'px';
+      const screenWidth = window.innerWidth;
+
+      // Mobile breakpoint: use stacked layout
+      if (screenWidth < 768 && mobileView) {
+        viewport.parentElement.style.display = 'none';
+        mobileView.style.display = 'block';
+        // Sync canvas to mobile
+        const mCanvas = document.getElementById('mobile-canvas');
+        const dCanvas = document.getElementById('preview-canvas');
+        if (mCanvas && dCanvas) {
+          const mCtx = mCanvas.getContext('2d');
+          mCanvas.width = dCanvas.width;
+          mCanvas.height = dCanvas.height;
+          mCtx.drawImage(dCanvas, 0, 0);
+        }
       } else {
-        viewport.style.transform = 'scale(1)';
-        viewport.style.height = '768px';
-        viewport.parentElement.style.height = '';
+        if (mobileView) mobileView.style.display = 'none';
+        viewport.parentElement.style.display = 'flex';
+        const containerWidth = viewport.parentElement.clientWidth;
+        const targetWidth = 1280;
+        const targetHeight = 824;
+        if (containerWidth < targetWidth) {
+          const scale = containerWidth / targetWidth;
+          viewport.style.transform = `scale(${scale})`;
+          viewport.style.height = (targetHeight * scale) + 'px';
+          viewport.parentElement.style.height = (targetHeight * scale + 64) + 'px';
+        } else {
+          viewport.style.transform = 'scale(1)';
+          viewport.style.height = targetHeight + 'px';
+          viewport.parentElement.style.height = '';
+        }
       }
     }
 
@@ -597,6 +779,22 @@ import Layout from '../layouts/Layout.astro';
       if (nameBtn && !charName) {
         nameBtn.style.display = allSelected ? 'inline-block' : 'none';
       }
+
+      // Sync mobile action buttons
+      const mNameBtn = document.getElementById('mobile-name-btn');
+      const mIdBtn = document.getElementById('mobile-id-btn');
+      const mSaveBtn = document.getElementById('mobile-save-btn');
+      if (mNameBtn) mNameBtn.style.display = document.getElementById('name-btn')?.style.display || 'none';
+      if (mIdBtn) mIdBtn.style.display = document.getElementById('id-btn')?.style.display || 'none';
+      if (mSaveBtn) mSaveBtn.style.display = document.getElementById('save-btn')?.style.display || 'none';
+
+      // Sync mobile category locked/selection states
+      const mobileCats = document.querySelectorAll('.mobile-cat-btn');
+      mobileCats.forEach((btn, i) => {
+        const cat = CATEGORIES[i];
+        btn.classList.toggle('locked', cat.unlockStage > currentUnlockStage);
+        btn.classList.toggle('has-selection', !!selections[cat.folder]);
+      });
     }
 
     function initCanvas() {
@@ -654,6 +852,9 @@ import Layout from '../layouts/Layout.astro';
       if (idCode) {
         drawIdPatch(ctx, idCode);
       }
+
+      // Sync to mobile canvas if visible
+      syncMobileCanvas();
     }
 
     function drawHudLabels(ctx) {
@@ -796,9 +997,17 @@ import Layout from '../layouts/Layout.astro';
       document.getElementById('name-btn').style.display = 'none';
       document.getElementById('id-btn').style.display = 'none';
       document.getElementById('save-btn').style.display = 'none';
+      // Reset mobile buttons too
+      const mNameBtn = document.getElementById('mobile-name-btn');
+      const mIdBtn = document.getElementById('mobile-id-btn');
+      const mSaveBtn = document.getElementById('mobile-save-btn');
+      if (mNameBtn) mNameBtn.style.display = 'none';
+      if (mIdBtn) mIdBtn.style.display = 'none';
+      if (mSaveBtn) mSaveBtn.style.display = 'none';
       document.getElementById('post-save-box').classList.remove('visible');
       renderCanvas();
       buildCategoryList();
+      buildMobileCategories();
       selectCategory(0);
     }
 
@@ -820,6 +1029,11 @@ import Layout from '../layouts/Layout.astro';
       hideNameModal();
       document.getElementById('name-btn').style.display = 'none';
       document.getElementById('id-btn').style.display = 'inline-block';
+      // Sync mobile
+      const mNameBtn = document.getElementById('mobile-name-btn');
+      const mIdBtn = document.getElementById('mobile-id-btn');
+      if (mNameBtn) mNameBtn.style.display = 'none';
+      if (mIdBtn) mIdBtn.style.display = 'inline-block';
     }
 
     function generateId() {
@@ -829,6 +1043,11 @@ import Layout from '../layouts/Layout.astro';
       idCode = letter + String(num).padStart(2, '0');
       document.getElementById('id-btn').style.display = 'none';
       document.getElementById('save-btn').style.display = 'inline-block';
+      // Sync mobile
+      const mIdBtn = document.getElementById('mobile-id-btn');
+      const mSaveBtn = document.getElementById('mobile-save-btn');
+      if (mIdBtn) mIdBtn.style.display = 'none';
+      if (mSaveBtn) mSaveBtn.style.display = 'inline-block';
       renderCanvas();
     }
 
@@ -917,14 +1136,9 @@ import Layout from '../layouts/Layout.astro';
         ctx.restore();
       }
 
-      // Crop to canvas aspect ratio (700:684 → remove 8px top/bottom at native scale)
-      const vcrop = Math.round(8 * scale);
-      const croppedHeight = exportSize - vcrop * 2;
-      const cropped = document.createElement('canvas');
-      cropped.width = exportSize;
-      cropped.height = croppedHeight;
-      const cctx = cropped.getContext('2d');
-      cctx.drawImage(offscreen, 0, vcrop, exportSize, croppedHeight, 0, 0, exportSize, croppedHeight);
+      // Export as square (canvas is now 700×700, source art is 4200×4200)
+      const cropped = offscreen; // No cropping needed — already square
+      const cctx = ctx;
 
       // LSB Steganography — encode JSON into red-channel LSBs
       const tok = Array.from({length: 8}, () => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)]).join('');

@@ -1,0 +1,129 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const characters = [
+  {
+    name: 'ARCIN',
+    image: '/images/char-arcin.jpg',
+    accent: '#d966d6',
+  },
+  {
+    name: 'MARUK',
+    image: '/images/char-maruk.jpg',
+    accent: '#e6261a',
+  },
+  {
+    name: 'ITSAHK',
+    image: '/images/char-itsahk.jpg',
+    accent: '#d4aa30',
+  },
+  {
+    name: 'DONKEY',
+    image: '/images/char-donkey.jpg',
+    accent: '#8c78cc',
+  },
+];
+---
+
+<Layout title="FILE 002 — INMATE DOSSIERS">
+  <div id="gate-wrapper">
+
+    <!-- Access denied -->
+    <div id="access-denied" class="min-h-[80vh] flex flex-col items-center justify-center px-4">
+      <div class="border border-p-red/50 bg-p-panel p-10 text-center max-w-md shadow-red-glow">
+        <div class="text-p-red text-5xl font-display mb-4">⊗</div>
+        <h1 class="font-display text-xl tracking-widest text-p-red mb-4">ACCESS DENIED</h1>
+        <p class="font-ui text-p-dim text-sm mb-6">
+          INMATE PROFILE NOT ON FILE.<br/>
+          COMPLETE INTAKE PROCESSING TO CONTINUE.
+        </p>
+        <a href="/avatar" class="inline-block px-8 py-3 border border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all">
+          GO TO INTAKE →
+        </a>
+      </div>
+    </div>
+
+    <!-- Access granted -->
+    <div id="access-granted" class="hidden">
+      <div class="max-w-6xl mx-auto px-4 py-16">
+
+        <!-- Back link -->
+        <a href="/unlocked" class="inline-flex items-center gap-2 font-ui text-p-unlock/60 text-xs tracking-widest hover:text-p-unlock transition-all mb-8">
+          ← CLASSIFIED FILES
+        </a>
+
+        <!-- Header -->
+        <div class="mb-14 border-b border-p-unlock/30 pb-8">
+          <p class="font-ui text-p-unlock text-xs tracking-[0.4em] mb-2">FILE 002</p>
+          <h1 class="font-display text-2xl md:text-3xl tracking-wide text-p-text">INMATE DOSSIERS</h1>
+          <p class="font-body text-p-dim text-sm mt-2">Classified personnel records — Block D.</p>
+          <div class="w-16 h-px bg-p-unlock mt-4"></div>
+        </div>
+
+        <!-- Character sheets -->
+        <div class="space-y-20">
+          {characters.map((char, i) => (
+            <div class:list={[
+              'grid grid-cols-1 lg:grid-cols-2 gap-8 items-start',
+              i % 2 === 1 ? 'lg:grid-flow-dense' : '',
+            ]}>
+
+              <!-- Image -->
+              <div class:list={[
+                'relative group overflow-hidden border',
+                i % 2 === 1 ? 'lg:col-start-2' : '',
+              ]}
+              style={`border-color: ${char.accent}33; box-shadow: 0 0 20px 2px ${char.accent}18;`}
+              >
+                <div class="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 z-10 transition-all duration-300 group-hover:w-8 group-hover:h-8" style={`border-color: ${char.accent}99;`}></div>
+                <div class="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 z-10 transition-all duration-300 group-hover:w-8 group-hover:h-8" style={`border-color: ${char.accent}99;`}></div>
+                <div class="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 z-10 transition-all duration-300 group-hover:w-8 group-hover:h-8" style={`border-color: ${char.accent}99;`}></div>
+                <div class="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 z-10 transition-all duration-300 group-hover:w-8 group-hover:h-8" style={`border-color: ${char.accent}99;`}></div>
+
+                <img
+                  src={char.image}
+                  alt={`Character sheet for ${char.name}`}
+                  class="w-full h-auto block group-hover:scale-[1.02] transition-transform duration-500"
+                />
+              </div>
+
+              <!-- Name plate -->
+              <div class:list={[
+                'flex flex-col justify-center py-4',
+                i % 2 === 1 ? 'lg:col-start-1 lg:row-start-1' : '',
+              ]}>
+                <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-4">INMATE FILE</p>
+                <h2
+                  class="font-display text-5xl md:text-6xl tracking-widest mb-6"
+                  style={`color: ${char.accent};`}
+                >
+                  {char.name}
+                </h2>
+                <div class="w-12 h-px mb-6" style={`background: ${char.accent};`}></div>
+                <p class="font-comic text-p-dim text-sm leading-relaxed">
+                  Details classified. Complete intake processing to access full inmate dossier.
+                </p>
+              </div>
+
+            </div>
+          ))}
+        </div>
+
+        <!-- Bottom nav -->
+        <div class="mt-12 pt-8 border-t border-p-unlock/10 flex items-center justify-between">
+          <a href="/unlocked/001" class="font-ui text-p-unlock/60 text-xs tracking-widest hover:text-p-unlock transition-all">← FILE 001</a>
+          <a href="/unlocked/003" class="font-ui text-p-unlock/60 text-xs tracking-widest hover:text-p-unlock transition-all">FILE 003 →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</Layout>
+
+<script>
+  const isComplete = localStorage.getItem('panopticon_intake_complete') === 'true';
+  if (isComplete) {
+    document.getElementById('access-denied')?.classList.add('hidden');
+    document.getElementById('access-granted')?.classList.remove('hidden');
+  }
+</script>

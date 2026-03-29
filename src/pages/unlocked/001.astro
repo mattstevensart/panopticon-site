@@ -1,0 +1,84 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="FILE 001 — MAP">
+  <div id="gate-wrapper">
+
+    <!-- Access denied -->
+    <div id="access-denied" class="min-h-[80vh] flex flex-col items-center justify-center px-4">
+      <div class="border border-p-red/50 bg-p-panel p-10 text-center max-w-md shadow-red-glow">
+        <div class="text-p-red text-5xl font-display mb-4">⊗</div>
+        <h1 class="font-display text-xl tracking-widest text-p-red mb-4">ACCESS DENIED</h1>
+        <p class="font-ui text-p-dim text-sm mb-6">
+          INMATE PROFILE NOT ON FILE.<br/>
+          COMPLETE INTAKE PROCESSING TO CONTINUE.
+        </p>
+        <a href="/avatar" class="inline-block px-8 py-3 border border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all">
+          GO TO INTAKE →
+        </a>
+      </div>
+    </div>
+
+    <!-- Access granted -->
+    <div id="access-granted" class="hidden">
+      <div class="max-w-6xl mx-auto px-4 py-16">
+
+        <!-- Back link -->
+        <a href="/unlocked" class="inline-flex items-center gap-2 font-ui text-p-unlock/60 text-xs tracking-widest hover:text-p-unlock transition-all mb-8">
+          ← CLASSIFIED FILES
+        </a>
+
+        <!-- Header -->
+        <div class="mb-12 border-b border-p-unlock/30 pb-8">
+          <p class="font-ui text-p-unlock text-xs tracking-[0.4em] mb-2">FILE 001</p>
+          <h1 class="font-display text-2xl md:text-3xl tracking-wide text-p-text">PANOPTICON | 63RD: MAP</h1>
+          <div class="w-16 h-px bg-p-unlock mt-4"></div>
+        </div>
+
+        <!-- Map -->
+        <div class="relative group border border-p-teal/30 hover:border-p-teal/60 transition-all duration-500 shadow-teal-glow overflow-hidden">
+          <div class="absolute inset-0 bg-scanline opacity-20 pointer-events-none z-10"></div>
+
+          <!-- Corner brackets -->
+          <div class="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-p-teal/70 z-20"></div>
+          <div class="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-p-teal/70 z-20"></div>
+          <div class="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-p-teal/70 z-20"></div>
+          <div class="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-p-teal/70 z-20"></div>
+
+          <!-- Classification stamp -->
+          <div class="absolute top-4 right-12 z-20 opacity-60 group-hover:opacity-80 transition-opacity">
+            <div class="border-2 border-p-red/70 px-3 py-1 rotate-[-8deg]">
+              <span class="font-display text-p-red text-xs tracking-widest">CLASSIFIED</span>
+            </div>
+          </div>
+
+          <img
+            src="/images/panopticon-map.jpg"
+            alt="Map of the Panopticon facility and surrounding regions"
+            class="w-full h-auto block"
+          />
+        </div>
+
+        <p class="text-center font-ui text-p-dim/50 text-xs tracking-widest mt-4">
+          THE PANOPTICON &nbsp;·&nbsp; THE HOLLOWS &nbsp;·&nbsp; THE VELDT &nbsp;·&nbsp; THE CHASM &nbsp;·&nbsp; THE PRAIRIE
+        </p>
+
+        <!-- Bottom nav -->
+        <div class="mt-12 pt-8 border-t border-p-unlock/10 flex items-center justify-between">
+          <a href="/unlocked" class="font-ui text-p-unlock/60 text-xs tracking-widest hover:text-p-unlock transition-all">← BACK</a>
+          <a href="/unlocked/002" class="font-ui text-p-unlock/60 text-xs tracking-widest hover:text-p-unlock transition-all">FILE 002 →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</Layout>
+
+<script>
+  const isComplete = localStorage.getItem('panopticon_intake_complete') === 'true';
+  if (isComplete) {
+    document.getElementById('access-denied')?.classList.add('hidden');
+    document.getElementById('access-granted')?.classList.remove('hidden');
+  }
+</script>
