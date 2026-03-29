@@ -29,8 +29,7 @@ import Layout from '../layouts/Layout.astro';
               <div id="intro-text" style="text-align: center; color: rgb(214, 214, 224); font-family: 'Orbitron'; font-size: 20px; line-height: 2;">
                 <div id="intro-line-1" style="opacity: 0; margin: 20px 0; transition: opacity 1s;">WELCOME TO THE PANOPTICON.</div>
                 <div id="intro-line-2" style="opacity: 0; margin: 20px 0; transition: opacity 1s;">CLASSIFICATION INITIATING.</div>
-                <div id="intro-line-3" style="opacity: 0; margin: 20px 0; transition: opacity 1s;">DO NOT MOVE DURING SCAN.</div>
-                <div id="intro-line-4" style="opacity: 0; margin: 20px 0; color: rgb(26, 224, 194); transition: opacity 1s;">SELECT FEATURES NOW.</div>
+                <div id="intro-line-3" style="opacity: 0; margin: 20px 0; color: rgb(26, 224, 194); transition: opacity 1s;">SELECT FEATURES NOW.</div>
               </div>
             </div>
           </div>
@@ -762,12 +761,10 @@ import Layout from '../layouts/Layout.astro';
       const line1 = document.getElementById('intro-line-1');
       const line2 = document.getElementById('intro-line-2');
       const line3 = document.getElementById('intro-line-3');
-      const line4 = document.getElementById('intro-line-4');
 
       setTimeout(() => { line1.style.opacity = '1'; }, 1200);
       setTimeout(() => { line2.style.opacity = '1'; }, 3400);
       setTimeout(() => { line3.style.opacity = '1'; }, 5600);
-      setTimeout(() => { line4.style.opacity = '1'; }, 8200);
 
       setTimeout(() => {
         overlay.style.opacity = '0';
@@ -776,7 +773,7 @@ import Layout from '../layouts/Layout.astro';
           overlay.style.display = 'none';
           introCompleted = true;
         }, 500);
-      }, 11000);
+      }, 8500);
     }
 
     function setupEventListeners() {
