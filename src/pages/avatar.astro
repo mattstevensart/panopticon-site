@@ -53,9 +53,9 @@ import Layout from '../layouts/Layout.astro';
         <!-- Bottom action bar -->
         <div id="action-bar" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 40px; background: rgb(23, 23, 33); border-top: 1px solid rgb(56, 140, 255); display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 0 12px; box-sizing: border-box; z-index: 10;">
           <button id="reset-btn" class="action-button">RESET</button>
-          <button id="name-btn" class="action-button">NAME INMATE</button>
-          <button id="id-btn" class="action-button" style="display: none;">GENERATE ID</button>
-          <button id="save-btn" class="action-button action-button-red" style="display: none;">SAVE PNG</button>
+          <button id="name-btn" class="action-button action-button-glow" style="display: none;">NAME INMATE</button>
+          <button id="id-btn" class="action-button action-button-glow" style="display: none;">GENERATE ID</button>
+          <button id="save-btn" class="action-button action-button-glow" style="display: none;">SAVE PNG</button>
         </div>
       </div>
     </div>
@@ -138,13 +138,16 @@ import Layout from '../layouts/Layout.astro';
 
     .category-btn {
       width: 100%;
-      padding: 12px;
+      padding: 14px 12px;
       background: rgb(51, 51, 66);
       border: none;
       border-left: 4px solid transparent;
       color: rgb(92, 87, 111);
-      font-family: 'Electrolize';
-      font-size: 12px;
+      font-family: 'Orbitron';
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
       cursor: pointer;
       text-align: left;
       transition: all 0.2s;
@@ -251,6 +254,31 @@ import Layout from '../layouts/Layout.astro';
     .action-button-red {
       background: rgb(230, 38, 26);
       border-color: rgb(230, 38, 26);
+    }
+
+    @keyframes glow-green-pulse {
+      0%, 100% {
+        box-shadow: 0 0 8px 2px rgba(56, 235, 97, 0.4);
+        border-color: rgb(56, 235, 97);
+      }
+      50% {
+        box-shadow: 0 0 20px 6px rgba(56, 235, 97, 0.7);
+        border-color: rgb(100, 255, 140);
+      }
+    }
+
+    .action-button-glow {
+      background: rgb(20, 60, 30);
+      border: 2px solid rgb(56, 235, 97);
+      color: rgb(56, 235, 97);
+      font-weight: bold;
+      animation: glow-green-pulse 1.8s ease-in-out infinite;
+    }
+
+    .action-button-glow:hover {
+      background: rgb(30, 80, 40);
+      color: rgb(100, 255, 140);
+      border-color: rgb(100, 255, 140);
     }
 
     #name-modal {
@@ -399,10 +427,18 @@ import Layout from '../layouts/Layout.astro';
         btn.addEventListener('click', () => toggleSelection(catIdx, item));
         wrapper.appendChild(btn);
 
-        const label = document.createElement('div');
-        label.className = 'item-label';
-        label.textContent = item.label;
-        wrapper.appendChild(label);
+        // Only show labels for Gender category (MALE / FEMALE)
+        if (cat.folder === 'clothing/') {
+          const label = document.createElement('div');
+          label.className = 'item-label';
+          const isFemale = item.filename.toLowerCase().includes('female');
+          label.textContent = isFemale ? 'FEMALE' : 'MALE';
+          label.style.fontSize = '12px';
+          label.style.fontFamily = 'Orbitron';
+          label.style.fontWeight = 'bold';
+          label.style.color = 'rgb(214, 214, 224)';
+          wrapper.appendChild(label);
+        }
 
         gridDiv.appendChild(wrapper);
       });
@@ -544,6 +580,14 @@ import Layout from '../layouts/Layout.astro';
         currentUnlockStage = 1;
       } else {
         currentUnlockStage = 0;
+      }
+
+      // Show NAME INMATE when all required features are selected
+      const requiredFolders = ['clothing/', 'heads/', 'eyes/', 'mouth/', 'noses/', 'eyebrows/'];
+      const allRequired = requiredFolders.every(f => !!selections[f]);
+      const nameBtn = document.getElementById('name-btn');
+      if (nameBtn && !charName) {
+        nameBtn.style.display = allRequired ? 'inline-block' : 'none';
       }
     }
 
@@ -743,9 +787,10 @@ import Layout from '../layouts/Layout.astro';
       charName = '';
       idCode = '';
       currentUnlockStage = 0;
-      document.getElementById('name-btn').style.display = 'block';
+      document.getElementById('name-btn').style.display = 'none';
       document.getElementById('id-btn').style.display = 'none';
       document.getElementById('save-btn').style.display = 'none';
+      document.getElementById('post-save-box').classList.remove('visible');
       renderCanvas();
       buildCategoryList();
       selectCategory(0);
