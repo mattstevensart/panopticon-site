@@ -61,7 +61,7 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- Name modal (hidden initially) -->
-    <div id="name-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: none; z-index: 2000; align-items: center; justify-content: center;">
+    <div id="name-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 2000; align-items: center; justify-content: center;">
       <div style="background: rgb(23, 23, 33); border: 2px solid rgb(56, 140, 255); padding: 24px; width: 400px; max-width: 90vw; font-family: 'Exo 2';">
         <div style="color: rgb(214, 214, 224); font-family: 'Orbitron'; font-size: 16px; margin-bottom: 8px;">IDENTIFY SUBJECT</div>
         <div style="color: rgb(92, 87, 111); font-family: 'Electrolize'; font-size: 12px; margin-bottom: 16px;">ENTER INMATE DESIGNATION</div>
@@ -74,7 +74,7 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- Post-save message box (hidden initially) -->
-    <div id="post-save-box" style="position: fixed; bottom: 40px; right: 40px; width: 320px; background: rgb(23, 23, 33); border: 2px solid rgb(26, 224, 194); padding: 20px; display: none; z-index: 2000; font-family: 'Exo 2'; max-width: 90vw;">
+    <div id="post-save-box" style="position: fixed; bottom: 40px; right: 40px; width: 320px; background: rgb(23, 23, 33); border: 2px solid rgb(26, 224, 194); padding: 20px; z-index: 2000; font-family: 'Exo 2'; max-width: 90vw;">
       <div id="post-save-text" style="color: rgb(214, 214, 224); font-size: 12px; line-height: 1.8; margin-bottom: 16px; white-space: pre-wrap; font-family: 'Electrolize';"></div>
       <a id="scan-btn" href="/scan" style="display: inline-block; padding: 8px 12px; background: rgb(56, 140, 255); border: 1px solid rgb(56, 140, 255); color: rgb(10, 10, 15); font-family: 'Electrolize'; font-size: 11px; cursor: pointer; text-decoration: none;">SCAN INTO PANOPTICON →</a>
     </div>
@@ -197,8 +197,8 @@ import Layout from '../layouts/Layout.astro';
     .item-thumbnail img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      image-rendering: pixelated;
+      object-fit: cover;
+      image-rendering: auto;
     }
 
     .item-thumbnail.preview {
@@ -390,6 +390,7 @@ import Layout from '../layouts/Layout.astro';
         const img = document.createElement('img');
         img.src = item.thumb;
         img.alt = item.label;
+        img.loading = 'lazy';
         btn.appendChild(img);
 
         const isSelected = selections[cat.folder]?.full === item.full;
