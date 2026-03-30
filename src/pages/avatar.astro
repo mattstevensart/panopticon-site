@@ -1552,8 +1552,7 @@ import Layout from '../layouts/Layout.astro';
 
         try {
           // ── Kit (ConvertKit) Form Submission ──
-          // Replace FORM_ID with your Kit form ID from kit.com
-          const KIT_FORM_ID = 'YOUR_FORM_ID';
+          const KIT_FORM_ID = '9266908';
           const resp = await fetch(`https://api.convertkit.com/v3/forms/${KIT_FORM_ID}/subscribe`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
