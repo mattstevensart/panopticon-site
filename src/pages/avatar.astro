@@ -120,6 +120,13 @@ import Layout from '../layouts/Layout.astro';
       <div style="width: 100%; position: relative; border-bottom: 2px solid rgb(56, 140, 255); display: flex; justify-content: center; background: rgb(10, 10, 15);">
         <canvas id="mobile-canvas" width="700" height="700" style="display: block; width: 100%; max-width: 500px; height: auto; background: rgb(10, 10, 15);"></canvas>
       </div>
+      <!-- Mobile action bar (directly under avatar) -->
+      <div id="mobile-action-bar" style="padding: 8px; background: rgb(23, 23, 33); border-bottom: 1px solid rgb(56, 140, 255); display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+        <button id="mobile-reset-btn" class="action-button action-button-reset">RESET</button>
+        <button id="mobile-name-btn" class="action-button action-button-glow" style="display: none;">NAME INMATE</button>
+        <button id="mobile-id-btn" class="action-button action-button-glow" style="display: none;">GENERATE ID</button>
+        <button id="mobile-save-btn" class="action-button action-button-glow" style="display: none;">SAVE PNG</button>
+      </div>
       <!-- Mobile categories (horizontal scroll) -->
       <div id="mobile-categories" style="display: flex; overflow-x: auto; background: rgb(15, 15, 23); border-bottom: 1px solid rgb(56, 140, 255); padding: 4px 0; gap: 0; -webkit-overflow-scrolling: touch;">
         <!-- Injected by JS -->
@@ -127,13 +134,6 @@ import Layout from '../layouts/Layout.astro';
       <!-- Mobile item grid -->
       <div id="mobile-items" style="padding: 8px; background: rgb(23, 23, 33); min-height: 200px;">
         <!-- Injected by JS -->
-      </div>
-      <!-- Mobile action bar -->
-      <div id="mobile-action-bar" style="padding: 8px; background: rgb(23, 23, 33); border-top: 1px solid rgb(56, 140, 255); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
-        <button id="mobile-reset-btn" class="action-button action-button-reset">RESET</button>
-        <button id="mobile-name-btn" class="action-button action-button-glow" style="display: none;">NAME INMATE</button>
-        <button id="mobile-id-btn" class="action-button action-button-glow" style="display: none;">GENERATE ID</button>
-        <button id="mobile-save-btn" class="action-button action-button-glow" style="display: none;">SAVE PNG</button>
       </div>
       </div><!-- /.concrete-frame mobile -->
     </div>
@@ -1288,6 +1288,26 @@ import Layout from '../layouts/Layout.astro';
       renderCanvas();
     }
 
+    function mobileFallbackSave(blob, filename) {
+      // Convert blob to data URL and open in new tab for long-press save
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        const newTab = window.open('', '_blank');
+        if (newTab) {
+          newTab.document.write(`<!DOCTYPE html><html><head><title>${filename}</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;}</style></head><body><p style="color:#d6d6e0;font-size:14px;margin-bottom:12px;text-align:center;">Long-press the image to save to Photos</p><img src="${dataUrl}" style="max-width:95vw;max-height:80vh;" alt="${filename}"/></body></html>`);
+          newTab.document.close();
+        } else {
+          // If popup blocked, use download link
+          const a = document.createElement('a');
+          a.href = dataUrl;
+          a.download = filename;
+          a.click();
+        }
+      };
+      reader.readAsDataURL(blob);
+    }
+
     async function savePng() {
       // Camera flash
       const flash = document.createElement('div');
@@ -1301,7 +1321,9 @@ import Layout from '../layouts/Layout.astro';
       setTimeout(() => { flash.remove(); }, 500);
 
       // Compose at full resolution on offscreen canvas
-      const exportSize = 4200;
+      // iOS Safari has canvas memory limits — use smaller export on mobile
+      const isMobile = window.innerWidth < 768;
+      const exportSize = isMobile ? 2100 : 4200;
       const offscreen = document.createElement('canvas');
       offscreen.width = exportSize;
       offscreen.height = exportSize;
@@ -1400,36 +1422,36 @@ import Layout from '../layouts/Layout.astro';
       cctx.putImageData(imgData, 0, 0);
 
       // Download — use different approach for mobile vs desktop
-      cropped.toBlob((blob) => {
-        const safeName = charName.replace(/\s+/g, '_').replace(/[\/:\\]/g, '-');
-        const filename = `${safeName}${idCode.toUpperCase()}.png`;
+      const blob = await new Promise(resolve => cropped.toBlob(resolve, 'image/png'));
+      const safeName = charName.replace(/\s+/g, '_').replace(/[\/:\\]/g, '-');
+      const filename = `${safeName}${idCode.toUpperCase()}.png`;
 
-        if (window.innerWidth < 768) {
-          // Mobile: open image in new tab so user can long-press to save to photos
-          const url = URL.createObjectURL(blob);
-          const newTab = window.open('', '_blank');
-          if (newTab) {
-            newTab.document.write(`<!DOCTYPE html><html><head><title>${filename}</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;}</style></head><body><p style="color:#d6d6e0;font-size:14px;margin-bottom:12px;text-align:center;">Long-press the image to save to Photos</p><img src="${url}" style="max-width:95vw;max-height:80vh;" alt="${filename}"/></body></html>`);
-            newTab.document.close();
+      if (isMobile) {
+        // Mobile: try Web Share API first (works on iOS Safari + Android Chrome)
+        if (navigator.share && navigator.canShare) {
+          const file = new File([blob], filename, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            try {
+              await navigator.share({ files: [file], title: filename });
+            } catch(e) {
+              // User cancelled share — that's fine
+            }
           } else {
-            // Fallback if popup blocked
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
+            mobileFallbackSave(blob, filename);
           }
         } else {
-          // Desktop: standard download
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = filename;
-          a.click();
-          URL.revokeObjectURL(url);
+          mobileFallbackSave(blob, filename);
         }
-        showPostSaveMessage();
-      }, 'image/png');
+      } else {
+        // Desktop: standard download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+      showPostSaveMessage();
     }
 
     function showPostSaveMessage() {
