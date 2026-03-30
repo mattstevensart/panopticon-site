@@ -89,5 +89,85 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </div>
     </div>
+
+    <!-- Contact Form -->
+    <div class="mt-16 border-t border-p-accent/20 pt-12">
+      <div class="max-w-2xl">
+        <h2 class="font-display text-sm tracking-widest text-p-red mb-2">⚠ TRANSMIT MESSAGE TO FACILITY ADMINISTRATION</h2>
+        <p class="font-comic text-p-dim text-sm mb-8">All transmissions are logged and monitored.</p>
+
+        <form id="contact-form" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-ui text-p-dim text-xs tracking-widest mb-2">DESIGNATION</label>
+              <input type="text" name="name" required placeholder="YOUR NAME"
+                class="w-full px-4 py-3 bg-p-root border-2 border-p-dim/30 text-p-text font-ui text-sm tracking-wide outline-none transition-colors focus:border-p-red"
+                style="letter-spacing: 1px;" />
+            </div>
+            <div>
+              <label class="block font-ui text-p-dim text-xs tracking-widest mb-2">FREQUENCY</label>
+              <input type="email" name="email" required placeholder="YOUR EMAIL"
+                class="w-full px-4 py-3 bg-p-root border-2 border-p-dim/30 text-p-text font-ui text-sm tracking-wide outline-none transition-colors focus:border-p-red"
+                style="letter-spacing: 1px;" />
+            </div>
+          </div>
+          <div>
+            <label class="block font-ui text-p-dim text-xs tracking-widest mb-2">TRANSMISSION</label>
+            <textarea name="message" required rows="5" placeholder="ENTER YOUR MESSAGE"
+              class="w-full px-4 py-3 bg-p-root border-2 border-p-dim/30 text-p-text font-ui text-sm tracking-wide outline-none transition-colors focus:border-p-red resize-none"
+              style="letter-spacing: 1px;"></textarea>
+          </div>
+          <div class="flex items-center gap-4">
+            <button type="submit" id="contact-submit"
+              class="px-6 py-3 bg-p-red border-2 border-p-red font-ui text-sm font-bold tracking-widest cursor-pointer transition-all hover:bg-transparent hover:text-p-red"
+              style="color: rgb(10, 10, 15);">
+              TRANSMIT →
+            </button>
+            <span id="contact-status" class="font-ui text-sm tracking-wide" style="display: none;"></span>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </Layout>
+
+<script>
+  const form = document.getElementById('contact-form');
+  const submitBtn = document.getElementById('contact-submit');
+  const status = document.getElementById('contact-status');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'TRANSMITTING...';
+    status.style.display = 'none';
+
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    data.access_key = 'bbd36a00-ce64-4810-b3b5-829e8504351d';
+
+    try {
+      const resp = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (resp.ok) {
+        status.textContent = 'TRANSMISSION RECEIVED. MESSAGE LOGGED.';
+        status.style.color = 'rgb(26, 224, 194)';
+        status.style.display = 'inline';
+        form.reset();
+      } else {
+        throw new Error('Failed');
+      }
+    } catch(err) {
+      status.textContent = 'TRANSMISSION FAILED. TRY AGAIN.';
+      status.style.color = 'rgb(230, 38, 26)';
+      status.style.display = 'inline';
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'TRANSMIT →';
+  });
+</script>
