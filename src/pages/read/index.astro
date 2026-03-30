@@ -7,6 +7,12 @@ const excerptPages = [
   { src: '/images/read/webtoon-15.jpg', alt: 'Panopticon Issue 1 — Page 15' },
   { src: '/images/read/webtoon-16.jpg', alt: 'Panopticon Issue 1 — Page 16' },
 ];
+
+const sneakPeekPages = [
+  { src: '/images/read/sneak-peek-issue5-p6.jpg', alt: 'Panopticon Issue 5 — Page 6', label: 'ISSUE 5' },
+  { src: '/images/read/sneak-peek-issue6-p18.jpg', alt: 'Panopticon Issue 6 — Page 18', label: 'ISSUE 6' },
+  { src: '/images/read/sneak-peek-issue6-p2.jpg', alt: 'Panopticon Issue 6 — Page 2', label: 'ISSUE 6' },
+];
 ---
 
 <Layout title="READ">
@@ -51,6 +57,34 @@ const excerptPages = [
       <p class="text-center font-ui text-p-dim/50 text-xs tracking-widest mt-4">
         PANOPTICON ISSUE 1 &nbsp;·&nbsp; PAGES 13–16
       </p>
+    </section>
+
+    <!-- Sneak Peek — Act 2 -->
+    <section class="mb-16">
+      <div class="text-center mb-10">
+        <h2 class="font-display text-2xl md:text-3xl text-p-text tracking-wide">SNEAK PEEK — ACT 2</h2>
+        <p class="font-body text-p-dim text-sm mt-3">A quick look at what's to come.</p>
+        <div class="w-24 h-px bg-p-red mx-auto mt-4"></div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {sneakPeekPages.map(page => (
+          <div class="relative border border-p-red/30 overflow-hidden group">
+            <!-- Corner brackets -->
+            <div class="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-p-red/50 z-20"></div>
+            <div class="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-p-red/50 z-20"></div>
+            <div class="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-p-red/50 z-20"></div>
+            <div class="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-p-red/50 z-20"></div>
+
+            <img src={page.src} alt={page.alt} class="w-full h-auto block transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+
+            <!-- Label overlay -->
+            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-p-root/90 to-transparent pt-10 pb-3 px-3 z-10">
+              <span class="font-display text-xs tracking-widest text-p-red/80">{page.label}</span>
+            </div>
+          </div>
+        ))}
+      </div>
     </section>
   </div>
 </Layout>
