@@ -51,7 +51,7 @@ import Layout from '../layouts/Layout.astro';
 
         <!-- Bottom action bar -->
         <div id="action-bar" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 56px; background: rgb(23, 23, 33); border-top: 1px solid rgb(56, 140, 255); display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 0 16px; box-sizing: border-box; z-index: 10;">
-          <button id="reset-btn" class="action-button">RESET</button>
+          <button id="reset-btn" class="action-button action-button-reset">RESET</button>
           <button id="name-btn" class="action-button action-button-glow" style="display: none;">NAME INMATE</button>
           <button id="id-btn" class="action-button action-button-glow" style="display: none;">GENERATE ID</button>
           <button id="save-btn" class="action-button action-button-glow" style="display: none;">SAVE PNG</button>
@@ -75,7 +75,7 @@ import Layout from '../layouts/Layout.astro';
       </div>
       <!-- Mobile action bar -->
       <div id="mobile-action-bar" style="padding: 8px; background: rgb(23, 23, 33); border-top: 1px solid rgb(56, 140, 255); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
-        <button id="mobile-reset-btn" class="action-button">RESET</button>
+        <button id="mobile-reset-btn" class="action-button action-button-reset">RESET</button>
         <button id="mobile-name-btn" class="action-button action-button-glow" style="display: none;">NAME INMATE</button>
         <button id="mobile-id-btn" class="action-button action-button-glow" style="display: none;">GENERATE ID</button>
         <button id="mobile-save-btn" class="action-button action-button-glow" style="display: none;">SAVE PNG</button>
@@ -282,6 +282,22 @@ import Layout from '../layouts/Layout.astro';
     .action-button-red {
       background: rgb(230, 38, 26);
       border-color: rgb(230, 38, 26);
+    }
+
+    .action-button-reset {
+      background: rgb(40, 20, 60);
+      border: 2px solid rgb(140, 64, 255);
+      color: rgb(140, 64, 255);
+      font-size: 15px;
+      font-weight: bold;
+      padding: 10px 22px;
+      letter-spacing: 2px;
+    }
+
+    .action-button-reset:hover {
+      background: rgb(55, 30, 80);
+      border-color: rgb(180, 100, 255);
+      color: rgb(180, 100, 255);
     }
 
     @keyframes glow-green-pulse {
@@ -1163,15 +1179,35 @@ import Layout from '../layouts/Layout.astro';
       }
       cctx.putImageData(imgData, 0, 0);
 
-      // Download
+      // Download — use different approach for mobile vs desktop
       cropped.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
         const safeName = charName.replace(/\s+/g, '_').replace(/[\/:\\]/g, '-');
-        a.download = `${safeName}${idCode.toUpperCase()}.png`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const filename = `${safeName}${idCode.toUpperCase()}.png`;
+
+        if (window.innerWidth < 768) {
+          // Mobile: open image in new tab so user can long-press to save to photos
+          const url = URL.createObjectURL(blob);
+          const newTab = window.open('', '_blank');
+          if (newTab) {
+            newTab.document.write(`<!DOCTYPE html><html><head><title>${filename}</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;}</style></head><body><p style="color:#d6d6e0;font-size:14px;margin-bottom:12px;text-align:center;">Long-press the image to save to Photos</p><img src="${url}" style="max-width:95vw;max-height:80vh;" alt="${filename}"/></body></html>`);
+            newTab.document.close();
+          } else {
+            // Fallback if popup blocked
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+          }
+        } else {
+          // Desktop: standard download
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
         showPostSaveMessage();
       }, 'image/png');
     }
@@ -1182,6 +1218,31 @@ import Layout from '../layouts/Layout.astro';
       text.textContent = `INMATE INTAKE COMPLETE.\nYOU ARE INMATE ${charName.toUpperCase()}. ID #${idCode}.\nWELCOME TO THE PANOPTICON.\nSURVEILLANCE IS MANDATORY.`;
       box.classList.add('visible');
       localStorage.setItem('panopticon_intake_complete', 'true');
+
+      // Store full inmate profile for header display
+      const genderSel = selections['clothing/'];
+      const headSel = selections['heads/'];
+      const foodSel = selections['Food/'];
+      const isFemale = genderSel?.filename?.toLowerCase().includes('female');
+      const raceParts = headSel?.full?.split('/') || [];
+      const raceName = raceParts[raceParts.length - 2] || '—';
+
+      localStorage.setItem('panopticon_inmate_name', charName.toUpperCase());
+      localStorage.setItem('panopticon_inmate_id', idCode.toUpperCase());
+      localStorage.setItem('panopticon_inmate_gender', isFemale ? 'FEMALE' : 'MALE');
+      localStorage.setItem('panopticon_inmate_race', raceName.toUpperCase());
+      localStorage.setItem('panopticon_inmate_nutri', foodSel ? foodSel.label.toUpperCase() : '—');
+
+      // Store avatar preview thumb
+      try {
+        const canvas = document.getElementById('preview-canvas');
+        const thumbCanvas = document.createElement('canvas');
+        thumbCanvas.width = 120;
+        thumbCanvas.height = 120;
+        const tCtx = thumbCanvas.getContext('2d');
+        tCtx.drawImage(canvas, 0, 0, 120, 120);
+        localStorage.setItem('panopticon_avatar_thumb', thumbCanvas.toDataURL('image/jpeg', 0.7));
+      } catch(e) {}
     }
 
     if (document.readyState === 'loading') {

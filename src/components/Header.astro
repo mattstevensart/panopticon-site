@@ -47,14 +47,50 @@ const pathname = Astro.url.pathname;
     </nav>
 
     <!-- Right: Avatar thumbnail (hidden until unlocked) -->
-    <div id="header-avatar-wrap" class="hidden md:hidden items-center gap-2">
-      <div class="relative">
-        <img id="header-avatar-img" src="" alt="Inmate avatar" class="w-10 h-10 border border-p-unlock/60 object-cover" />
-        <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-p-teal border border-p-canvas"></div>
-      </div>
+    <div id="header-avatar-wrap" class="hidden items-center gap-3 cursor-pointer relative" role="button" tabindex="0">
       <div class="flex flex-col items-end">
-        <span id="header-avatar-name" class="font-display text-[10px] tracking-widest text-p-unlock"></span>
-        <span id="header-avatar-id" class="font-ui text-[9px] tracking-widest text-p-dim"></span>
+        <span id="header-avatar-name" class="font-display text-xs tracking-widest text-p-unlock"></span>
+        <span id="header-avatar-id" class="font-ui text-[10px] tracking-widest text-p-dim"></span>
+      </div>
+      <div class="relative">
+        <img id="header-avatar-img" src="" alt="Inmate avatar" class="w-12 h-12 border-2 border-p-unlock/60 object-cover hover:border-p-unlock transition-all" />
+        <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-p-teal border-2 border-p-canvas"></div>
+      </div>
+
+      <!-- Inmate info dropdown panel -->
+      <div id="inmate-panel" class="hidden absolute top-full right-0 mt-2 w-72 bg-p-panel border border-p-unlock/40 z-[100] shadow-2xl" style="box-shadow: 0 4px 30px rgba(140, 64, 255, 0.2);">
+        <div class="flex items-center gap-4 p-4 border-b border-p-unlock/20 bg-p-canvas">
+          <img id="panel-avatar-img" src="" alt="Inmate avatar" class="w-16 h-16 border-2 border-p-unlock/60 object-cover" />
+          <div>
+            <p id="panel-name" class="font-display text-sm tracking-widest text-p-unlock"></p>
+            <p id="panel-id" class="font-ui text-xs tracking-widest text-p-dim mt-1"></p>
+          </div>
+        </div>
+        <div class="p-4 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="font-ui text-p-dim text-[10px] tracking-widest">GENDER</span>
+            <span id="panel-gender" class="font-display text-p-accent text-xs"></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-ui text-p-dim text-[10px] tracking-widest">RACE</span>
+            <span id="panel-race" class="font-display text-p-accent text-xs"></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-ui text-p-dim text-[10px] tracking-widest">NUTRIQUIREMENTS</span>
+            <span id="panel-nutri" class="font-display text-p-accent text-xs"></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-ui text-p-dim text-[10px] tracking-widest">TOKEN</span>
+            <span id="panel-token" class="font-display text-p-dim text-xs"></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-ui text-p-dim text-[10px] tracking-widest">STATUS</span>
+            <span class="font-ui text-p-teal text-[10px] tracking-widest">● REGISTERED</span>
+          </div>
+        </div>
+        <a href="/unlocked" class="block p-3 text-center font-ui text-p-unlock text-[10px] tracking-widest border-t border-p-unlock/20 hover:bg-p-unlock/10 transition-all">
+          VIEW CLASSIFIED FILES →
+        </a>
       </div>
     </div>
 
@@ -110,7 +146,6 @@ const pathname = Astro.url.pathname;
     const navLink = document.getElementById('nav-classified');
     if (navLink) {
       navLink.classList.remove('hidden');
-      // Check if current page is /unlocked
       if (window.location.pathname.startsWith('/unlocked')) {
         navLink.classList.add('text-p-unlock', 'border-p-unlock');
         navLink.classList.remove('text-p-unlock/70', 'border-transparent');
@@ -123,17 +158,56 @@ const pathname = Astro.url.pathname;
     const avatarThumb = localStorage.getItem('panopticon_avatar_thumb');
     const inmateName = localStorage.getItem('panopticon_inmate_name');
     const inmateId = localStorage.getItem('panopticon_inmate_id');
+    const inmateGender = localStorage.getItem('panopticon_inmate_gender');
+    const inmateRace = localStorage.getItem('panopticon_inmate_race');
+    const inmateNutri = localStorage.getItem('panopticon_inmate_nutri');
+    const inmateTok = localStorage.getItem('panopticon_inmate_tok');
 
     if (avatarThumb && inmateName) {
+      // Header avatar
       const wrap = document.getElementById('header-avatar-wrap');
       const img = document.getElementById('header-avatar-img');
       const nameEl = document.getElementById('header-avatar-name');
       const idEl = document.getElementById('header-avatar-id');
 
-      if (wrap) { wrap.classList.remove('hidden', 'md:hidden'); wrap.classList.add('flex'); }
+      if (wrap) { wrap.classList.remove('hidden'); wrap.classList.add('flex'); }
       if (img) img.src = avatarThumb;
       if (nameEl) nameEl.textContent = inmateName;
       if (idEl) idEl.textContent = inmateId ? '#' + inmateId : '';
+
+      // Populate panel
+      const panelImg = document.getElementById('panel-avatar-img');
+      const panelName = document.getElementById('panel-name');
+      const panelId = document.getElementById('panel-id');
+      const panelGender = document.getElementById('panel-gender');
+      const panelRace = document.getElementById('panel-race');
+      const panelNutri = document.getElementById('panel-nutri');
+      const panelToken = document.getElementById('panel-token');
+
+      if (panelImg) panelImg.src = avatarThumb;
+      if (panelName) panelName.textContent = inmateName;
+      if (panelId) panelId.textContent = inmateId ? '#' + inmateId : '';
+      if (panelGender) panelGender.textContent = inmateGender || '—';
+      if (panelRace) panelRace.textContent = inmateRace || '—';
+      if (panelNutri) panelNutri.textContent = inmateNutri || '—';
+      if (panelToken) panelToken.textContent = inmateTok || '—';
+
+      // Toggle panel on click
+      wrap?.addEventListener('click', (e) => {
+        // Don't toggle if clicking the classified files link inside the panel
+        if (e.target.closest('a[href="/unlocked"]')) return;
+        const panel = document.getElementById('inmate-panel');
+        panel?.classList.toggle('hidden');
+      });
+
+      // Close panel when clicking outside
+      document.addEventListener('click', (e) => {
+        const wrap = document.getElementById('header-avatar-wrap');
+        const panel = document.getElementById('inmate-panel');
+        if (panel && wrap && !wrap.contains(e.target)) {
+          panel.classList.add('hidden');
+        }
+      });
     }
   }
 </script>
