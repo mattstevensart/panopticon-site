@@ -33,16 +33,19 @@ import Layout from '../layouts/Layout.astro';
         <!-- Classified file cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
-            { id: '001', title: 'PANOPTICON | 63RD: MAP',  body: 'Classified facility map and surrounding regions.',                     href: '/unlocked/001' },
-            { id: '002', title: 'INMATE DOSSIERS',         body: 'Character profiles, backstories, and classified personnel records.',   href: '/unlocked/002' },
-            { id: '003', title: 'NOTES FROM THE CELLS',    body: 'Script excerpts from Act 1 — straight from the cells.',               href: '/unlocked/003' },
-            { id: '004', title: 'THE TOWER',               body: 'What really happens in the tower? Lore drops and world-building extras.', href: '/unlocked/004' },
+            { id: '001', title: 'PANOPTICON | 63RD: MAP',  body: 'Classified facility map and surrounding regions.',                     href: '/unlocked/001', thumb: '/images/panopticon-map.jpg' },
+            { id: '002', title: 'INMATE DOSSIERS',         body: 'Character profiles, backstories, and classified personnel records.',   href: '/unlocked/002', thumb: '/images/char-arcin.jpg' },
+            { id: '003', title: 'NOTES FROM THE CELLS',    body: 'Script excerpts from Act 1 — straight from the cells.',               href: '/unlocked/003', thumb: '/images/read/webtoon-13.jpg' },
+            { id: '004', title: 'THE TOWER',               body: 'What really happens in the tower? Lore drops and world-building extras.', href: '/unlocked/004', thumb: '/images/read/webtoon-28.jpg' },
           ].map(file => (
-            <a href={file.href} class="bg-p-panel border border-p-unlock/20 p-6 hover:border-p-unlock/40 transition-all block group">
-              <p class="font-ui text-p-unlock text-xs tracking-widest mb-3">FILE {file.id}</p>
-              <h3 class="font-display text-sm text-p-text tracking-wide mb-3">{file.title}</h3>
-              <p class="font-body text-p-dim text-sm">{file.body}</p>
-              <p class="font-ui text-p-unlock/50 text-xs tracking-widest mt-4 group-hover:text-p-unlock group-hover:tracking-[0.3em] transition-all">OPEN FILE →</p>
+            <a href={file.href} class="bg-p-panel border border-p-unlock/20 hover:border-p-unlock/40 transition-all block group relative overflow-hidden">
+              <img src={file.thumb} alt="" class="absolute top-0 right-0 w-28 h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity" style="mask-image: linear-gradient(to left, rgba(0,0,0,0.6) 0%, transparent 100%); -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,0.6) 0%, transparent 100%);" />
+              <div class="relative z-10 p-6">
+                <p class="font-ui text-p-unlock text-xs tracking-widest mb-3">FILE {file.id}</p>
+                <h3 class="font-display text-sm text-p-text tracking-wide mb-3">{file.title}</h3>
+                <p class="font-body text-p-dim text-sm">{file.body}</p>
+                <p class="font-ui text-p-unlock/50 text-xs tracking-widest mt-4 group-hover:text-p-unlock group-hover:tracking-[0.3em] transition-all">OPEN FILE →</p>
+              </div>
             </a>
           ))}
         </div>
