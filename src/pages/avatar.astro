@@ -198,7 +198,7 @@ import Layout from '../layouts/Layout.astro';
         linear-gradient(95deg, transparent 55%, rgba(0,0,0,0.1) 55.1%, transparent 55.3%),
         linear-gradient(140deg, transparent 70%, rgba(0,0,0,0.12) 70.15%, transparent 70.3%);
       pointer-events: none;
-      z-index: 50;
+      z-index: 0;
       filter: url(#concrete-texture);
     }
     /* Worn edge via ::after — top & bottom scuffed highlight */
@@ -220,7 +220,7 @@ import Layout from '../layouts/Layout.astro';
           rgba(0,0,0,0.1) 100%
         );
       pointer-events: none;
-      z-index: 51;
+      z-index: 0;
     }
 
     /* Corner bolts */
@@ -235,7 +235,7 @@ import Layout from '../layouts/Layout.astro';
         inset 0 1px 2px rgba(255,255,255,0.15),
         inset 0 -1px 2px rgba(0,0,0,0.5),
         0 1px 3px rgba(0,0,0,0.6);
-      z-index: 60;
+      z-index: 1;
     }
     .corner-bolt::before {
       content: '';
@@ -272,7 +272,7 @@ import Layout from '../layouts/Layout.astro';
       letter-spacing: 4px;
       color: rgba(0,0,0,0.3);
       text-shadow: 0 1px 0 rgba(255,255,255,0.05);
-      z-index: 60;
+      z-index: 1;
       pointer-events: none;
       white-space: nowrap;
     }
@@ -283,7 +283,7 @@ import Layout from '../layouts/Layout.astro';
       top: 0;
       width: 60px;
       height: 18px;
-      z-index: 55;
+      z-index: 1;
       background: repeating-linear-gradient(
         -45deg,
         rgba(230, 38, 26, 0.25) 0px,
