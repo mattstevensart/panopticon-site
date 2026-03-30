@@ -67,6 +67,12 @@ body {
 }
 .animate-pulse-teal-text { animation: pulse-teal-text 3s ease-in-out infinite; }
 
+@keyframes pulse-unlock-text {
+  0%, 100% { opacity: 0.5; text-shadow: 0 0 4px rgba(140,64,255,0.2); }
+  50%       { opacity: 1;   text-shadow: 0 0 10px rgba(140,64,255,0.5), 0 0 20px rgba(140,64,255,0.2); }
+}
+.animate-pulse-unlock-text { animation: pulse-unlock-text 3s ease-in-out infinite; }
+
 @keyframes scroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }

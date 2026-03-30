@@ -6,21 +6,25 @@ const characters = [
     name: 'ARCIN',
     image: '/images/char-arcin.jpg',
     accent: '#d966d6',
+    id: 'A03',
   },
   {
     name: 'MARUK',
     image: '/images/char-maruk.jpg',
     accent: '#e6261a',
+    id: 'M68',
   },
   {
     name: 'ITSAHK',
     image: '/images/char-itsahk.jpg',
     accent: '#d4aa30',
+    id: 'I56',
   },
   {
     name: 'DONKEY',
     image: '/images/char-donkey.jpg',
     accent: '#8c78cc',
+    id: 'D51',
   },
 ];
 ---
@@ -56,7 +60,7 @@ const characters = [
         <div class="mb-14 border-b border-p-unlock/30 pb-8">
           <p class="font-ui text-p-unlock text-xs tracking-[0.4em] mb-2">FILE 002</p>
           <h1 class="font-display text-2xl md:text-3xl tracking-wide text-p-text">INMATE DOSSIERS</h1>
-          <p class="font-body text-p-dim text-sm mt-2">Classified personnel records — Block D.</p>
+          <p class="font-body text-p-dim text-sm mt-2">Classified personnel records.</p>
           <div class="w-16 h-px bg-p-unlock mt-4"></div>
         </div>
 
@@ -100,9 +104,11 @@ const characters = [
                   {char.name}
                 </h2>
                 <div class="w-12 h-px mb-6" style={`background: ${char.accent};`}></div>
-                <p class="font-comic text-p-dim text-sm leading-relaxed">
-                  Details classified. Complete intake processing to access full inmate dossier.
-                </p>
+                <div class="space-y-2 font-ui text-sm">
+                  <p class="text-p-dim">Inmate — <span class="text-p-text">Panopticon | 63rd</span></p>
+                  <p class="text-p-dim">Vericycles — <span class="text-p-red">{'{redacted}'}</span></p>
+                  <p class="text-p-dim">ID — <span style={`color: ${char.accent};`}>#{char.id}</span></p>
+                </div>
               </div>
 
             </div>
