@@ -1,10 +1,12 @@
 ---
-const navLinks = [
+const browseLinks = [
   { href: '/',           label: 'HOME' },
   { href: '/read',       label: 'READ' },
   { href: '/about',      label: 'ABOUT' },
-  { href: '/avatar',     label: 'CREATE AN AVATAR' },
-  { href: '/scan',       label: 'SCAN' },
+];
+const actionLinks = [
+  { href: '/avatar',     label: 'CREATE AN AVATAR', storeKey: 'panopticon_inmate_name', color: 'teal' },
+  { href: '/scan',       label: 'SCAN',             storeKey: 'panopticon_intake_complete', color: 'teal' },
 ];
 const pathname = Astro.url.pathname;
 ---
@@ -23,25 +25,41 @@ const pathname = Astro.url.pathname;
       </div>
     </div>
 
-    <!-- Center: Nav -->
-    <nav class="hidden md:flex items-center gap-1">
-      {navLinks.map(link => {
+    <!-- Center: Nav (two-tier split) -->
+    <nav class="hidden md:flex items-center gap-0">
+      <!-- Browse group -->
+      {browseLinks.map(link => {
         const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
-        const isScan   = link.href === '/scan';
         return (
           <a href={link.href} class:list={[
-            'px-3 py-2 text-xs font-display tracking-widest transition-all duration-200 text-center leading-tight max-w-[10rem]',
-            isActive && !isScan  ? 'text-p-accent border-b-2 border-p-accent' :
-            isActive &&  isScan  ? 'text-p-teal  border-b-2 border-p-teal'   :
-            isScan               ? 'text-p-teal/60 hover:text-p-teal'         :
-                                   'text-p-dim hover:text-p-accent/80',
+            'px-3 py-2 text-xs font-display tracking-widest transition-all duration-200 text-center leading-tight',
+            isActive ? 'text-p-accent border-b-2 border-p-accent' : 'text-p-dim hover:text-p-accent/80',
           ]}>
             {link.label}
           </a>
         );
       })}
+
+      <!-- Divider -->
+      <span class="mx-2 h-5 w-px bg-p-dim/30"></span>
+
+      <!-- Action group (with progress dots) -->
+      {actionLinks.map(link => {
+        const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+        return (
+          <a href={link.href} data-store-key={link.storeKey} class:list={[
+            'nav-action-link px-3 py-2 text-xs font-display tracking-widest transition-all duration-200 text-center leading-tight flex items-center gap-1.5',
+            isActive ? 'text-p-teal border-b-2 border-p-teal' : 'text-p-teal/60 hover:text-p-teal',
+          ]}>
+            <span class="nav-dot w-1.5 h-1.5 rounded-full border border-p-dim/40 flex-shrink-0" data-store-key={link.storeKey}></span>
+            {link.label}
+          </a>
+        );
+      })}
+
       <!-- Classified nav link (hidden until unlocked) -->
-      <a id="nav-classified" href="/unlocked" class="hidden px-3 py-2 text-xs font-display tracking-widest transition-all duration-200 text-center leading-tight max-w-[10rem] text-p-unlock/70 hover:text-p-unlock border-b-2 border-transparent" style="animation: nav-unlock-pulse 2.5s ease-in-out infinite;">
+      <a id="nav-classified" href="/unlocked" class="hidden px-3 py-2 text-xs font-display tracking-widest transition-all duration-200 text-center leading-tight flex items-center gap-1.5 text-p-unlock/70 hover:text-p-unlock border-b-2 border-transparent" style="animation: nav-unlock-pulse 2.5s ease-in-out infinite;">
+        <span class="nav-dot w-1.5 h-1.5 rounded-full border border-p-dim/40 flex-shrink-0" id="nav-dot-classified"></span>
         CLASSIFIED
       </a>
     </nav>
@@ -104,18 +122,24 @@ const pathname = Astro.url.pathname;
   </div>
 
   <div id="mobile-nav" class="md:hidden hidden border-t border-p-accent/20 bg-p-canvas">
-    {navLinks.map(link => (
-      <a href={link.href} class:list={[
-        'block px-6 py-3 text-sm font-display tracking-widest transition-all',
-        link.href === '/scan'
-          ? 'text-p-teal/70 hover:text-p-teal hover:bg-p-panel'
-          : 'text-p-dim hover:text-p-accent hover:bg-p-panel',
-      ]}>
+    <!-- Browse -->
+    {browseLinks.map(link => (
+      <a href={link.href} class="block px-6 py-3 text-sm font-display tracking-widest text-p-dim hover:text-p-accent hover:bg-p-panel transition-all">
+        {link.label}
+      </a>
+    ))}
+    <!-- Divider -->
+    <div class="mx-4 border-t border-p-dim/20"></div>
+    <!-- Action group -->
+    {actionLinks.map(link => (
+      <a href={link.href} class="block px-6 py-3 text-sm font-display tracking-widest text-p-teal/70 hover:text-p-teal hover:bg-p-panel transition-all flex items-center gap-2">
+        <span class="nav-dot w-2 h-2 rounded-full border border-p-dim/40 flex-shrink-0" data-store-key={link.storeKey}></span>
         {link.label}
       </a>
     ))}
     <!-- Mobile classified link (hidden until unlocked) -->
-    <a id="mobile-nav-classified" href="/unlocked" class="hidden px-6 py-3 text-sm font-display tracking-widest text-p-unlock/70 hover:text-p-unlock hover:bg-p-panel transition-all">
+    <a id="mobile-nav-classified" href="/unlocked" class="hidden px-6 py-3 text-sm font-display tracking-widest text-p-unlock/70 hover:text-p-unlock hover:bg-p-panel transition-all flex items-center gap-2">
+      <span class="nav-dot w-2 h-2 rounded-full border border-p-dim/40 flex-shrink-0" id="mobile-nav-dot-classified"></span>
       CLASSIFIED
     </a>
   </div>
@@ -149,6 +173,17 @@ const pathname = Astro.url.pathname;
     document.getElementById('mobile-nav')?.classList.toggle('hidden');
   });
 
+  // Progress dots — fill in based on localStorage state
+  document.querySelectorAll('.nav-dot[data-store-key]').forEach(dot => {
+    const key = dot.dataset.storeKey;
+    const val = localStorage.getItem(key);
+    if (val && val !== 'false') {
+      dot.style.backgroundColor = 'rgb(26, 224, 194)';
+      dot.style.borderColor = 'rgb(26, 224, 194)';
+      dot.style.boxShadow = '0 0 4px rgba(26, 224, 194, 0.5)';
+    }
+  });
+
   // Unlock classified nav + avatar thumbnail if intake complete
   const isComplete = localStorage.getItem('panopticon_intake_complete') === 'true';
   if (isComplete) {
@@ -161,6 +196,17 @@ const pathname = Astro.url.pathname;
         navLink.classList.remove('text-p-unlock/70', 'border-transparent');
       }
     }
+    // Classified dot — purple
+    const classifiedDot = document.getElementById('nav-dot-classified');
+    const mobileClassifiedDot = document.getElementById('mobile-nav-dot-classified');
+    [classifiedDot, mobileClassifiedDot].forEach(d => {
+      if (d) {
+        d.style.backgroundColor = 'rgb(140, 64, 255)';
+        d.style.borderColor = 'rgb(140, 64, 255)';
+        d.style.boxShadow = '0 0 4px rgba(140, 64, 255, 0.5)';
+      }
+    });
+
     const mobileLink = document.getElementById('mobile-nav-classified');
     if (mobileLink) mobileLink.classList.remove('hidden');
 
