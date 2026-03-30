@@ -151,6 +151,20 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
+    <!-- Email registration modal (appears after PNG save) -->
+    <div id="email-modal" style="display: none; position: fixed; inset: 0; z-index: 2500; background: rgba(10, 10, 15, 0.92); align-items: center; justify-content: center;">
+      <div style="width: 460px; max-width: 92vw; background: rgb(23, 23, 33); border: 3px solid rgb(230, 38, 26); padding: 28px 32px; box-shadow: 0 0 30px rgba(230, 38, 26, 0.3), 0 0 60px rgba(230, 38, 26, 0.1);">
+        <div style="color: rgb(230, 38, 26); font-family: 'Orbitron'; font-size: 13px; letter-spacing: 3px; margin-bottom: 6px;">⚠ MANDATORY REGISTRATION</div>
+        <div style="color: rgb(214, 214, 224); font-family: 'Electrolize'; font-size: 14px; line-height: 1.8; margin-bottom: 20px;">All inmates must register a communication frequency.<br>Non-compliance will be noted in your permanent file.</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <input id="email-input" type="email" placeholder="ENTER EMAIL FREQUENCY" style="flex: 1; min-width: 200px; padding: 12px 14px; background: rgb(10, 10, 15); border: 2px solid rgb(92, 87, 111); color: rgb(214, 214, 224); font-family: 'Electrolize'; font-size: 14px; letter-spacing: 1px; outline: none;" />
+          <button id="email-submit-btn" style="padding: 12px 20px; background: rgb(230, 38, 26); border: 2px solid rgb(230, 38, 26); color: rgb(10, 10, 15); font-family: 'Electrolize'; font-size: 14px; font-weight: bold; cursor: pointer; letter-spacing: 1px; white-space: nowrap;">REGISTER →</button>
+        </div>
+        <div id="email-error" style="display: none; color: rgb(230, 38, 26); font-family: 'Electrolize'; font-size: 12px; margin-top: 8px;"></div>
+        <div id="email-success" style="display: none; color: rgb(26, 224, 194); font-family: 'Electrolize'; font-size: 13px; margin-top: 12px; line-height: 1.6;"></div>
+      </div>
+    </div>
+
     <!-- Post-save message box (hidden initially) -->
     <div id="post-save-box" style="position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); width: 460px; background: rgb(23, 23, 33); border: 3px solid rgb(26, 224, 194); padding: 28px 32px; z-index: 2000; font-family: 'Exo 2'; max-width: 92vw; box-shadow: 0 0 30px rgba(26, 224, 194, 0.3), 0 0 60px rgba(26, 224, 194, 0.1);">
       <div id="post-save-text" style="color: rgb(214, 214, 224); font-size: 15px; line-height: 2; margin-bottom: 20px; white-space: pre-wrap; font-family: 'Electrolize';"></div>
@@ -1276,6 +1290,7 @@ import Layout from '../layouts/Layout.astro';
       if (mIdBtn) mIdBtn.style.display = 'none';
       if (mSaveBtn) mSaveBtn.style.display = 'none';
       document.getElementById('post-save-box').classList.remove('visible');
+      document.getElementById('email-modal').style.display = 'none';
       renderCanvas();
       buildCategoryList();
       buildMobileCategories();
@@ -1493,7 +1508,95 @@ import Layout from '../layouts/Layout.astro';
         a.click();
         URL.revokeObjectURL(url);
       }
-      showPostSaveMessage();
+      showEmailModal();
+    }
+
+    function showEmailModal() {
+      const modal = document.getElementById('email-modal');
+      const input = document.getElementById('email-input');
+      const submitBtn = document.getElementById('email-submit-btn');
+      const errorEl = document.getElementById('email-error');
+      const successEl = document.getElementById('email-success');
+
+      modal.style.display = 'flex';
+      input.value = '';
+      errorEl.style.display = 'none';
+      successEl.style.display = 'none';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'REGISTER →';
+
+      // Focus input after animation
+      setTimeout(() => input.focus(), 100);
+
+      // Enter key submits
+      input.onkeydown = (e) => { if (e.key === 'Enter') submitBtn.click(); };
+
+      // Focus styling
+      input.onfocus = () => { input.style.borderColor = 'rgb(230, 38, 26)'; };
+      input.onblur = () => { input.style.borderColor = 'rgb(92, 87, 111)'; };
+
+      submitBtn.onclick = async () => {
+        const email = input.value.trim();
+        errorEl.style.display = 'none';
+
+        // Validate email
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          errorEl.textContent = 'INVALID FREQUENCY FORMAT. ENTER A VALID EMAIL.';
+          errorEl.style.display = 'block';
+          input.style.borderColor = 'rgb(230, 38, 26)';
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'REGISTERING...';
+
+        try {
+          // ── Kit (ConvertKit) Form Submission ──
+          // Replace FORM_ID with your Kit form ID from kit.com
+          const KIT_FORM_ID = 'YOUR_FORM_ID';
+          const resp = await fetch(`https://api.convertkit.com/v3/forms/${KIT_FORM_ID}/subscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: email,
+              fields: {
+                inmate_name: charName?.toUpperCase() || '',
+                inmate_id: idCode?.toUpperCase() || ''
+              }
+            })
+          });
+
+          if (!resp.ok) throw new Error('Registration failed');
+
+          // Store email locally
+          localStorage.setItem('panopticon_inmate_email', email);
+
+          // Show success, then transition to post-save
+          successEl.textContent = 'FREQUENCY REGISTERED. WELCOME TO THE SYSTEM.';
+          successEl.style.display = 'block';
+          submitBtn.style.display = 'none';
+          input.style.display = 'none';
+
+          setTimeout(() => {
+            modal.style.display = 'none';
+            showPostSaveMessage();
+          }, 1800);
+
+        } catch(err) {
+          // If Kit API fails (e.g., no form ID yet), still let them through
+          console.warn('Kit subscription error:', err);
+          localStorage.setItem('panopticon_inmate_email', email);
+          successEl.textContent = 'FREQUENCY LOGGED. PROCESSING...';
+          successEl.style.display = 'block';
+          submitBtn.style.display = 'none';
+          input.style.display = 'none';
+
+          setTimeout(() => {
+            modal.style.display = 'none';
+            showPostSaveMessage();
+          }, 1800);
+        }
+      };
     }
 
     function showPostSaveMessage() {
