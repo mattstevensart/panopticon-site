@@ -43,49 +43,50 @@ import Layout from '../../layouts/Layout.astro';
             alt="The Tower"
             class="w-full h-auto block"
           />
-          <!-- Fade to black gradient overlay -->
-          <div class="absolute bottom-0 left-0 w-full" style="height: 50%; background: linear-gradient(to bottom, transparent 0%, rgba(10,10,15,0.6) 30%, rgba(10,10,15,0.9) 60%, rgb(10,10,15) 85%);"></div>
+          <!-- Fade to black gradient overlay — extended for protocols -->
+          <div class="absolute bottom-0 left-0 w-full" style="height: 70%; background: linear-gradient(to bottom, transparent 0%, rgba(10,10,15,0.5) 20%, rgba(10,10,15,0.8) 40%, rgba(10,10,15,0.95) 60%, rgb(10,10,15) 80%);"></div>
 
-          <!-- Green text in the fade -->
+          <!-- Overlaid content in the fade -->
           <div class="absolute bottom-0 left-0 w-full px-6 pb-10 md:px-12 md:pb-16 z-10">
+            <!-- Welcome text -->
             <p class="font-display text-sm md:text-base tracking-wide leading-relaxed text-center max-w-2xl mx-auto" style="color: rgb(26, 224, 194); text-shadow: 0 0 12px rgba(26, 224, 194, 0.5), 0 0 30px rgba(26, 224, 194, 0.2);">
               Welcome to the Panopticon — our state of the art, all-seeing prison design allowing our central tower to observe all inmates anonymously. You will comply.
             </p>
             <p class="font-display text-sm md:text-base tracking-wide text-center max-w-2xl mx-auto mt-4 glitch-surveillance" style="color: rgb(230, 38, 26);">
               <span class="glitch-text" data-text="Surveillance is mandatory.">Surveillance is mandatory.</span>
             </p>
-          </div>
-        </div>
 
-        <!-- Protocols -->
-        <div class="mt-16 border border-p-red/20 bg-p-panel/50 p-8 md:p-10">
-          <h3 class="font-display text-sm tracking-[0.3em] text-p-red mb-6">PROTOCOLS</h3>
-          <ul class="space-y-4 font-ui text-sm text-p-dim leading-relaxed">
-            <li class="flex items-start gap-3">
-              <span class="text-p-red mt-0.5">▸</span>
-              <span>All inmates must follow codes at all times.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-p-red mt-0.5">▸</span>
-              <span>Klaxon signals must be followed.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-p-red mt-0.5">▸</span>
-              <span>Do not approach Tower.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-p-red mt-0.5">▸</span>
-              <span>There is no sharing, trading, or disposing of Nutri. All calories must be consumed by inmate.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-p-red mt-0.5">▸</span>
-              <span>Do not remove ID# from prison grays.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <span class="text-p-red mt-0.5">▸</span>
-              <span>Do not attempt to access unauthorized areas, panels, surfaces.</span>
-            </li>
-          </ul>
+            <!-- Protocols overlaid -->
+            <div class="mt-10 max-w-xl mx-auto border border-p-red/30 bg-p-root/40 backdrop-blur-sm p-6 md:p-8" style="box-shadow: 0 0 40px rgba(230, 38, 26, 0.08);">
+              <h3 class="font-display text-xs tracking-[0.3em] text-p-red mb-5" style="text-shadow: 0 0 8px rgba(230, 38, 26, 0.4);">PROTOCOLS</h3>
+              <ul class="space-y-3 font-ui text-xs md:text-sm text-p-dim/90 leading-relaxed">
+                <li class="flex items-start gap-3">
+                  <span class="text-p-red mt-0.5">▸</span>
+                  <span>All inmates must follow codes at all times.</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="text-p-red mt-0.5">▸</span>
+                  <span>Klaxon signals must be followed.</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="text-p-red mt-0.5">▸</span>
+                  <span>Do not approach Tower.</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="text-p-red mt-0.5">▸</span>
+                  <span>There is no sharing, trading, or disposing of Nutri. All calories must be consumed by inmate.</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="text-p-red mt-0.5">▸</span>
+                  <span>Do not remove ID# from prison grays.</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="text-p-red mt-0.5">▸</span>
+                  <span>Do not attempt to access unauthorized areas, panels, surfaces.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
 
         <!-- Bottom nav -->
