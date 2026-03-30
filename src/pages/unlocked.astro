@@ -24,16 +24,15 @@ import Layout from '../layouts/Layout.astro';
     <div id="access-granted" class="hidden">
       <div class="max-w-6xl mx-auto px-4 py-16">
         <div class="mb-12 border-b border-p-unlock/30 pb-8">
-          <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">CLEARANCE: LEVEL 5 — EYES ONLY</p>
           <h1 class="font-display text-3xl md:text-4xl tracking-wide text-p-unlock">CLASSIFIED FILES</h1>
-          <p class="font-body text-p-dim text-sm mt-2">Intake confirmed. You now have access to restricted content.</p>
+          <p class="font-body text-sm mt-2 intake-pulse">Intake confirmed.</p>
           <div class="w-16 h-px bg-p-unlock mt-4"></div>
         </div>
 
         <!-- Classified file cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
-            { id: '001', title: 'PANOPTICON | 63RD: MAP',  body: 'Classified facility map and surrounding regions.',                     href: '/unlocked/001', thumb: '/images/panopticon-map.jpg' },
+            { id: '001', title: 'PANOPTICON | 63RD: MAP',  body: 'Panopticon and the surrounding regions.',                               href: '/unlocked/001', thumb: '/images/panopticon-map.jpg' },
             { id: '002', title: 'INMATE DOSSIERS',         body: 'Character profiles, backstories, and classified personnel records.',   href: '/unlocked/002', thumb: '/images/char-arcin.jpg' },
             { id: '003', title: 'NOTES FROM THE CELLS',    body: 'Script excerpts from Act 1 — straight from the cells.',               href: '/unlocked/003', thumb: '/images/read/webtoon-13.jpg' },
             { id: '004', title: 'THE TOWER',               body: 'What really happens in the tower? Lore drops and world-building extras.', href: '/unlocked/004', thumb: '/images/read/webtoon-28.jpg' },
@@ -71,6 +70,22 @@ import Layout from '../layouts/Layout.astro';
 
   </div>
 </Layout>
+
+<style>
+  @keyframes intake-pulse {
+    0%, 100% {
+      color: rgb(92, 87, 111);
+      text-shadow: none;
+    }
+    50% {
+      color: rgb(140, 64, 255);
+      text-shadow: 0 0 10px rgba(140, 64, 255, 0.4), 0 0 20px rgba(140, 64, 255, 0.15);
+    }
+  }
+  .intake-pulse {
+    animation: intake-pulse 3s ease-in-out infinite;
+  }
+</style>
 
 <script>
   const isComplete = localStorage.getItem('panopticon_intake_complete') === 'true';
