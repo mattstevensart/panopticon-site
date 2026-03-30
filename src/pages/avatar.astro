@@ -3,6 +3,28 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="INTAKE PROCESSING">
+
+  <!-- Returning user landing screen -->
+  <div id="returning-landing" style="display: none;">
+    <div style="min-height: 60vh; display: flex; align-items: center; justify-content: center;">
+      <div style="text-align: center; max-width: 480px; padding: 40px 24px;">
+        <div style="width: 120px; height: 120px; margin: 0 auto 24px; border: 3px solid rgb(140, 64, 255); overflow: hidden;">
+          <img id="landing-avatar-img" src="" alt="Current avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+        </div>
+        <p style="font-family: 'Orbitron'; color: rgb(140, 64, 255); font-size: 14px; letter-spacing: 3px; margin-bottom: 4px;">INMATE <span id="landing-name"></span></p>
+        <p style="font-family: 'Electrolize'; color: rgb(92, 87, 111); font-size: 12px; letter-spacing: 2px; margin-bottom: 32px;">ALREADY PROCESSED</p>
+        <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
+          <button id="landing-new-btn" style="width: 280px; padding: 14px 24px; background: rgb(26, 224, 194); border: 2px solid rgb(26, 224, 194); color: rgb(10, 10, 15); font-family: 'Electrolize'; font-size: 14px; font-weight: bold; cursor: pointer; letter-spacing: 2px; transition: all 0.2s;">
+            CREATE ANOTHER AVATAR →
+          </button>
+          <button id="landing-continue-btn" style="width: 280px; padding: 14px 24px; background: transparent; border: 2px solid rgb(92, 87, 111); color: rgb(214, 214, 224); font-family: 'Electrolize'; font-size: 13px; cursor: pointer; letter-spacing: 1px; transition: all 0.2s;">
+            MODIFY CURRENT AVATAR
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="avatar-creator-container" class="w-full bg-p-root">
     <!-- SVG filter for concrete texture (zero-size, invisible) -->
     <svg width="0" height="0" style="position: absolute;">
@@ -673,6 +695,62 @@ import Layout from '../layouts/Layout.astro';
     const imageCache = {};
 
     function init() {
+      // Check if returning user (has completed intake before)
+      const urlParams = new URLSearchParams(window.location.search);
+      const forceNew = urlParams.get('new') === '1';
+      const hasExistingAvatar = localStorage.getItem('panopticon_intake_complete') === 'true';
+
+      if (hasExistingAvatar && !forceNew) {
+        // Show returning user landing screen
+        const landing = document.getElementById('returning-landing');
+        const creator = document.getElementById('avatar-creator-container');
+        const landingImg = document.getElementById('landing-avatar-img');
+        const landingName = document.getElementById('landing-name');
+
+        const avatarThumb = localStorage.getItem('panopticon_avatar_thumb');
+        const inmateName = localStorage.getItem('panopticon_inmate_name');
+
+        if (landingImg && avatarThumb) landingImg.src = avatarThumb;
+        if (landingName) landingName.textContent = inmateName || 'UNKNOWN';
+
+        if (landing) landing.style.display = 'block';
+        if (creator) creator.style.display = 'none';
+
+        // "Create another avatar" — reset state and start fresh
+        document.getElementById('landing-new-btn')?.addEventListener('click', () => {
+          localStorage.removeItem('panopticon_intake_complete');
+          localStorage.removeItem('panopticon_avatar_thumb');
+          localStorage.removeItem('panopticon_inmate_name');
+          localStorage.removeItem('panopticon_inmate_id');
+          localStorage.removeItem('panopticon_inmate_tok');
+          localStorage.removeItem('panopticon_inmate_gender');
+          localStorage.removeItem('panopticon_inmate_race');
+          localStorage.removeItem('panopticon_inmate_nutri');
+          localStorage.removeItem('panopticon_inmate_email');
+          if (landing) landing.style.display = 'none';
+          if (creator) creator.style.display = 'block';
+          launchCreator();
+        });
+
+        // "Modify current avatar" — keep state, open creator
+        document.getElementById('landing-continue-btn')?.addEventListener('click', () => {
+          if (landing) landing.style.display = 'none';
+          if (creator) creator.style.display = 'block';
+          launchCreator();
+        });
+
+        return;
+      }
+
+      // If ?new=1, clean the URL
+      if (forceNew) {
+        window.history.replaceState({}, '', '/avatar');
+      }
+
+      launchCreator();
+    }
+
+    function launchCreator() {
       buildCategoryList();
       buildMobileCategories();
       initCanvas();
