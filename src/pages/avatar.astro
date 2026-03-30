@@ -1237,11 +1237,13 @@ import Layout from '../layouts/Layout.astro';
       try {
         const canvas = document.getElementById('preview-canvas');
         const thumbCanvas = document.createElement('canvas');
-        thumbCanvas.width = 120;
-        thumbCanvas.height = 120;
+        thumbCanvas.width = 240;
+        thumbCanvas.height = 240;
         const tCtx = thumbCanvas.getContext('2d');
-        tCtx.drawImage(canvas, 0, 0, 120, 120);
-        localStorage.setItem('panopticon_avatar_thumb', thumbCanvas.toDataURL('image/jpeg', 0.7));
+        tCtx.imageSmoothingEnabled = true;
+        tCtx.imageSmoothingQuality = 'high';
+        tCtx.drawImage(canvas, 0, 0, 240, 240);
+        localStorage.setItem('panopticon_avatar_thumb', thumbCanvas.toDataURL('image/png'));
       } catch(e) {}
     }
 

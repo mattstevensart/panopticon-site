@@ -464,11 +464,13 @@ import Layout from '../layouts/Layout.astro';
     // ── Store avatar as small thumbnail data URL ──
     try {
       const thumbCanvas = document.createElement('canvas');
-      thumbCanvas.width = 80;
-      thumbCanvas.height = 80;
+      thumbCanvas.width = 240;
+      thumbCanvas.height = 240;
       const tCtx = thumbCanvas.getContext('2d');
-      tCtx.drawImage(scanImg, 0, 0, 80, 80);
-      localStorage.setItem('panopticon_avatar_thumb', thumbCanvas.toDataURL('image/jpeg', 0.6));
+      tCtx.imageSmoothingEnabled = true;
+      tCtx.imageSmoothingQuality = 'high';
+      tCtx.drawImage(scanImg, 0, 0, 240, 240);
+      localStorage.setItem('panopticon_avatar_thumb', thumbCanvas.toDataURL('image/png'));
     } catch(e) { /* cross-origin or missing image */ }
 
     setStatus('IDENTITY CONFIRMED  ·  INMATE ON FILE', 'bg-p-teal dot-green');
