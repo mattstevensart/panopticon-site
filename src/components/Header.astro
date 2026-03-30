@@ -12,10 +12,18 @@ const pathname = Astro.url.pathname;
 <header class="sticky top-0 z-50 bg-p-canvas/95 backdrop-blur border-b border-p-accent/20">
   <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
 
-    <a href="/" class="flex items-center gap-3 group">
-      <img src="/images/panopticon-title.png" alt="PANOPTICON" class="h-8 w-auto opacity-90 group-hover:opacity-100 transition-opacity" />
-    </a>
+    <!-- Left: Logo + monitoring -->
+    <div class="flex flex-col items-start">
+      <a href="/" class="flex items-center gap-3 group">
+        <img src="/images/panopticon-title.png" alt="PANOPTICON" class="h-8 w-auto opacity-90 group-hover:opacity-100 transition-opacity" />
+      </a>
+      <div class="hidden md:flex items-center gap-1.5 -mt-0.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-p-teal animate-pulse"></span>
+        <span class="font-ui text-p-dim text-[9px] tracking-widest">MONITORING ACTIVE</span>
+      </div>
+    </div>
 
+    <!-- Center: Nav -->
     <nav class="hidden md:flex items-center gap-1">
       {navLinks.map(link => {
         const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
@@ -32,11 +40,22 @@ const pathname = Astro.url.pathname;
           </a>
         );
       })}
+      <!-- Classified nav link (hidden until unlocked) -->
+      <a id="nav-classified" href="/unlocked" class="hidden px-3 py-2 text-xs font-display tracking-widest transition-all duration-200 text-center leading-tight max-w-[10rem] text-p-unlock/70 hover:text-p-unlock border-b-2 border-transparent" style="animation: nav-unlock-pulse 2.5s ease-in-out infinite;">
+        CLASSIFIED
+      </a>
     </nav>
 
-    <div class="hidden md:flex items-center gap-2 text-xs font-ui text-p-dim">
-      <span class="w-2 h-2 rounded-full bg-p-teal animate-pulse"></span>
-      <span>MONITORING ACTIVE</span>
+    <!-- Right: Avatar thumbnail (hidden until unlocked) -->
+    <div id="header-avatar-wrap" class="hidden md:hidden items-center gap-2">
+      <div class="relative">
+        <img id="header-avatar-img" src="" alt="Inmate avatar" class="w-10 h-10 border border-p-unlock/60 object-cover" />
+        <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-p-teal border border-p-canvas"></div>
+      </div>
+      <div class="flex flex-col items-end">
+        <span id="header-avatar-name" class="font-display text-[10px] tracking-widest text-p-unlock"></span>
+        <span id="header-avatar-id" class="font-ui text-[9px] tracking-widest text-p-dim"></span>
+      </div>
     </div>
 
     <button id="mobile-menu-btn" class="md:hidden text-p-dim hover:text-p-accent transition-colors p-2" aria-label="Toggle navigation">
@@ -59,11 +78,62 @@ const pathname = Astro.url.pathname;
         {link.label}
       </a>
     ))}
+    <!-- Mobile classified link (hidden until unlocked) -->
+    <a id="mobile-nav-classified" href="/unlocked" class="hidden px-6 py-3 text-sm font-display tracking-widest text-p-unlock/70 hover:text-p-unlock hover:bg-p-panel transition-all">
+      CLASSIFIED
+    </a>
   </div>
 </header>
+
+<style>
+  @keyframes nav-unlock-pulse {
+    0%, 100% {
+      color: rgba(140, 64, 255, 0.5);
+      text-shadow: none;
+    }
+    50% {
+      color: rgb(140, 64, 255);
+      text-shadow: 0 0 8px rgba(140, 64, 255, 0.4);
+    }
+  }
+</style>
 
 <script>
   document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
     document.getElementById('mobile-nav')?.classList.toggle('hidden');
   });
+
+  // Unlock classified nav + avatar thumbnail if intake complete
+  const isComplete = localStorage.getItem('panopticon_intake_complete') === 'true';
+  if (isComplete) {
+    // Show CLASSIFIED nav links
+    const navLink = document.getElementById('nav-classified');
+    if (navLink) {
+      navLink.classList.remove('hidden');
+      // Check if current page is /unlocked
+      if (window.location.pathname.startsWith('/unlocked')) {
+        navLink.classList.add('text-p-unlock', 'border-p-unlock');
+        navLink.classList.remove('text-p-unlock/70', 'border-transparent');
+      }
+    }
+    const mobileLink = document.getElementById('mobile-nav-classified');
+    if (mobileLink) mobileLink.classList.remove('hidden');
+
+    // Show avatar thumbnail
+    const avatarThumb = localStorage.getItem('panopticon_avatar_thumb');
+    const inmateName = localStorage.getItem('panopticon_inmate_name');
+    const inmateId = localStorage.getItem('panopticon_inmate_id');
+
+    if (avatarThumb && inmateName) {
+      const wrap = document.getElementById('header-avatar-wrap');
+      const img = document.getElementById('header-avatar-img');
+      const nameEl = document.getElementById('header-avatar-name');
+      const idEl = document.getElementById('header-avatar-id');
+
+      if (wrap) { wrap.classList.remove('hidden', 'md:hidden'); wrap.classList.add('flex'); }
+      if (img) img.src = avatarThumb;
+      if (nameEl) nameEl.textContent = inmateName;
+      if (idEl) idEl.textContent = inmateId ? '#' + inmateId : '';
+    }
+  }
 </script>

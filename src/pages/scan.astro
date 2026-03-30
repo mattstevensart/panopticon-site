@@ -456,6 +456,21 @@ import Layout from '../layouts/Layout.astro';
     // ── GATE UNLOCK: set localStorage so /unlocked page grants access ──
     localStorage.setItem('panopticon_intake_complete', 'true');
 
+    // ── Store identity data for header avatar display ──
+    localStorage.setItem('panopticon_inmate_name', (data.name || '').toUpperCase());
+    localStorage.setItem('panopticon_inmate_id', (data.id || '').toUpperCase());
+    localStorage.setItem('panopticon_inmate_tok', (data.tok || '').toUpperCase());
+
+    // ── Store avatar as small thumbnail data URL ──
+    try {
+      const thumbCanvas = document.createElement('canvas');
+      thumbCanvas.width = 80;
+      thumbCanvas.height = 80;
+      const tCtx = thumbCanvas.getContext('2d');
+      tCtx.drawImage(scanImg, 0, 0, 80, 80);
+      localStorage.setItem('panopticon_avatar_thumb', thumbCanvas.toDataURL('image/jpeg', 0.6));
+    } catch(e) { /* cross-origin or missing image */ }
+
     setStatus('IDENTITY CONFIRMED  ·  INMATE ON FILE', 'bg-p-teal dot-green');
 
     resultIcon.textContent  = '✓';
