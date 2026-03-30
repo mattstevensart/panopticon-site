@@ -1139,11 +1139,11 @@ import Layout from '../layouts/Layout.astro';
 
       ctx.save();
 
-      // Drop shadow (soft, slightly offset down-right)
+      // Drop shadow (tight, slightly offset down-right)
       ctx.beginPath();
-      ctx.arc(cx + 3, cy + 4, r + 2, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-      ctx.filter = 'blur(4px)';
+      ctx.arc(cx + 1.5, cy + 2, r + 1, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.filter = 'blur(2px)';
       ctx.fill();
       ctx.filter = 'none';
 
@@ -1186,31 +1186,27 @@ import Layout from '../layouts/Layout.astro';
       ctx.restore();
     }
 
-    // Patch glitch animation loop
+    // Patch glitch — fires ONCE when patch first appears, then stops
     let patchGlitchTimer = null;
     function startPatchGlitch() {
       if (patchGlitchTimer) return;
-      function glitchLoop() {
-        if (!idCode) { patchGlitchTimer = null; return; }
-        // Random delay between glitches: 2-5 seconds
-        const delay = 2000 + Math.random() * 3000;
-        patchGlitchTimer = setTimeout(async () => {
-          const canvas = document.getElementById('preview-canvas');
-          if (!canvas) { patchGlitchTimer = null; return; }
-          // Quick burst of 3-5 glitch frames
-          const burstCount = 3 + Math.floor(Math.random() * 3);
-          for (let i = 0; i < burstCount; i++) {
-            const ox = (Math.random() - 0.5) * 6;
-            const oy = (Math.random() - 0.5) * 4;
-            await renderCanvas({ x: ox, y: oy });
-            await new Promise(r => setTimeout(r, 40 + Math.random() * 30));
-          }
-          // Settle back to normal
-          await renderCanvas(null);
-          glitchLoop();
-        }, delay);
-      }
-      glitchLoop();
+      if (!idCode) return;
+      // Fire immediately (tiny delay to let the initial render settle)
+      patchGlitchTimer = setTimeout(async () => {
+        const canvas = document.getElementById('preview-canvas');
+        if (!canvas) { patchGlitchTimer = null; return; }
+        // Quick burst of 3-5 glitch frames
+        const burstCount = 3 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < burstCount; i++) {
+          const ox = (Math.random() - 0.5) * 6;
+          const oy = (Math.random() - 0.5) * 4;
+          await renderCanvas({ x: ox, y: oy });
+          await new Promise(r => setTimeout(r, 40 + Math.random() * 30));
+        }
+        // Settle back to normal
+        await renderCanvas(null);
+        patchGlitchTimer = null;
+      }, 100);
     }
 
     function loadImage(path) {
@@ -1419,10 +1415,10 @@ import Layout from '../layouts/Layout.astro';
       if (idCode) {
         const cx = 462 * scale, cy = 596 * scale, r = 45 * scale;
         ctx.save();
-        // Drop shadow
-        ctx.beginPath(); ctx.arc(cx + 3 * scale, cy + 4 * scale, r + 2 * scale, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-        ctx.filter = 'blur(' + (4 * scale) + 'px)';
+        // Drop shadow (tight)
+        ctx.beginPath(); ctx.arc(cx + 1.5 * scale, cy + 2 * scale, r + 1 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.filter = 'blur(' + (2 * scale) + 'px)';
         ctx.fill();
         ctx.filter = 'none';
         // Outer dark ring
