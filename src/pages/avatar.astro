@@ -1038,7 +1038,7 @@ import Layout from '../layouts/Layout.astro';
       // Canvas is ready
     }
 
-    async function renderCanvas() {
+    async function renderCanvas(patchGlitch) {
       const canvas = document.getElementById('preview-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
@@ -1087,7 +1087,7 @@ import Layout from '../layouts/Layout.astro';
 
       // Draw ID patch if generated
       if (idCode) {
-        drawIdPatch(ctx, idCode);
+        drawIdPatch(ctx, idCode, patchGlitch || null);
       }
 
       // Sync to mobile canvas if visible
@@ -1131,33 +1131,44 @@ import Layout from '../layouts/Layout.astro';
       ctx.restore();
     }
 
-    function drawIdPatch(ctx, code) {
+    function drawIdPatch(ctx, code, glitchOffset) {
       // Patch at chest position (Godot: PATCH_CX=462, PATCH_CY=596, PATCH_DISP=90)
       const cx = 462, cy = 596, r = 45;
+      const gx = glitchOffset ? glitchOffset.x : 0;
+      const gy = glitchOffset ? glitchOffset.y : 0;
 
       ctx.save();
+
+      // Drop shadow (soft, slightly offset down-right)
+      ctx.beginPath();
+      ctx.arc(cx + 3, cy + 4, r + 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+      ctx.filter = 'blur(4px)';
+      ctx.fill();
+      ctx.filter = 'none';
+
       // Outer dark ring
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(cx + gx, cy + gy, r, 0, Math.PI * 2);
       ctx.fillStyle = 'rgb(28, 28, 32)';
       ctx.fill();
 
       // Dark outer border
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(cx + gx, cy + gy, r, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgb(12, 12, 15)';
       ctx.lineWidth = 8;
       ctx.stroke();
 
       // Light gray center
       ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.80, 0, Math.PI * 2);
+      ctx.arc(cx + gx, cy + gy, r * 0.80, 0, Math.PI * 2);
       ctx.fillStyle = 'rgb(168, 168, 172)';
       ctx.fill();
 
       // Thin dark ring
       ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.80, 0, Math.PI * 2);
+      ctx.arc(cx + gx, cy + gy, r * 0.80, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgb(85, 85, 92)';
       ctx.lineWidth = 2;
       ctx.stroke();
@@ -1168,11 +1179,38 @@ import Layout from '../layouts/Layout.astro';
       ctx.textBaseline = 'middle';
       // Shadow
       ctx.fillStyle = 'rgba(30, 0, 50, 0.55)';
-      ctx.fillText(code, cx + 1, cy + 1);
+      ctx.fillText(code, cx + gx + 1, cy + gy + 1);
       // Main text
       ctx.fillStyle = 'rgb(100, 0, 140)';
-      ctx.fillText(code, cx, cy);
+      ctx.fillText(code, cx + gx, cy + gy);
       ctx.restore();
+    }
+
+    // Patch glitch animation loop
+    let patchGlitchTimer = null;
+    function startPatchGlitch() {
+      if (patchGlitchTimer) return;
+      function glitchLoop() {
+        if (!idCode) { patchGlitchTimer = null; return; }
+        // Random delay between glitches: 2-5 seconds
+        const delay = 2000 + Math.random() * 3000;
+        patchGlitchTimer = setTimeout(async () => {
+          const canvas = document.getElementById('preview-canvas');
+          if (!canvas) { patchGlitchTimer = null; return; }
+          // Quick burst of 3-5 glitch frames
+          const burstCount = 3 + Math.floor(Math.random() * 3);
+          for (let i = 0; i < burstCount; i++) {
+            const ox = (Math.random() - 0.5) * 6;
+            const oy = (Math.random() - 0.5) * 4;
+            await renderCanvas({ x: ox, y: oy });
+            await new Promise(r => setTimeout(r, 40 + Math.random() * 30));
+          }
+          // Settle back to normal
+          await renderCanvas(null);
+          glitchLoop();
+        }, delay);
+      }
+      glitchLoop();
     }
 
     function loadImage(path) {
@@ -1286,6 +1324,7 @@ import Layout from '../layouts/Layout.astro';
       if (mIdBtn) mIdBtn.style.display = 'none';
       if (mSaveBtn) mSaveBtn.style.display = 'inline-block';
       renderCanvas();
+      startPatchGlitch();
     }
 
     function mobileFallbackSave(blob, filename) {
@@ -1380,6 +1419,13 @@ import Layout from '../layouts/Layout.astro';
       if (idCode) {
         const cx = 462 * scale, cy = 596 * scale, r = 45 * scale;
         ctx.save();
+        // Drop shadow
+        ctx.beginPath(); ctx.arc(cx + 3 * scale, cy + 4 * scale, r + 2 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+        ctx.filter = 'blur(' + (4 * scale) + 'px)';
+        ctx.fill();
+        ctx.filter = 'none';
+        // Outer dark ring
         ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fillStyle = 'rgb(28, 28, 32)'; ctx.fill();
         ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
