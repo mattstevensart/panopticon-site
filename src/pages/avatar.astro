@@ -1063,6 +1063,8 @@ import Layout from '../layouts/Layout.astro';
         noneBtn.style.display = 'flex';
         noneBtn.style.alignItems = 'center';
         noneBtn.style.justifyContent = 'center';
+        noneBtn.style.aspectRatio = '1';
+        noneBtn.style.lineHeight = 'normal';
         const isNoneSelected = selections[cat.folder] === '__none__';
         if (isNoneSelected) noneBtn.classList.add('confirmed');
         noneBtn.innerHTML = '<span style="font-family: Orbitron; font-size: 13px; font-weight: bold; color: rgb(214, 214, 224); letter-spacing: 2px;">NONE</span>';
