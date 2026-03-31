@@ -45,7 +45,7 @@ const sneakPeekPages = [
 
         <div class="flex flex-col">
           {excerptPages.map(page => (
-            <img src={page.src} alt={page.alt} class="w-full h-auto block" loading="lazy" />
+            <img src={page.src} alt={page.alt} class="w-full h-auto block comic-zoomable" loading="lazy" style="cursor: zoom-in;" />
           ))}
         </div>
 
@@ -76,7 +76,7 @@ const sneakPeekPages = [
             <div class="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-p-red/50 z-20"></div>
             <div class="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-p-red/50 z-20"></div>
 
-            <img src={page.src} alt={page.alt} class="w-full h-auto block transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+            <img src={page.src} alt={page.alt} class="w-full h-auto block transition-transform duration-500 group-hover:scale-105 comic-zoomable" loading="lazy" style="cursor: zoom-in;" />
 
             <!-- Label overlay -->
             <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-p-root/90 to-transparent pt-10 pb-3 px-3 z-10">
@@ -87,4 +87,208 @@ const sneakPeekPages = [
       </div>
     </section>
   </div>
+
+  <!-- Lightbox zoom viewer -->
+  <div id="lightbox" style="display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(10, 10, 15, 0.95); cursor: grab; touch-action: none; overflow: hidden;">
+    <!-- Close button -->
+    <button id="lb-close" style="position: absolute; top: 16px; right: 16px; z-index: 9010; width: 44px; height: 44px; background: rgba(23, 23, 33, 0.8); border: 2px solid rgba(56, 140, 255, 0.4); color: rgb(214, 214, 224); font-family: 'Orbitron'; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s;">✕</button>
+    <!-- Zoom controls -->
+    <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9010; display: flex; gap: 8px; align-items: center;">
+      <button id="lb-zoom-out" style="width: 40px; height: 40px; background: rgba(23, 23, 33, 0.8); border: 2px solid rgba(56, 140, 255, 0.4); color: rgb(214, 214, 224); font-family: 'Orbitron'; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">−</button>
+      <span id="lb-zoom-level" style="color: rgb(92, 87, 111); font-family: 'Electrolize'; font-size: 12px; letter-spacing: 2px; min-width: 50px; text-align: center;">100%</span>
+      <button id="lb-zoom-in" style="width: 40px; height: 40px; background: rgba(23, 23, 33, 0.8); border: 2px solid rgba(56, 140, 255, 0.4); color: rgb(214, 214, 224); font-family: 'Orbitron'; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+    </div>
+    <p style="position: absolute; bottom: 68px; left: 50%; transform: translateX(-50%); z-index: 9010; color: rgb(92, 87, 111); font-family: 'Electrolize'; font-size: 11px; letter-spacing: 2px; pointer-events: none;">SCROLL TO ZOOM · DRAG TO PAN</p>
+    <!-- Image container -->
+    <div id="lb-container" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+      <img id="lb-img" src="" alt="" style="max-width: none; max-height: none; transform-origin: center center; transition: none; user-select: none; -webkit-user-drag: none;" draggable="false" />
+    </div>
+  </div>
 </Layout>
+
+<script>
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lb-img');
+  const lbClose = document.getElementById('lb-close');
+  const lbZoomIn = document.getElementById('lb-zoom-in');
+  const lbZoomOut = document.getElementById('lb-zoom-out');
+  const lbZoomLevel = document.getElementById('lb-zoom-level');
+
+  let scale = 1;
+  let panX = 0;
+  let panY = 0;
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let panStartX = 0;
+  let panStartY = 0;
+
+  function updateTransform() {
+    lbImg.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    lbZoomLevel.textContent = Math.round(scale * 100) + '%';
+  }
+
+  function openLightbox(src, alt) {
+    lbImg.src = src;
+    lbImg.alt = alt || '';
+    scale = 1;
+    panX = 0;
+    panY = 0;
+    lightbox.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+
+    // Fit image to viewport
+    lbImg.onload = () => {
+      const vw = window.innerWidth * 0.9;
+      const vh = window.innerHeight * 0.85;
+      const iw = lbImg.naturalWidth;
+      const ih = lbImg.naturalHeight;
+      scale = Math.min(vw / iw, vh / ih, 1);
+      updateTransform();
+    };
+    // If already cached
+    if (lbImg.complete && lbImg.naturalWidth) {
+      const vw = window.innerWidth * 0.9;
+      const vh = window.innerHeight * 0.85;
+      scale = Math.min(vw / lbImg.naturalWidth, vh / lbImg.naturalHeight, 1);
+      updateTransform();
+    }
+  }
+
+  function closeLightbox() {
+    lightbox.style.display = 'none';
+    document.body.style.overflow = '';
+    lbImg.src = '';
+  }
+
+  // Click to open
+  document.querySelectorAll('.comic-zoomable').forEach(img => {
+    img.addEventListener('click', () => openLightbox(img.src, img.alt));
+  });
+
+  // Close
+  lbClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox || e.target.id === 'lb-container') closeLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox.style.display === 'block') closeLightbox();
+  });
+
+  // Zoom buttons
+  lbZoomIn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    scale = Math.min(scale * 1.3, 5);
+    updateTransform();
+  });
+  lbZoomOut.addEventListener('click', (e) => {
+    e.stopPropagation();
+    scale = Math.max(scale / 1.3, 0.2);
+    updateTransform();
+  });
+
+  // Scroll to zoom
+  lightbox.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.85 : 1.18;
+    const newScale = Math.max(0.2, Math.min(5, scale * delta));
+
+    // Zoom toward cursor position
+    const rect = lbImg.getBoundingClientRect();
+    const cx = e.clientX - rect.left - rect.width / 2;
+    const cy = e.clientY - rect.top - rect.height / 2;
+    const ratio = 1 - newScale / scale;
+    panX += cx * ratio;
+    panY += cy * ratio;
+
+    scale = newScale;
+    updateTransform();
+  }, { passive: false });
+
+  // Drag to pan (mouse)
+  lightbox.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button')) return;
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    panStartX = panX;
+    panStartY = panY;
+    lightbox.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    panX = panStartX + (e.clientX - dragStartX);
+    panY = panStartY + (e.clientY - dragStartY);
+    updateTransform();
+  });
+  window.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      lightbox.style.cursor = 'grab';
+    }
+  });
+
+  // Touch pan + pinch zoom
+  let touches = [];
+  let lastPinchDist = 0;
+
+  lightbox.addEventListener('touchstart', (e) => {
+    if (e.target.closest('button')) return;
+    touches = Array.from(e.touches);
+    if (touches.length === 1) {
+      isDragging = true;
+      dragStartX = touches[0].clientX;
+      dragStartY = touches[0].clientY;
+      panStartX = panX;
+      panStartY = panY;
+    } else if (touches.length === 2) {
+      isDragging = false;
+      lastPinchDist = Math.hypot(touches[1].clientX - touches[0].clientX, touches[1].clientY - touches[0].clientY);
+    }
+  }, { passive: true });
+
+  lightbox.addEventListener('touchmove', (e) => {
+    if (e.target.closest('button')) return;
+    e.preventDefault();
+    const t = Array.from(e.touches);
+    if (t.length === 1 && isDragging) {
+      panX = panStartX + (t[0].clientX - dragStartX);
+      panY = panStartY + (t[0].clientY - dragStartY);
+      updateTransform();
+    } else if (t.length === 2) {
+      const dist = Math.hypot(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
+      if (lastPinchDist > 0) {
+        scale = Math.max(0.2, Math.min(5, scale * (dist / lastPinchDist)));
+        updateTransform();
+      }
+      lastPinchDist = dist;
+    }
+  }, { passive: false });
+
+  lightbox.addEventListener('touchend', () => {
+    isDragging = false;
+    lastPinchDist = 0;
+  });
+
+  // Double-click to toggle zoom
+  lbImg.addEventListener('dblclick', (e) => {
+    e.stopPropagation();
+    if (scale > 1.5) {
+      scale = 1;
+      panX = 0;
+      panY = 0;
+    } else {
+      // Zoom to 2.5x centered on click point
+      const rect = lbImg.getBoundingClientRect();
+      const cx = e.clientX - rect.left - rect.width / 2;
+      const cy = e.clientY - rect.top - rect.height / 2;
+      const newScale = 2.5;
+      const ratio = 1 - newScale / scale;
+      panX += cx * ratio;
+      panY += cy * ratio;
+      scale = newScale;
+    }
+    updateTransform();
+  });
+</script>
