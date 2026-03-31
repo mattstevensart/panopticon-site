@@ -25,6 +25,26 @@ import Layout from '../layouts/Layout.astro';
     </div>
   </div>
 
+  <!-- Welcome notice for first-time visitors -->
+  <div id="welcome-notice" style="display: none; min-height: 80vh; background: rgb(10, 10, 15); display: none; align-items: center; justify-content: center;">
+    <div style="max-width: 540px; width: 92%; padding: 48px 36px; text-align: center;">
+      <!-- Panopticon eye icon -->
+      <div style="font-size: 48px; margin-bottom: 24px; filter: drop-shadow(0 0 20px rgba(140, 64, 255, 0.4));">👁</div>
+      <h2 style="font-family: 'Orbitron'; color: rgb(214, 214, 224); font-size: 22px; font-weight: bold; letter-spacing: 4px; margin-bottom: 28px; text-shadow: 0 0 20px rgba(140, 64, 255, 0.3);">AVATAR CREATION</h2>
+      <div style="background: rgba(23, 23, 33, 0.8); border: 1px solid rgba(140, 64, 255, 0.25); padding: 28px 24px; margin-bottom: 32px; text-align: left;">
+        <p style="font-family: 'Exo 2', sans-serif; color: rgb(214, 214, 224); font-size: 15px; line-height: 1.7; margin: 0;">
+          Create a character in the world of Panopticon! This avatar will be yours. Create multiple alter inmates. The saved image will be your passport into more content including maps, scripts, character bios, and lore building. This will also provide special perks as Panopticon rolls out.
+        </p>
+        <p style="font-family: 'Exo 2', sans-serif; color: rgb(26, 224, 194); font-size: 15px; line-height: 1.7; margin: 20px 0 0 0;">
+          But for now, make a character, scan it in as your ID, and be admitted into the world of Panopticon.
+        </p>
+      </div>
+      <button id="welcome-start-btn" style="padding: 16px 40px; background: transparent; border: 2px solid rgb(26, 224, 194); color: rgb(26, 224, 194); font-family: 'Orbitron'; font-size: 15px; font-weight: bold; letter-spacing: 3px; cursor: pointer; transition: all 0.3s; text-shadow: 0 0 10px rgba(26, 224, 194, 0.3);">
+        CREATE AN AVATAR →
+      </button>
+    </div>
+  </div>
+
   <div id="avatar-creator-container" class="w-full bg-p-root">
     <!-- SVG filter for concrete texture (zero-size, invisible) -->
     <svg width="0" height="0" style="position: absolute;">
@@ -746,9 +766,41 @@ import Layout from '../layouts/Layout.astro';
         return;
       }
 
-      // If ?new=1, clean the URL
+      // If ?new=1, clean the URL and go straight to creator
       if (forceNew) {
         window.history.replaceState({}, '', '/avatar');
+        launchCreator();
+        return;
+      }
+
+      // First-time visitor — show welcome notice
+      const welcome = document.getElementById('welcome-notice');
+      const creator = document.getElementById('avatar-creator-container');
+      if (welcome) {
+        welcome.style.display = 'flex';
+        if (creator) creator.style.display = 'none';
+
+        const startBtn = document.getElementById('welcome-start-btn');
+        if (startBtn) {
+          startBtn.addEventListener('mouseenter', () => {
+            startBtn.style.background = 'rgba(26, 224, 194, 0.12)';
+            startBtn.style.boxShadow = '0 0 30px rgba(26, 224, 194, 0.2), inset 0 0 20px rgba(26, 224, 194, 0.05)';
+          });
+          startBtn.addEventListener('mouseleave', () => {
+            startBtn.style.background = 'transparent';
+            startBtn.style.boxShadow = 'none';
+          });
+          startBtn.addEventListener('click', () => {
+            welcome.style.opacity = '0';
+            welcome.style.transition = 'opacity 0.4s ease';
+            setTimeout(() => {
+              welcome.style.display = 'none';
+              if (creator) creator.style.display = 'block';
+              launchCreator();
+            }, 400);
+          });
+        }
+        return;
       }
 
       launchCreator();
@@ -979,7 +1031,7 @@ import Layout from '../layouts/Layout.astro';
         const cat = CATEGORIES[i];
         const isUnlocked = cat.unlockStage <= currentUnlockStage;
         b.classList.toggle('locked', !isUnlocked);
-        b.classList.toggle('has-selection', !!selections[cat.folder]);
+        b.classList.toggle('has-selection', !!selections[cat.folder] || selections[cat.folder] === '__none__');
       });
       renderItemGrid(idx);
     }
@@ -995,6 +1047,30 @@ import Layout from '../layouts/Layout.astro';
 
       const gridDiv = document.createElement('div');
       gridDiv.className = 'item-grid';
+
+      // Add NONE option first for optional categories (not Gender)
+      if (cat.optional && cat.folder !== 'clothing/') {
+        const noneWrapper = document.createElement('div');
+        noneWrapper.className = 'item-wrapper';
+        const noneBtn = document.createElement('button');
+        noneBtn.className = 'item-thumbnail';
+        noneBtn.dataset.categoryIdx = catIdx;
+        noneBtn.dataset.itemPath = '__none__';
+        noneBtn.style.borderStyle = 'dashed';
+        noneBtn.style.display = 'flex';
+        noneBtn.style.alignItems = 'center';
+        noneBtn.style.justifyContent = 'center';
+        const isNoneSelected = selections[cat.folder] === '__none__';
+        if (isNoneSelected) noneBtn.classList.add('confirmed');
+        noneBtn.innerHTML = '<span style="font-family: Orbitron; font-size: 13px; font-weight: bold; color: rgb(214, 214, 224); letter-spacing: 2px;">NONE</span>';
+        noneBtn.addEventListener('click', () => {
+          selections[cat.folder] = '__none__';
+          renderCanvas();
+          selectCategory(catIdx);
+        });
+        noneWrapper.appendChild(noneBtn);
+        gridDiv.appendChild(noneWrapper);
+      }
 
       items.forEach(item => {
         const wrapper = document.createElement('div');
@@ -1034,27 +1110,6 @@ import Layout from '../layouts/Layout.astro';
 
         gridDiv.appendChild(wrapper);
       });
-
-      // Add NONE option for all categories except Gender
-      if (cat.folder !== 'clothing/') {
-        const noneWrapper = document.createElement('div');
-        noneWrapper.className = 'item-wrapper';
-        const noneBtn = document.createElement('button');
-        noneBtn.className = 'item-thumbnail';
-        noneBtn.style.borderStyle = 'dashed';
-        noneBtn.style.display = 'flex';
-        noneBtn.style.alignItems = 'center';
-        noneBtn.style.justifyContent = 'center';
-        noneBtn.style.minHeight = '80px';
-        noneBtn.innerHTML = '<span style="font-family: Electrolize; font-size: 12px; color: rgb(92, 87, 111);">NONE</span>';
-        noneBtn.addEventListener('click', () => {
-          selections[cat.folder] = null;
-          renderCanvas();
-          selectCategory(catIdx);
-        });
-        noneWrapper.appendChild(noneBtn);
-        gridDiv.appendChild(noneWrapper);
-      }
 
       gridArea.appendChild(gridDiv);
     }
@@ -1216,7 +1271,7 @@ import Layout from '../layouts/Layout.astro';
       const layers = [];
       CATEGORIES.forEach(cat => {
         const sel = selections[cat.folder];
-        if (sel) {
+        if (sel && sel !== '__none__') {
           layers.push({ order: cat.drawOrder, path: sel.full, catName: cat.name });
         }
       });
@@ -1283,7 +1338,7 @@ import Layout from '../layouts/Layout.astro';
 
       // Nutri (food name)
       const foodSel = selections['Food/'];
-      if (foodSel) {
+      if (foodSel && foodSel !== '__none__') {
         labels.push({ text: foodSel.label.toUpperCase(), y: 183 });
       }
 
@@ -1588,7 +1643,7 @@ import Layout from '../layouts/Layout.astro';
       const layers = [];
       CATEGORIES.forEach(cat => {
         const sel = selections[cat.folder];
-        if (sel) layers.push({ order: cat.drawOrder, path: sel.full });
+        if (sel && sel !== '__none__') layers.push({ order: cat.drawOrder, path: sel.full });
       });
       layers.sort((a, b) => a.order - b.order);
 
@@ -1626,7 +1681,7 @@ import Layout from '../layouts/Layout.astro';
         ctx.fillText((parts[parts.length - 2] || '').toUpperCase(), (27 + 73) * scale, 127 * scale);
       }
       const foodSel = selections['Food/'];
-      if (foodSel) {
+      if (foodSel && foodSel !== '__none__') {
         ctx.fillText(foodSel.label.toUpperCase(), (27 + 73) * scale, 183 * scale);
       }
       ctx.restore();
@@ -1822,7 +1877,7 @@ import Layout from '../layouts/Layout.astro';
       localStorage.setItem('panopticon_inmate_id', idCode.toUpperCase());
       localStorage.setItem('panopticon_inmate_gender', isFemale ? 'FEMALE' : 'MALE');
       localStorage.setItem('panopticon_inmate_race', raceName.toUpperCase());
-      localStorage.setItem('panopticon_inmate_nutri', foodSel ? foodSel.label.toUpperCase() : '—');
+      localStorage.setItem('panopticon_inmate_nutri', (foodSel && foodSel !== '__none__') ? foodSel.label.toUpperCase() : '—');
 
       // Store avatar preview thumb
       try {
