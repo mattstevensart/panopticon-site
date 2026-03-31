@@ -699,7 +699,7 @@ import Layout from '../layouts/Layout.astro';
       // Check if returning user (has completed intake before)
       const urlParams = new URLSearchParams(window.location.search);
       const forceNew = urlParams.get('new') === '1';
-      const hasExistingAvatar = localStorage.getItem('panopticon_intake_complete') === 'true';
+      const hasExistingAvatar = localStorage.getItem('panopticon_avatar_created') === 'true';
 
       if (hasExistingAvatar && !forceNew) {
         // Show returning user landing screen
@@ -719,6 +719,7 @@ import Layout from '../layouts/Layout.astro';
 
         // "Create another avatar" — reset state and start fresh
         document.getElementById('landing-new-btn')?.addEventListener('click', () => {
+          localStorage.removeItem('panopticon_avatar_created');
           localStorage.removeItem('panopticon_intake_complete');
           localStorage.removeItem('panopticon_avatar_thumb');
           localStorage.removeItem('panopticon_inmate_name');
@@ -1734,7 +1735,7 @@ import Layout from '../layouts/Layout.astro';
       const text = document.getElementById('post-save-text');
       text.textContent = `INMATE INTAKE COMPLETE.\nYOU ARE INMATE ${charName.toUpperCase()}. ID #${idCode}.\nWELCOME TO THE PANOPTICON.\nSURVEILLANCE IS MANDATORY.`;
       box.classList.add('visible');
-      localStorage.setItem('panopticon_intake_complete', 'true');
+      localStorage.setItem('panopticon_avatar_created', 'true');
 
       // Store full inmate profile for header display
       const genderSel = selections['clothing/'];
