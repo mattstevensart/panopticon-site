@@ -77,9 +77,11 @@ import Layout from '../layouts/Layout.astro';
       <div id="creator-viewport" style="width: 1280px; height: 840px; transform-origin: top center; position: relative;">
 
         <!-- Title bar -->
-        <div id="title-bar" style="position: absolute; top: 0; left: 0; width: 100%; height: 84px; background: rgb(15, 15, 23); border-left: 5px solid rgb(230, 38, 26); border-right: 5px solid rgb(26, 224, 194); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-sizing: border-box; z-index: 10;">
-          <img id="logo-img" src="/avatar-assets/Panopticon%20title%20chrome.png" style="height: 70px; width: auto;" alt="Panopticon" />
-          <div style="display: flex; align-items: baseline; gap: 12px;">
+        <div id="title-bar" style="position: absolute; top: 0; left: 0; width: 100%; height: 84px; background: rgb(15, 15, 23); border-left: 5px solid rgb(230, 38, 26); border-right: 5px solid rgb(26, 224, 194); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-sizing: border-box; z-index: 10; overflow: hidden;">
+          <img id="logo-img" src="/avatar-assets/Panopticon%20title%20chrome.png" style="height: 70px; width: auto; position: relative; z-index: 2;" alt="Panopticon" />
+          <!-- EKG heartbeat line -->
+          <canvas id="ekg-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; mask-image: linear-gradient(to right, transparent 0%, black 25%, black 55%, transparent 75%); -webkit-mask-image: linear-gradient(to right, transparent 0%, black 25%, black 55%, transparent 75%);"></canvas>
+          <div style="display: flex; align-items: baseline; gap: 12px; position: relative; z-index: 2;">
             <span style="color: rgb(56, 140, 255); font-family: 'Electrolize'; font-size: 18px;">INTAKE</span>
             <span id="title-pulse" style="color: rgb(140, 64, 255); font-family: 'Orbitron'; font-size: 14px; font-weight: bold;">ASSESSMENT AND CLASSIFICATION SYSTEM</span>
           </div>
@@ -761,6 +763,77 @@ import Layout from '../layouts/Layout.astro';
       setupMobileEvents();
       handleResize();
       window.addEventListener('resize', handleResize);
+      initEkg();
+    }
+
+    // ── EKG Heartbeat Animation ──
+    function initEkg() {
+      const canvas = document.getElementById('ekg-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const titleBar = document.getElementById('title-bar');
+
+      function resize() {
+        canvas.width = titleBar.offsetWidth;
+        canvas.height = titleBar.offsetHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      // EKG waveform shape — one heartbeat cycle as normalized y-values
+      // flat → small bump (P wave) → flat → sharp spike up (QRS) → sharp dip → flat → small bump (T wave) → flat
+      function ekgWave(t) {
+        // t is 0..1 across one beat cycle
+        if (t < 0.10) return 0;                                          // baseline
+        if (t < 0.15) return Math.sin((t - 0.10) / 0.05 * Math.PI) * 0.12;  // P wave
+        if (t < 0.20) return 0;                                          // baseline
+        if (t < 0.23) return -((t - 0.20) / 0.03) * 0.15;               // Q dip
+        if (t < 0.28) return -0.15 + ((t - 0.23) / 0.05) * 1.15;        // R spike up
+        if (t < 0.33) return 1.0 - ((t - 0.28) / 0.05) * 1.35;          // S dip down
+        if (t < 0.38) return -0.35 + ((t - 0.33) / 0.05) * 0.35;        // return to baseline
+        if (t < 0.50) return 0;                                          // baseline
+        if (t < 0.58) return Math.sin((t - 0.50) / 0.08 * Math.PI) * 0.18;  // T wave
+        return 0;                                                        // baseline
+      }
+
+      let offset = 0;
+      const speed = 1.5;        // pixels per frame
+      const cycleWidth = 200;   // pixels per heartbeat cycle
+      const amplitude = 22;     // max spike height in pixels
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const midY = canvas.height / 2;
+
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(26, 224, 194, 0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = 'rgba(26, 224, 194, 0.4)';
+        ctx.shadowBlur = 6;
+
+        for (let x = 0; x < canvas.width; x++) {
+          const t = (((x + offset) % cycleWidth) + cycleWidth) % cycleWidth / cycleWidth;
+          const y = midY - ekgWave(t) * amplitude;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Brighter leading edge dot
+        const leadX = canvas.width * 0.55;
+        const leadT = (((leadX + offset) % cycleWidth) + cycleWidth) % cycleWidth / cycleWidth;
+        const leadY = midY - ekgWave(leadT) * amplitude;
+        ctx.beginPath();
+        ctx.arc(leadX, leadY, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(26, 224, 194, 0.9)';
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        offset += speed;
+        requestAnimationFrame(draw);
+      }
+      draw();
     }
 
     function buildMobileCategories() {
