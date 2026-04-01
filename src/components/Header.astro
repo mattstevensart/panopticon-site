@@ -112,6 +112,9 @@ const pathname = Astro.url.pathname;
         <a href="/avatar?new=1" class="block p-3 text-center font-ui text-p-teal text-[10px] tracking-widest border-t border-p-unlock/20 hover:bg-p-teal/10 transition-all">
           CREATE ANOTHER AVATAR →
         </a>
+        <button id="sign-out-avatar-btn" class="w-full block p-3 text-center font-ui text-p-dim text-[10px] tracking-widest border-t border-p-dim/20 hover:bg-p-red/10 hover:text-p-red transition-all cursor-pointer bg-transparent">
+          ✕ SIGN OUT AVATAR
+        </button>
       </div>
     </div>
 
@@ -266,6 +269,25 @@ const pathname = Astro.url.pathname;
         if (panel && wrap && !wrap.contains(e.target)) {
           panel.classList.add('hidden');
         }
+      });
+
+      // Sign out avatar — clear all inmate localStorage keys and reload
+      document.getElementById('sign-out-avatar-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const keys = [
+          'panopticon_avatar_created',
+          'panopticon_intake_complete',
+          'panopticon_avatar_thumb',
+          'panopticon_inmate_name',
+          'panopticon_inmate_id',
+          'panopticon_inmate_tok',
+          'panopticon_inmate_gender',
+          'panopticon_inmate_race',
+          'panopticon_inmate_nutri',
+          'panopticon_inmate_email',
+        ];
+        keys.forEach(k => localStorage.removeItem(k));
+        window.location.href = '/';
       });
     }
   }
