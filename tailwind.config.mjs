@@ -12,7 +12,7 @@ export default {
         'p-red':    '#e6261a',
         'p-teal':   '#1ae0c2',
         'p-text':   '#d6d6e0',
-        'p-dim':    '#5c576f',
+        'p-dim':    '#7e7a91',
         'p-unlock': '#8c40ff',
         'p-green':  '#39eb61',
         'p-thumb':  '#333340',
