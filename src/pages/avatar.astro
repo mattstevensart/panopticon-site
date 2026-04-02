@@ -114,6 +114,14 @@ import Layout from '../layouts/Layout.astro';
           <div id="canvas-wrapper" style="position: relative; width: 700px; height: 100%; background: rgb(10, 10, 15); border: 2px solid rgb(56, 140, 255); overflow: hidden;">
             <canvas id="preview-canvas" width="700" height="700" style="display: block; width: 100%; height: 100%;"></canvas>
 
+            <!-- Completion flash overlay (pointer-events: none so it never blocks interaction) -->
+            <div id="canvas-complete-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: none;">
+              <div id="canvas-flash-bg"></div>
+              <div class="flash-ring" style="animation-delay: 0s;"></div>
+              <div class="flash-ring" style="animation-delay: 0.2s;"></div>
+              <div class="flash-ring" style="animation-delay: 0.4s;"></div>
+            </div>
+
             <!-- Intro overlay -->
             <div id="intro-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 15, 0.97); display: flex; align-items: center; justify-content: center; z-index: 1000;">
               <div id="intro-text" style="text-align: center; font-family: 'Orbitron'; line-height: 1.4;">
@@ -162,8 +170,14 @@ import Layout from '../layouts/Layout.astro';
         <span class="stencil-mark" style="top: 3px; left: 50%; transform: translateX(-50%); font-size: 6px;">INTAKE TERMINAL</span>
 
       <!-- Mobile canvas -->
-      <div style="width: 100%; position: relative; border-bottom: 2px solid rgb(56, 140, 255); display: flex; justify-content: center; background: rgb(10, 10, 15);">
+      <div id="mobile-canvas-wrapper" style="width: 100%; position: relative; border-bottom: 2px solid rgb(56, 140, 255); display: flex; justify-content: center; background: rgb(10, 10, 15); overflow: hidden;">
         <canvas id="mobile-canvas" width="700" height="700" style="display: block; width: 100%; max-width: 500px; height: auto; background: rgb(10, 10, 15);"></canvas>
+        <div id="mobile-canvas-complete-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: none;">
+          <div class="canvas-flash-bg-m"></div>
+          <div class="flash-ring" style="animation-delay: 0s;"></div>
+          <div class="flash-ring" style="animation-delay: 0.2s;"></div>
+          <div class="flash-ring" style="animation-delay: 0.4s;"></div>
+        </div>
       </div>
       <!-- Mobile action bar (directly under avatar) -->
       <div id="mobile-action-bar" style="padding: 8px; background: rgb(23, 23, 33); border-bottom: 1px solid rgb(56, 140, 255); display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
@@ -655,6 +669,46 @@ import Layout from '../layouts/Layout.astro';
       }
     }
 
+    /* ── Completion flash overlay ── */
+    @keyframes canvas-bg-flash {
+      0%   { opacity: 0; }
+      12%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes flash-ring-expand {
+      0%   { transform: translate(-50%, -50%) scale(0.05); opacity: 0.95; }
+      100% { transform: translate(-50%, -50%) scale(3.8);  opacity: 0; }
+    }
+
+    #canvas-flash-bg,
+    .canvas-flash-bg-m {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse 60% 70% at 50% 52%,
+        rgba(26, 224, 194, 0.38) 0%,
+        rgba(26, 224, 194, 0.18) 35%,
+        transparent 70%
+      );
+      animation: canvas-bg-flash 1.1s ease-out forwards;
+    }
+
+    .flash-ring {
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      width: 320px;
+      height: 320px;
+      border: 2px solid rgba(26, 224, 194, 0.9);
+      border-radius: 50%;
+      box-shadow:
+        0 0 18px rgba(26, 224, 194, 0.6),
+        0 0 40px rgba(26, 224, 194, 0.25),
+        inset 0 0 18px rgba(26, 224, 194, 0.2);
+      animation: flash-ring-expand 1.1s ease-out forwards;
+    }
+
     /* Mobile category tabs */
     .mobile-cat-btn {
       flex: 0 0 auto;
@@ -746,6 +800,7 @@ import Layout from '../layouts/Layout.astro';
     let selections = {};
     let charName = '';
     let idCode = '';
+    let completionFlashPlayed = false;
     let introCompleted = false;
     const imageCache = {};
 
@@ -1309,6 +1364,14 @@ import Layout from '../layouts/Layout.astro';
         }
       }
 
+      // Fire the completion burst the first time all categories are filled
+      if (allSelected && !completionFlashPlayed) {
+        completionFlashPlayed = true;
+        triggerCompletionFlash();
+      } else if (!allSelected) {
+        completionFlashPlayed = false; // reset if user deselects something
+      }
+
       // Sync mobile action buttons
       const mNameBtn = document.getElementById('mobile-name-btn');
       const mIdBtn = document.getElementById('mobile-id-btn');
@@ -1592,6 +1655,31 @@ import Layout from '../layouts/Layout.astro';
       }, 9500);
     }
 
+    // Fire the completion burst behind the character — plays once per build session
+    function triggerCompletionFlash() {
+      ['canvas-complete-overlay', 'mobile-canvas-complete-overlay'].forEach(id => {
+        const overlay = document.getElementById(id);
+        if (!overlay) return;
+
+        // Reset all animated children so the animation can restart cleanly
+        overlay.querySelectorAll('#canvas-flash-bg, .canvas-flash-bg-m, .flash-ring').forEach(el => {
+          el.style.animationName = 'none';
+        });
+
+        overlay.style.display = 'block';
+
+        // Double rAF forces the browser to commit the "none" state before removing it
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          overlay.querySelectorAll('#canvas-flash-bg, .canvas-flash-bg-m, .flash-ring').forEach(el => {
+            el.style.animationName = '';
+          });
+        }));
+
+        // Hide overlay once the longest animation (ring 3 at 0.4s delay + 1.1s) is done
+        setTimeout(() => { overlay.style.display = 'none'; }, 1700);
+      });
+    }
+
     // Reveal a button with the spring slide-in entrance animation
     function revealBtn(id) {
       const btn = document.getElementById(id);
@@ -1620,6 +1708,7 @@ import Layout from '../layouts/Layout.astro';
       charName = '';
       idCode = '';
       currentUnlockStage = 0;
+      completionFlashPlayed = false;
       document.getElementById('name-btn').style.display = 'none';
       document.getElementById('id-btn').style.display = 'none';
       document.getElementById('save-btn').style.display = 'none';
