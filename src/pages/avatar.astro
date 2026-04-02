@@ -468,11 +468,23 @@ import Layout from '../layouts/Layout.astro';
     }
 
     .category-btn.has-selection {
-      color: rgb(56, 140, 255);
+      color: rgb(26, 224, 194);
+      border-left-color: rgb(26, 224, 194);
+      background: rgb(16, 38, 32);
     }
 
     .category-btn.active.has-selection {
       color: rgb(10, 10, 15);
+    }
+
+    @keyframes cat-confirm-flash {
+      0%   { box-shadow: inset 0 0 0 2px rgb(26, 224, 194), 0 0 18px rgba(26, 224, 194, 0.5); background: rgb(20, 60, 46); }
+      50%  { box-shadow: none; background: rgb(51, 51, 66); }
+      100% { box-shadow: inset 0 0 0 2px rgb(26, 224, 194), 0 0 18px rgba(26, 224, 194, 0.5); background: rgb(16, 38, 32); }
+    }
+
+    .category-btn.just-selected {
+      animation: cat-confirm-flash 0.22s ease-in-out 3;
     }
 
     .item-grid {
@@ -1229,6 +1241,15 @@ import Layout from '../layouts/Layout.astro';
         }
 
         updateUnlockStage();
+
+        // Flash the category button 3× to confirm selection
+        const catBtn = document.querySelector(`.category-btn[data-index="${catIdx}"]`);
+        if (catBtn) {
+          catBtn.classList.remove('just-selected');
+          void catBtn.offsetWidth; // force reflow to restart animation
+          catBtn.classList.add('just-selected');
+          catBtn.addEventListener('animationend', () => catBtn.classList.remove('just-selected'), { once: true });
+        }
       }
 
       renderCanvas();
@@ -1358,11 +1379,11 @@ import Layout from '../layouts/Layout.astro';
         labels.push({ text: isFemale ? 'FEMALE' : 'MALE', y: 71 });
       }
 
-      // Race (head style name)
+      // Race (head style name — strip _female suffix for display)
       const headSel = selections['heads/'];
       if (headSel) {
         const parts = headSel.full.split('/');
-        const styleName = parts[parts.length - 2] || '';
+        const styleName = (parts[parts.length - 2] || '').replace(/_female$/i, '');
         labels.push({ text: styleName.toUpperCase(), y: 127 });
       }
 
@@ -1708,7 +1729,8 @@ import Layout from '../layouts/Layout.astro';
       const headSel = selections['heads/'];
       if (headSel) {
         const parts = headSel.full.split('/');
-        ctx.fillText((parts[parts.length - 2] || '').toUpperCase(), (27 + 73) * scale, 127 * scale);
+        const raceName = (parts[parts.length - 2] || '').replace(/_female$/i, '');
+        ctx.fillText(raceName.toUpperCase(), (27 + 73) * scale, 127 * scale);
       }
       const foodSel = selections['Food/'];
       if (foodSel && foodSel !== '__none__') {
@@ -1918,7 +1940,7 @@ import Layout from '../layouts/Layout.astro';
       const foodSel = selections['Food/'];
       const isFemale = genderSel?.filename?.toLowerCase().includes('female');
       const raceParts = headSel?.full?.split('/') || [];
-      const raceName = raceParts[raceParts.length - 2] || '—';
+      const raceName = (raceParts[raceParts.length - 2] || '—').replace(/_female$/i, '');
 
       localStorage.setItem('panopticon_inmate_name', charName.toUpperCase());
       localStorage.setItem('panopticon_inmate_id', idCode.toUpperCase());
