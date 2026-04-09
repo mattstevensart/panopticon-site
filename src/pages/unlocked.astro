@@ -26,9 +26,6 @@ import Layout from '../layouts/Layout.astro';
         <div class="mb-12 border-b border-p-unlock/30 pb-8">
           <h1 class="font-display text-3xl md:text-4xl tracking-wide text-p-unlock">CLASSIFIED FILES</h1>
           <p class="font-body text-sm mt-2 intake-pulse">Intake confirmed.</p>
-          <p class="font-body text-p-dim text-sm mt-4 max-w-xl leading-relaxed">
-            Intake complete. Your inmate ID has been logged in our system. It unlocks restricted artwork, facility perks, and priority access when our Kickstarter launches. Hang onto it — we've got extra goodies cooking for ID holders.
-          </p>
           <div class="w-16 h-px bg-p-unlock mt-4"></div>
         </div>
 
@@ -71,10 +68,54 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
+    <!-- Welcome Notice Modal -->
+    <div id="welcome-modal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); align-items: center; justify-content: center;">
+      <div id="welcome-box" style="position: relative; max-width: 520px; width: 90%; padding: 40px 36px 32px; background: rgb(14, 14, 22); border: 2px solid rgb(26, 224, 194); text-align: center; opacity: 0; transform: scale(0.9);">
+        <!-- Flash overlay -->
+        <div id="welcome-flash" style="position: absolute; inset: 0; background: rgba(26, 224, 194, 0.3); pointer-events: none; opacity: 0;"></div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 4px; color: rgb(26, 224, 194); margin-bottom: 20px;">SYSTEM NOTICE</div>
+        <p style="font-family: 'Electrolize', sans-serif; font-size: 15px; color: rgb(214, 214, 224); line-height: 1.8; margin-bottom: 28px;">
+          Intake complete. Your inmate ID has been logged in our system. It unlocks restricted artwork, facility perks, and priority access when our Kickstarter launches. Hang onto it — we've got extra goodies cooking for ID holders.
+        </p>
+        <button id="welcome-dismiss" style="padding: 10px 32px; background: transparent; border: 2px solid rgb(26, 224, 194); color: rgb(26, 224, 194); font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 3px; cursor: pointer; transition: all 0.3s;">
+          DISMISS
+        </button>
+      </div>
+    </div>
+
   </div>
 </Layout>
 
 <style>
+  @keyframes welcome-entrance {
+    0%   { opacity: 0; transform: scale(0.9); }
+    50%  { opacity: 1; transform: scale(1.02); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes welcome-flash-anim {
+    0%   { opacity: 0.6; }
+    100% { opacity: 0; }
+  }
+  @keyframes welcome-border-pulse {
+    0%, 100% {
+      border-color: rgb(26, 224, 194);
+      box-shadow: 0 0 15px rgba(26, 224, 194, 0.2), inset 0 0 15px rgba(26, 224, 194, 0.05);
+    }
+    50% {
+      border-color: rgb(56, 255, 220);
+      box-shadow: 0 0 30px rgba(26, 224, 194, 0.5), 0 0 60px rgba(26, 224, 194, 0.15), inset 0 0 20px rgba(26, 224, 194, 0.1);
+    }
+  }
+  #welcome-box.active {
+    animation: welcome-entrance 0.5s ease-out forwards, welcome-border-pulse 2s ease-in-out infinite 0.5s;
+  }
+  #welcome-flash.flash {
+    animation: welcome-flash-anim 0.6s ease-out forwards;
+  }
+  #welcome-dismiss:hover {
+    background: rgba(26, 224, 194, 0.15);
+    box-shadow: 0 0 20px rgba(26, 224, 194, 0.3);
+  }
   @keyframes intake-pulse {
     0%, 100% {
       color: rgb(92, 87, 111);
@@ -95,5 +136,37 @@ import Layout from '../layouts/Layout.astro';
   if (isComplete) {
     document.getElementById('access-denied')?.classList.add('hidden');
     document.getElementById('access-granted')?.classList.remove('hidden');
+
+    // Show welcome modal if not yet dismissed
+    const dismissed = localStorage.getItem('panopticon_welcome_dismissed');
+    if (!dismissed) {
+      const modal = document.getElementById('welcome-modal');
+      const box = document.getElementById('welcome-box');
+      const flash = document.getElementById('welcome-flash');
+      if (modal) {
+        setTimeout(() => {
+          modal.style.display = 'flex';
+          requestAnimationFrame(() => {
+            box.classList.add('active');
+            flash.classList.add('flash');
+          });
+        }, 600);
+      }
+    }
   }
+
+  // Dismiss button
+  document.getElementById('welcome-dismiss')?.addEventListener('click', () => {
+    const modal = document.getElementById('welcome-modal');
+    const box = document.getElementById('welcome-box');
+    if (box) {
+      box.style.transition = 'opacity 0.3s, transform 0.3s';
+      box.style.opacity = '0';
+      box.style.transform = 'scale(0.95)';
+    }
+    setTimeout(() => {
+      if (modal) modal.style.display = 'none';
+      localStorage.setItem('panopticon_welcome_dismissed', 'true');
+    }, 300);
+  });
 </script>
