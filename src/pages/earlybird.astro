@@ -1,0 +1,675 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="KICKSTARTER HQ">
+  <div class="max-w-5xl mx-auto px-4 py-12">
+
+    <!-- ── Page header (dynamic based on phase) ── -->
+    <div class="mb-8 border-b border-p-accent/20 pb-6">
+      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">THE 63RD — COMMISSARY REQUISITION UNIT</p>
+      <h1 class="font-display text-2xl md:text-3xl text-p-accent tracking-wide" id="page-title">KICKSTARTER CAMPAIGN HQ</h1>
+      <p class="font-ui text-p-dim text-sm mt-2 max-w-xl" id="page-subtitle">
+        REGISTER YOUR INMATE ID · BACK THE CAMPAIGN · WIN A SPOT IN THE NEXT BOOK
+      </p>
+      <div class="w-16 h-px bg-p-accent mt-4"></div>
+    </div>
+
+    <!-- ── Phase banner ── -->
+    <div id="phase-banner" class="bg-p-panel border border-p-accent/30 p-3 mb-6 flex items-center gap-3">
+      <span id="phase-dot" class="w-2 h-2 rounded-full bg-p-accent animate-pulse flex-shrink-0"></span>
+      <span id="phase-text" class="font-ui text-p-accent text-xs tracking-widest">
+        LOADING CAMPAIGN STATUS...
+      </span>
+    </div>
+
+    <!-- ── Countdown (shown pre-launch only) ── -->
+    <div id="countdown-section" class="bg-p-panel border border-p-accent/20 p-6 mb-8 text-center" style="display:none;">
+      <p class="font-ui text-p-dim text-xs tracking-widest mb-4" id="countdown-label">CAMPAIGN LAUNCH COUNTDOWN</p>
+      <div class="flex gap-6 justify-center">
+        <div class="text-center">
+          <div class="font-display text-3xl md:text-4xl text-p-accent" id="cd-days">--</div>
+          <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">DAYS</div>
+        </div>
+        <div class="text-center">
+          <div class="font-display text-3xl md:text-4xl text-p-accent" id="cd-hours">--</div>
+          <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">HOURS</div>
+        </div>
+        <div class="text-center">
+          <div class="font-display text-3xl md:text-4xl text-p-accent" id="cd-mins">--</div>
+          <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">MINS</div>
+        </div>
+        <div class="text-center">
+          <div class="font-display text-3xl md:text-4xl text-p-accent" id="cd-secs">--</div>
+          <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">SECS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         THREE INCENTIVE PILLARS
+    ══════════════════════════════════════════════ -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+
+      <!-- PILLAR 1: Early Bird Perks -->
+      <div class="border border-[#f59e0b]/30 bg-[#f59e0b]/5 p-5 relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#f59e0b] to-[#d97706]"></div>
+        <p class="font-display text-sm tracking-widest text-[#f59e0b] mt-2 mb-1">EARLY BIRD PERKS</p>
+        <p class="font-ui text-p-dim text-[10px] tracking-widest mb-3" id="earlybird-window-label">REGISTER BEFORE LAUNCH → GOLD TIER</p>
+        <p class="font-comic text-p-text text-sm leading-relaxed mb-3">The earlier you register, the better your rewards. Pre-launch registrants get automatic <span style="color:#f59e0b;">Gold Tier</span> status.</p>
+        <div class="space-y-2 mt-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full" style="background:#f59e0b;"></span>
+            <span class="font-ui text-[10px] tracking-widest" style="color:#f59e0b;">GOLD</span>
+            <span class="font-comic text-p-dim text-xs" id="gold-window">— Pre-launch + first 24hrs</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full" style="background:#94a3b8;"></span>
+            <span class="font-ui text-[10px] tracking-widest" style="color:#94a3b8;">SILVER</span>
+            <span class="font-comic text-p-dim text-xs">— 24–48 hrs after launch</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full" style="background:#d97706;"></span>
+            <span class="font-ui text-[10px] tracking-widest" style="color:#d97706;">BRONZE</span>
+            <span class="font-comic text-p-dim text-xs">— 48–72 hrs after launch</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PILLAR 2: Back the Campaign -->
+      <div class="border border-p-teal/30 bg-p-teal/5 p-5 relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-p-teal to-[#0d9488]"></div>
+        <p class="font-display text-sm tracking-widest text-p-teal mt-2 mb-1">BACK THE CAMPAIGN</p>
+        <p class="font-ui text-p-dim text-[10px] tracking-widest mb-3">SUPPORT PANOPTICON ON KICKSTARTER</p>
+        <p class="font-comic text-p-text text-sm leading-relaxed mb-3">Back the Kickstarter and verify your pledge here to unlock your perks and enter the character lottery.</p>
+        <div id="ks-link-wrap" style="display:none;">
+          <a id="ks-link" href="#" target="_blank" class="inline-block mt-2 px-4 py-2 border border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all" style="text-decoration:none;">
+            VIEW ON KICKSTARTER →
+          </a>
+        </div>
+        <p id="ks-coming" class="font-ui text-p-dim text-xs tracking-widest mt-2">LAUNCHING MAY 15</p>
+      </div>
+
+      <!-- PILLAR 3: Character Lottery -->
+      <div class="border border-p-unlock/30 bg-p-unlock/5 p-5 relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-p-unlock to-[#7c3aed]"></div>
+        <p class="font-display text-sm tracking-widest text-p-unlock mt-2 mb-1">CHARACTER LOTTERY</p>
+        <p class="font-ui text-p-dim text-[10px] tracking-widest mb-3">YOUR AVATAR IN THE NEXT BOOK</p>
+        <p class="font-comic text-p-text text-sm leading-relaxed">One lucky backer's avatar will be drawn into the next issue of Panopticon. Create an avatar, back the campaign, and verify your pledge to enter.</p>
+        <div class="mt-3 border border-p-unlock/20 bg-p-unlock/10 p-2">
+          <p class="font-ui text-p-unlock text-[10px] tracking-widest text-center">AVATAR + VERIFIED PLEDGE = LOTTERY ENTRY</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         GATE: Must have scanned avatar
+    ══════════════════════════════════════════════ -->
+    <div id="eb-gate" class="border-2 border-dashed border-p-red/40 bg-p-red/5 p-8 text-center" style="display:none;">
+      <p class="font-display text-p-red text-sm tracking-widest mb-3">⊗ IDENTITY NOT VERIFIED</p>
+      <p class="font-comic text-p-dim text-sm mb-6">You must create and scan your inmate avatar before registering.</p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="/avatar" class="inline-block px-6 py-3 border-2 border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all text-center" style="text-decoration:none;">
+          CREATE AVATAR →
+        </a>
+        <a href="/scan" class="inline-block px-6 py-3 border-2 border-p-accent text-p-accent font-display text-xs tracking-widest hover:bg-p-accent/10 transition-all text-center" style="text-decoration:none;">
+          SCAN EXISTING AVATAR →
+        </a>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         ALREADY REGISTERED view
+    ══════════════════════════════════════════════ -->
+    <div id="eb-already" style="display:none;">
+      <div class="border-2 border-p-teal bg-p-teal/5 p-8">
+
+        <!-- Status header -->
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-16 h-16 border-2 border-p-teal/60 overflow-hidden flex-shrink-0">
+            <img id="already-avatar" src="" alt="Your avatar" class="w-full h-full object-cover" />
+          </div>
+          <div class="flex-1">
+            <p class="font-display text-sm tracking-widest text-p-teal" id="already-name">—</p>
+            <p class="font-ui text-[10px] tracking-widest text-p-dim" id="already-id">—</p>
+          </div>
+          <div class="text-right">
+            <p class="font-display text-p-teal text-xs tracking-widest">✓ REGISTERED</p>
+          </div>
+        </div>
+
+        <!-- Token display -->
+        <div class="bg-p-panel border border-p-accent/30 p-5 max-w-md mx-auto mb-6 text-center">
+          <p class="font-ui text-p-dim text-[10px] tracking-widest mb-2">YOUR TOKEN</p>
+          <p class="font-display text-xl text-p-accent tracking-widest" id="already-token" style="font-family:'Courier New',monospace;">—</p>
+          <button id="copy-existing-token" class="mt-3 px-4 py-2 border border-p-dim/40 text-p-dim font-ui text-xs tracking-widest hover:text-p-accent hover:border-p-accent transition-all cursor-pointer bg-transparent">
+            COPY TOKEN
+          </button>
+        </div>
+
+        <!-- Status grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6 text-center">
+          <div class="bg-p-panel border border-p-dim/20 p-3">
+            <p class="font-ui text-p-dim text-[10px] tracking-widest mb-1">TIER</p>
+            <p id="already-tier" class="font-display text-sm tracking-widest"></p>
+          </div>
+          <div class="bg-p-panel border border-p-dim/20 p-3">
+            <p class="font-ui text-p-dim text-[10px] tracking-widest mb-1">PLEDGE</p>
+            <p id="already-pledge-status" class="font-display text-sm tracking-widest"></p>
+          </div>
+          <div class="bg-p-panel border border-p-dim/20 p-3">
+            <p class="font-ui text-p-dim text-[10px] tracking-widest mb-1">LOTTERY</p>
+            <p id="already-lottery-status" class="font-display text-sm tracking-widest"></p>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center" id="already-actions">
+          <a href="/earlybird-verify" id="verify-cta" class="inline-block px-6 py-3 border-2 border-p-accent text-p-accent font-display text-xs tracking-widest hover:bg-p-accent/10 transition-all text-center" style="text-decoration:none;">
+            VERIFY MY PLEDGE →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         REGISTRATION FORM
+    ══════════════════════════════════════════════ -->
+    <div id="eb-register" style="display:none;">
+      <div class="border-2 border-p-accent/40">
+
+        <!-- Header with avatar preview -->
+        <div class="flex items-center gap-4 px-6 py-5 border-b border-p-accent/20 bg-p-canvas">
+          <div class="w-16 h-16 border-2 border-p-teal/60 overflow-hidden flex-shrink-0">
+            <img id="reg-avatar" src="" alt="Your avatar" class="w-full h-full object-cover" />
+          </div>
+          <div>
+            <p class="font-display text-sm tracking-widest text-p-teal" id="reg-inmate-name">—</p>
+            <p class="font-ui text-[10px] tracking-widest text-p-dim" id="reg-inmate-id">—</p>
+          </div>
+          <div class="ml-auto">
+            <span class="font-ui text-p-teal text-[10px] tracking-widest">● VERIFIED</span>
+          </div>
+        </div>
+
+        <!-- What you'll get banner -->
+        <div id="reg-tier-preview" class="px-6 py-3 border-b border-p-accent/20 bg-[#f59e0b]/5">
+          <p class="font-ui text-[10px] tracking-widest text-center">
+            <span style="color:#f59e0b;" id="reg-tier-label">REGISTERING NOW = GOLD TIER</span>
+          </p>
+        </div>
+
+        <!-- Form body -->
+        <div class="bg-p-panel px-6 py-6">
+          <p class="font-display text-xs tracking-widest text-p-text mb-1">CAMPAIGN REGISTRATION</p>
+          <p class="font-comic text-p-dim text-sm mb-6">Enter your email to register. You'll get a unique token to link with your Kickstarter pledge later. Your avatar will also be entered into the character lottery once you verify your pledge.</p>
+
+          <div class="space-y-4">
+            <div>
+              <label class="font-ui text-p-dim text-[10px] tracking-widest block mb-2">EMAIL ADDRESS</label>
+              <input type="email" id="reg-email"
+                class="w-full bg-p-canvas border border-p-dim/30 text-p-text font-ui text-sm px-4 py-3 focus:border-p-accent focus:outline-none transition-colors"
+                placeholder="your@email.com" />
+            </div>
+            <div>
+              <label class="font-ui text-p-dim text-[10px] tracking-widest block mb-2">CONFIRM EMAIL</label>
+              <input type="email" id="reg-email2"
+                class="w-full bg-p-canvas border border-p-dim/30 text-p-text font-ui text-sm px-4 py-3 focus:border-p-accent focus:outline-none transition-colors"
+                placeholder="your@email.com" />
+            </div>
+          </div>
+
+          <div id="reg-error" class="mt-4 p-3 border border-p-red/40 bg-p-red/10 text-p-red font-ui text-xs tracking-widest" style="display:none;"></div>
+
+          <button id="reg-submit"
+            class="mt-6 w-full py-4 bg-p-accent/20 border-2 border-p-accent text-p-accent font-display text-sm tracking-widest hover:bg-p-accent/30 transition-all cursor-pointer">
+            REGISTER & GET MY TOKEN →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SUCCESS view
+    ══════════════════════════════════════════════ -->
+    <div id="eb-success" style="display:none;">
+      <div class="border-2 border-p-teal text-center">
+        <div class="bg-p-canvas px-6 py-8 border-b border-p-teal/30">
+          <div class="w-16 h-16 rounded-full bg-p-teal/20 border-2 border-p-teal flex items-center justify-center mx-auto mb-4">
+            <span class="font-display text-2xl text-p-teal">✓</span>
+          </div>
+          <p class="font-display text-lg tracking-widest text-p-teal mb-2">REGISTRATION COMPLETE</p>
+          <p class="font-comic text-p-dim text-sm">You're in. Here's what's next.</p>
+        </div>
+
+        <div class="bg-p-panel px-6 py-6">
+          <p class="font-ui text-p-dim text-[10px] tracking-widest mb-2">YOUR TIER</p>
+          <p id="success-tier" class="font-display text-sm tracking-widest mb-6"></p>
+
+          <div class="bg-p-canvas border-2 border-p-accent/40 p-5 max-w-md mx-auto mb-6">
+            <p class="font-ui text-p-dim text-[10px] tracking-widest mb-2">YOUR AVATAR TOKEN</p>
+            <p class="font-display text-2xl text-p-accent tracking-widest" id="success-token" style="font-family:'Courier New',monospace;">—</p>
+            <button id="copy-token-btn" class="mt-3 px-4 py-2 border border-p-dim/40 text-p-dim font-ui text-xs tracking-widest hover:text-p-accent hover:border-p-accent transition-all cursor-pointer bg-transparent">
+              COPY TOKEN
+            </button>
+          </div>
+
+          <!-- Next steps -->
+          <div class="border border-p-dim/20 bg-p-canvas p-4 max-w-md mx-auto mb-6 text-left">
+            <p class="font-display text-xs tracking-widest text-p-text mb-3">NEXT STEPS</p>
+            <div class="space-y-2 font-comic text-p-dim text-sm">
+              <p><span class="text-p-teal font-display text-xs">01</span> &nbsp;Save your token (above)</p>
+              <p><span class="text-p-teal font-display text-xs">02</span> &nbsp;<span id="next-step-ks">When the Kickstarter launches, back the campaign</span></p>
+              <p><span class="text-p-teal font-display text-xs">03</span> &nbsp;Return here to <a href="/earlybird-verify" class="text-p-accent" style="text-decoration:underline;">verify your pledge</a></p>
+              <p><span class="text-p-unlock font-display text-xs">★</span> &nbsp;Verified backers are entered into the <span class="text-p-unlock">Character Lottery</span> — your avatar could appear in the next book!</p>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="/earlybird-verify" class="inline-block px-6 py-3 border-2 border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all text-center" style="text-decoration:none;">
+              VERIFY PLEDGE →
+            </a>
+            <a href="/" class="inline-block px-6 py-3 border border-p-dim/40 text-p-dim font-display text-xs tracking-widest hover:border-p-text hover:text-p-text transition-all text-center" style="text-decoration:none;">
+              RETURN TO FACILITY →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         CAMPAIGN ENDED view
+    ══════════════════════════════════════════════ -->
+    <div id="eb-ended" style="display:none;">
+      <div class="border-2 border-p-dim/40 bg-p-panel p-8 text-center">
+        <p class="font-display text-p-dim text-lg tracking-widest mb-2">CAMPAIGN HAS ENDED</p>
+        <p class="font-comic text-p-dim text-sm mb-6">Registration is now closed. If you're already registered, you can still check your status below.</p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a href="/earlybird-verify" class="inline-block px-6 py-3 border border-p-accent text-p-accent font-display text-xs tracking-widest hover:bg-p-accent/10 transition-all text-center" style="text-decoration:none;">
+            VERIFY PLEDGE →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         HOW IT WORKS
+    ══════════════════════════════════════════════ -->
+    <div class="mt-10 border border-p-dim/20 bg-p-panel p-6">
+      <p class="font-display text-xs tracking-widest text-p-text mb-4">HOW IT WORKS</p>
+      <div class="space-y-3 font-comic text-p-dim text-sm leading-relaxed">
+        <p><span class="text-p-teal font-display text-xs">01</span> &nbsp;Create your inmate avatar and scan it to verify your identity.</p>
+        <p><span class="text-p-teal font-display text-xs">02</span> &nbsp;Register here with your email to get your unique token and lock in your tier.</p>
+        <p><span class="text-p-teal font-display text-xs">03</span> &nbsp;Back the Panopticon Kickstarter when it launches.</p>
+        <p><span class="text-p-teal font-display text-xs">04</span> &nbsp;<a href="/earlybird-verify" class="text-p-accent hover:text-p-accent/80" style="text-decoration:underline;">Verify your pledge</a> to lock in your perks and enter the lottery.</p>
+        <p><span class="text-p-unlock font-display text-xs">★</span> &nbsp;After the campaign, one verified backer's avatar will be drawn into the next issue of Panopticon!</p>
+      </div>
+    </div>
+
+    <p class="font-ui text-p-dim/30 text-xs tracking-widest text-center mt-12">
+      PANOPTICON COMMISSARY · THE 63RD · ALL TRANSACTIONS LOGGED
+    </p>
+
+  </div>
+</Layout>
+
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+ * KICKSTARTER CAMPAIGN HQ — Phase-aware registration system
+ *
+ * PHASES:
+ *   pre-launch   → now until launchDate          (register → auto Gold)
+ *   gold-window  → launch +0 to +24h             (register → Gold)
+ *   silver-window→ launch +24h to +48h            (register → Silver)
+ *   bronze-window→ launch +48h to +72h            (register → Bronze)
+ *   active       → launch +72h to campaignEndDate (register → Supporter)
+ *   ended        → after campaignEndDate          (registration closed)
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+// ── CONFIG ──
+const CONFIG = {
+  // KEY DATES — adjust these!
+  launchDate:      '2026-05-15T12:00:00',   // Kickstarter launch
+  campaignEndDate: '2026-06-14T12:00:00',   // ~30 days later
+
+  // Kickstarter URL (set once campaign is live)
+  kickstarterUrl: '',
+
+  // Tier definitions
+  tiers: {
+    gold:      { maxHoursAfterLaunch: 24,  label: 'GOLD',      color: '#f59e0b' },
+    silver:    { maxHoursAfterLaunch: 48,  label: 'SILVER',    color: '#94a3b8' },
+    bronze:    { maxHoursAfterLaunch: 72,  label: 'BRONZE',    color: '#d97706' },
+    supporter: { maxHoursAfterLaunch: Infinity, label: 'SUPPORTER', color: '#1ae0c2' },
+  },
+
+  // Firebase config — fill in for production
+  firebase: {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: ""
+  }
+};
+
+// ── PHASE DETECTION ──
+function getPhase() {
+  const now = Date.now();
+  const launch = new Date(CONFIG.launchDate).getTime();
+  const end = new Date(CONFIG.campaignEndDate).getTime();
+
+  if (now < launch) return 'pre-launch';
+  const hoursIn = (now - launch) / 3600000;
+  if (hoursIn <= 24) return 'gold-window';
+  if (hoursIn <= 48) return 'silver-window';
+  if (hoursIn <= 72) return 'bronze-window';
+  if (now <= end) return 'active';
+  return 'ended';
+}
+
+function calculateTier(registeredAt) {
+  const regTime = new Date(registeredAt).getTime();
+  const launch = new Date(CONFIG.launchDate).getTime();
+
+  // Pre-launch = always Gold
+  if (regTime < launch) return 'gold';
+
+  const hoursAfterLaunch = (regTime - launch) / 3600000;
+  if (hoursAfterLaunch <= 24) return 'gold';
+  if (hoursAfterLaunch <= 48) return 'silver';
+  if (hoursAfterLaunch <= 72) return 'bronze';
+  return 'supporter';
+}
+
+// ── DATABASE LAYER ──
+let db = null;
+let useFirebase = false;
+
+function isFirebaseConfigured() {
+  return CONFIG.firebase.apiKey && CONFIG.firebase.apiKey.length > 5;
+}
+
+async function initDB() {
+  if (isFirebaseConfigured()) {
+    try {
+      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
+      const { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, orderBy } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+      const app = initializeApp(CONFIG.firebase);
+      db = {
+        firestore: getFirestore(app),
+        _m: { collection, addDoc, getDocs, query, where, updateDoc, doc, orderBy }
+      };
+      useFirebase = true;
+      console.log('✅ Firebase connected');
+    } catch (e) {
+      console.warn('Firebase init failed, using localStorage:', e);
+    }
+  }
+}
+
+async function getAllRegistrations() {
+  if (useFirebase) {
+    const { collection, getDocs, orderBy, query } = db._m;
+    const q = query(collection(db.firestore, 'earlybird_registrations'), orderBy('registeredAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  return JSON.parse(localStorage.getItem('eb_registrations') || '[]');
+}
+
+async function addRegistration(reg) {
+  if (useFirebase) {
+    const { collection, addDoc } = db._m;
+    const docRef = await addDoc(collection(db.firestore, 'earlybird_registrations'), reg);
+    return docRef.id;
+  }
+  const data = JSON.parse(localStorage.getItem('eb_registrations') || '[]');
+  reg.id = 'local_' + Date.now();
+  data.push(reg);
+  localStorage.setItem('eb_registrations', JSON.stringify(data));
+  return reg.id;
+}
+
+async function findByEmail(email) {
+  const all = await getAllRegistrations();
+  return all.find(r => r.email === email.toLowerCase()) || null;
+}
+
+async function findByInmateId(inmateId) {
+  const all = await getAllRegistrations();
+  return all.find(r => r.inmateId === inmateId) || null;
+}
+
+async function findRegistration(token, email) {
+  if (useFirebase) {
+    const { collection, getDocs, query, where } = db._m;
+    const q = query(
+      collection(db.firestore, 'earlybird_registrations'),
+      where('token', '==', token.toUpperCase()),
+      where('email', '==', email.toLowerCase())
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    const d = snap.docs[0];
+    return { id: d.id, ...d.data() };
+  }
+  const data = JSON.parse(localStorage.getItem('eb_registrations') || '[]');
+  return data.find(r => r.token === token.toUpperCase() && r.email === email.toLowerCase()) || null;
+}
+
+// ── TIER DISPLAY ──
+function tierHTML(tier) {
+  const t = CONFIG.tiers[tier] || CONFIG.tiers.supporter;
+  return `<span style="color:${t.color};">${t.label}</span>`;
+}
+
+// ── COUNTDOWN ──
+function updateCountdown(targetDate) {
+  const diff = Math.max(0, new Date(targetDate).getTime() - Date.now());
+  document.getElementById('cd-days').textContent = Math.floor(diff / 86400000);
+  document.getElementById('cd-hours').textContent = Math.floor((diff % 86400000) / 3600000);
+  document.getElementById('cd-mins').textContent = Math.floor((diff % 3600000) / 60000);
+  document.getElementById('cd-secs').textContent = Math.floor((diff % 60000) / 1000);
+}
+
+// ── UI HELPERS ──
+function showView(viewId) {
+  ['eb-gate', 'eb-register', 'eb-success', 'eb-already', 'eb-ended'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = id === viewId ? 'block' : 'none';
+  });
+}
+
+function setPhase(msg, color = '#388cff') {
+  const dot = document.getElementById('phase-dot');
+  const text = document.getElementById('phase-text');
+  if (dot) dot.style.backgroundColor = color;
+  if (text) { text.textContent = msg; text.style.color = color; }
+}
+
+// ── INIT ──
+(async function init() {
+  await initDB();
+
+  const phase = getPhase();
+
+  // Phase-specific UI
+  if (phase === 'pre-launch') {
+    document.getElementById('countdown-section').style.display = 'block';
+    updateCountdown(CONFIG.launchDate);
+    setInterval(() => updateCountdown(CONFIG.launchDate), 1000);
+    setPhase('PRE-LAUNCH · REGISTER NOW FOR GUARANTEED GOLD TIER', '#f59e0b');
+  } else if (phase === 'gold-window') {
+    document.getElementById('countdown-section').style.display = 'block';
+    document.getElementById('countdown-label').textContent = 'GOLD TIER WINDOW CLOSING IN';
+    const goldEnd = new Date(CONFIG.launchDate).getTime() + 24 * 3600000;
+    updateCountdown(new Date(goldEnd).toISOString());
+    setInterval(() => updateCountdown(new Date(goldEnd).toISOString()), 1000);
+    setPhase('CAMPAIGN LIVE · GOLD TIER WINDOW OPEN', '#f59e0b');
+  } else if (phase === 'silver-window') {
+    setPhase('CAMPAIGN LIVE · SILVER TIER WINDOW OPEN', '#94a3b8');
+  } else if (phase === 'bronze-window') {
+    setPhase('CAMPAIGN LIVE · BRONZE TIER WINDOW OPEN', '#d97706');
+  } else if (phase === 'active') {
+    setPhase('CAMPAIGN LIVE · REGISTRATION OPEN · SUPPORTER TIER', '#1ae0c2');
+  } else if (phase === 'ended') {
+    setPhase('CAMPAIGN ENDED · REGISTRATION CLOSED', '#5c576f');
+  }
+
+  // Show KS link if URL set and campaign is live
+  if (CONFIG.kickstarterUrl && phase !== 'pre-launch') {
+    document.getElementById('ks-link').href = CONFIG.kickstarterUrl;
+    document.getElementById('ks-link-wrap').style.display = 'block';
+    document.getElementById('ks-coming').style.display = 'none';
+  }
+
+  // Campaign ended — show ended view
+  if (phase === 'ended') {
+    showView('eb-ended');
+    return;
+  }
+
+  // Check if user has scanned their avatar
+  const isIntakeComplete = localStorage.getItem('panopticon_intake_complete') === 'true';
+  const inmateName = localStorage.getItem('panopticon_inmate_name');
+  const inmateId = localStorage.getItem('panopticon_inmate_id');
+  const avatarThumb = localStorage.getItem('panopticon_avatar_thumb');
+  const inmateTok = localStorage.getItem('panopticon_inmate_tok');
+
+  if (!isIntakeComplete || !inmateName) {
+    showView('eb-gate');
+    return;
+  }
+
+  // Check if already registered
+  const existing = await findByInmateId(inmateId || inmateTok || inmateName);
+  if (existing) {
+    showView('eb-already');
+    setPhase(phase === 'pre-launch'
+      ? '✓ REGISTERED · PRE-LAUNCH · GOLD TIER LOCKED IN'
+      : '✓ REGISTERED · TOKEN ON FILE', '#1ae0c2');
+
+    if (avatarThumb) document.getElementById('already-avatar').src = avatarThumb;
+    document.getElementById('already-name').textContent = existing.name;
+    document.getElementById('already-id').textContent = existing.inmateId ? '#' + existing.inmateId : '';
+    document.getElementById('already-token').textContent = existing.token;
+    document.getElementById('already-tier').innerHTML = tierHTML(existing.tier);
+
+    if (existing.pledgeVerified) {
+      document.getElementById('already-pledge-status').innerHTML = '<span style="color:#1ae0c2;">✓ VERIFIED</span>';
+      document.getElementById('already-lottery-status').innerHTML = '<span style="color:#8c40ff;">★ ENTERED</span>';
+      document.getElementById('verify-cta').textContent = 'VIEW VERIFICATION →';
+    } else {
+      document.getElementById('already-pledge-status').innerHTML = '<span style="color:#5c576f;">PENDING</span>';
+      document.getElementById('already-lottery-status').innerHTML = '<span style="color:#5c576f;">VERIFY TO ENTER</span>';
+    }
+
+    document.getElementById('copy-existing-token')?.addEventListener('click', () => {
+      navigator.clipboard.writeText(existing.token);
+      document.getElementById('copy-existing-token').textContent = '✓ COPIED';
+      setTimeout(() => { document.getElementById('copy-existing-token').textContent = 'COPY TOKEN'; }, 2000);
+    });
+
+    return;
+  }
+
+  // Show registration form
+  showView('eb-register');
+
+  // Set tier preview based on phase
+  const currentTier = calculateTier(new Date().toISOString());
+  const tierInfo = CONFIG.tiers[currentTier];
+  document.getElementById('reg-tier-label').textContent = `REGISTERING NOW = ${tierInfo.label} TIER`;
+  document.getElementById('reg-tier-preview').style.borderColor = tierInfo.color + '33';
+  document.getElementById('reg-tier-preview').style.backgroundColor = tierInfo.color + '0d';
+
+  if (avatarThumb) document.getElementById('reg-avatar').src = avatarThumb;
+  document.getElementById('reg-inmate-name').textContent = inmateName || '—';
+  document.getElementById('reg-inmate-id').textContent = inmateId ? '#' + inmateId : inmateTok || '—';
+
+  // Submit handler
+  document.getElementById('reg-submit')?.addEventListener('click', async () => {
+    const email = document.getElementById('reg-email').value.trim().toLowerCase();
+    const email2 = document.getElementById('reg-email2').value.trim().toLowerCase();
+    const errEl = document.getElementById('reg-error');
+
+    if (!email || !email.includes('@')) {
+      errEl.textContent = '⊗ ENTER A VALID EMAIL ADDRESS';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (email !== email2) {
+      errEl.textContent = '⊗ EMAIL ADDRESSES DO NOT MATCH';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+
+    const dupe = await findByEmail(email);
+    if (dupe) {
+      errEl.textContent = '⊗ THIS EMAIL IS ALREADY REGISTERED. CHECK YOUR STATUS OR VERIFY YOUR PLEDGE.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('reg-submit');
+    btn.textContent = 'PROCESSING...';
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+
+    const token = inmateTok || inmateId || '';
+    if (!token) {
+      errEl.textContent = '⊗ NO AVATAR TOKEN FOUND. PLEASE SCAN YOUR AVATAR AGAIN.';
+      errEl.style.display = 'block';
+      btn.textContent = 'REGISTER & GET MY TOKEN →';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const tier = calculateTier(now);
+
+    const reg = {
+      name: inmateName || '',
+      inmateId: inmateId || inmateTok || inmateName || '',
+      email,
+      token,
+      tier,
+      avatarThumb: avatarThumb || '',
+      registeredAt: now,
+      pledgeVerified: false,
+      backerName: '',
+      backerEmail: '',
+      pledgeAmount: '',
+      verifiedAt: '',
+      lotteryEligible: false,  // becomes true when pledge is verified
+      lotteryWinner: false,
+    };
+
+    await addRegistration(reg);
+
+    localStorage.setItem('panopticon_eb_token', token);
+    localStorage.setItem('panopticon_eb_email', email);
+
+    // Show success
+    showView('eb-success');
+    document.getElementById('success-token').textContent = token;
+    document.getElementById('success-tier').innerHTML = tierHTML(tier);
+
+    // Adjust "next step" text based on phase
+    if (phase !== 'pre-launch') {
+      document.getElementById('next-step-ks').textContent = 'Back the Kickstarter campaign (link above)';
+    }
+
+    document.getElementById('copy-token-btn')?.addEventListener('click', () => {
+      navigator.clipboard.writeText(token);
+      document.getElementById('copy-token-btn').textContent = '✓ COPIED';
+      setTimeout(() => { document.getElementById('copy-token-btn').textContent = 'COPY TOKEN'; }, 2000);
+    });
+  });
+})();
+</script>

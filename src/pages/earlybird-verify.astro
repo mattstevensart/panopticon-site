@@ -1,0 +1,402 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="VERIFY PLEDGE">
+  <div class="max-w-5xl mx-auto px-4 py-12">
+
+    <!-- ── Page header ── -->
+    <div class="mb-8 border-b border-p-teal/20 pb-6">
+      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">THE 63RD — PLEDGE VERIFICATION UNIT</p>
+      <h1 class="font-display text-2xl md:text-3xl text-p-teal tracking-wide">VERIFY YOUR KICKSTARTER PLEDGE</h1>
+      <p class="font-ui text-p-dim text-sm mt-2 max-w-xl">
+        LINK YOUR PLEDGE TO UNLOCK YOUR PERKS + ENTER THE CHARACTER LOTTERY
+      </p>
+      <div class="w-16 h-px bg-p-teal mt-4"></div>
+    </div>
+
+    <!-- ── Status bar ── -->
+    <div class="bg-p-panel border border-p-teal/30 p-3 mb-8 flex items-center gap-3">
+      <span id="v-status-dot" class="w-2 h-2 rounded-full bg-p-teal animate-pulse flex-shrink-0"></span>
+      <span id="v-status-text" class="font-ui text-p-teal text-xs tracking-widest">
+        VERIFICATION SYSTEM ONLINE · AWAITING INPUT...
+      </span>
+    </div>
+
+    <!-- ── STEP 1: Lookup ── -->
+    <div id="v-step1">
+      <div class="border-2 border-p-teal/40">
+        <div class="bg-p-canvas px-6 py-4 border-b border-p-teal/20">
+          <p class="font-display text-xs tracking-widest text-p-teal">STEP 1 — LOCATE YOUR REGISTRATION</p>
+        </div>
+        <div class="bg-p-panel px-6 py-6">
+          <p class="font-comic text-p-dim text-sm mb-6">Enter the token and email you used when registering.</p>
+
+          <div class="space-y-4">
+            <div>
+              <label class="font-ui text-p-dim text-[10px] tracking-widest block mb-2">YOUR TOKEN</label>
+              <input type="text" id="v-token"
+                class="w-full bg-p-canvas border border-p-dim/30 text-p-accent font-display text-lg px-4 py-3 focus:border-p-teal focus:outline-none transition-colors tracking-widest"
+                placeholder="e.g. K4HN7RBQ" style="font-family:'Courier New',monospace;" />
+            </div>
+            <div>
+              <label class="font-ui text-p-dim text-[10px] tracking-widest block mb-2">EMAIL ADDRESS</label>
+              <input type="email" id="v-email"
+                class="w-full bg-p-canvas border border-p-dim/30 text-p-text font-ui text-sm px-4 py-3 focus:border-p-teal focus:outline-none transition-colors"
+                placeholder="your@email.com" />
+            </div>
+          </div>
+
+          <div id="v-lookup-error" class="mt-4 p-3 border border-p-red/40 bg-p-red/10 text-p-red font-ui text-xs tracking-widest" style="display:none;"></div>
+
+          <button id="v-lookup-btn"
+            class="mt-6 w-full py-4 border-2 border-p-teal text-p-teal font-display text-sm tracking-widest hover:bg-p-teal/10 transition-all cursor-pointer bg-transparent">
+            LOCATE REGISTRATION →
+          </button>
+
+          <p class="font-comic text-p-dim/50 text-xs mt-4 text-center">Don't have a token? <a href="/earlybird" class="text-p-accent" style="text-decoration:underline;">Register first →</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: Enter backer info ── -->
+    <div id="v-step2" style="display:none;">
+      <div class="border-2 border-p-accent/40">
+
+        <!-- Registration summary -->
+        <div class="flex items-center gap-4 px-6 py-4 border-b border-p-accent/20 bg-p-canvas">
+          <div class="w-12 h-12 border-2 border-p-teal/60 overflow-hidden flex-shrink-0">
+            <img id="v-avatar" src="" alt="Avatar" class="w-full h-full object-cover" />
+          </div>
+          <div class="flex-1">
+            <p class="font-display text-sm tracking-widest text-p-teal" id="v-name">—</p>
+            <p class="font-ui text-[10px] tracking-widest text-p-dim" id="v-reg-token">—</p>
+          </div>
+          <div>
+            <span id="v-tier-badge" class="font-display text-xs tracking-widest"></span>
+          </div>
+        </div>
+
+        <div class="bg-p-canvas px-6 py-4 border-b border-p-accent/20">
+          <p class="font-display text-xs tracking-widest text-p-accent">STEP 2 — ENTER YOUR KICKSTARTER BACKER INFO</p>
+        </div>
+
+        <div class="bg-p-panel px-6 py-6">
+          <p class="font-comic text-p-dim text-sm mb-2">
+            Enter your Kickstarter backer information so we can match your pledge. Find this in your Kickstarter account under "Backed Projects."
+          </p>
+          <p class="font-comic text-p-unlock text-sm mb-6">
+            ★ Verifying your pledge also enters your avatar into the <strong>Character Lottery</strong> — your avatar could be drawn into the next book!
+          </p>
+
+          <div class="space-y-4">
+            <div>
+              <label class="font-ui text-p-dim text-[10px] tracking-widest block mb-2">KICKSTARTER BACKER NAME</label>
+              <input type="text" id="v-backer-name"
+                class="w-full bg-p-canvas border border-p-dim/30 text-p-text font-ui text-sm px-4 py-3 focus:border-p-accent focus:outline-none transition-colors"
+                placeholder="Your name on Kickstarter" />
+            </div>
+            <div>
+              <label class="font-ui text-p-dim text-[10px] tracking-widest block mb-2">KICKSTARTER EMAIL</label>
+              <input type="email" id="v-backer-email"
+                class="w-full bg-p-canvas border border-p-dim/30 text-p-text font-ui text-sm px-4 py-3 focus:border-p-accent focus:outline-none transition-colors"
+                placeholder="Email used on Kickstarter" />
+            </div>
+            <div>
+              <label class="font-ui text-p-dim text-[10px] tracking-widest block mb-2">PLEDGE AMOUNT (USD)</label>
+              <input type="text" id="v-pledge-amount"
+                class="w-full bg-p-canvas border border-p-dim/30 text-p-text font-ui text-sm px-4 py-3 focus:border-p-accent focus:outline-none transition-colors"
+                placeholder="e.g. 50" />
+            </div>
+            <div>
+              <label class="font-ui text-p-dim text-[10px] tracking-widest block mb-2">PLEDGE CONFIRMATION SCREENSHOT (OPTIONAL)</label>
+              <p class="font-comic text-p-dim/60 text-xs mb-2">Screenshot of your Kickstarter pledge confirmation for faster verification.</p>
+              <input type="file" id="v-screenshot" accept="image/*"
+                class="w-full bg-p-canvas border border-p-dim/30 text-p-dim font-ui text-xs px-4 py-3" />
+            </div>
+          </div>
+
+          <div id="v-submit-error" class="mt-4 p-3 border border-p-red/40 bg-p-red/10 text-p-red font-ui text-xs tracking-widest" style="display:none;"></div>
+
+          <div class="flex gap-3 mt-6">
+            <button id="v-back-btn"
+              class="py-4 px-6 border border-p-dim/40 text-p-dim font-display text-xs tracking-widest hover:border-p-text hover:text-p-text transition-all cursor-pointer bg-transparent">
+              ← BACK
+            </button>
+            <button id="v-submit-btn"
+              class="flex-1 py-4 bg-p-teal/20 border-2 border-p-teal text-p-teal font-display text-sm tracking-widest hover:bg-p-teal/30 transition-all cursor-pointer">
+              ✓ VERIFY MY PLEDGE
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SUCCESS ── -->
+    <div id="v-success" style="display:none;">
+      <div class="border-2 border-p-teal text-center">
+        <div class="bg-p-canvas px-6 py-8">
+          <div class="w-20 h-20 rounded-full bg-p-teal/20 border-2 border-p-teal flex items-center justify-center mx-auto mb-4">
+            <span class="font-display text-3xl text-p-teal">✓</span>
+          </div>
+          <p class="font-display text-lg tracking-widest text-p-teal mb-2">PLEDGE VERIFIED</p>
+          <p class="font-comic text-p-dim text-sm mb-4">Your Kickstarter pledge is linked. Your tier perks are locked in.</p>
+
+          <div class="inline-block border border-p-teal/30 bg-p-teal/10 px-6 py-3 mb-4">
+            <span class="font-display text-p-teal text-xs tracking-widest">● VERIFIED BACKER</span>
+          </div>
+
+          <!-- Lottery confirmation -->
+          <div class="border-2 border-p-unlock/40 bg-p-unlock/5 p-6 max-w-md mx-auto mb-6">
+            <div class="w-12 h-12 rounded-full bg-p-unlock/20 border-2 border-p-unlock flex items-center justify-center mx-auto mb-3">
+              <span class="font-display text-xl text-p-unlock">★</span>
+            </div>
+            <p class="font-display text-sm tracking-widest text-p-unlock mb-2">LOTTERY ENTRY CONFIRMED</p>
+            <p class="font-comic text-p-dim text-sm">Your avatar is now in the draw. After the campaign ends, one lucky backer's character will be drawn into the next issue of Panopticon.</p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="/earlybird" class="inline-block px-6 py-3 border border-p-accent text-p-accent font-display text-xs tracking-widest hover:bg-p-accent/10 transition-all text-center" style="text-decoration:none;">
+              VIEW MY STATUS →
+            </a>
+            <a href="/" class="inline-block px-6 py-3 border border-p-dim/40 text-p-dim font-display text-xs tracking-widest hover:border-p-text hover:text-p-text transition-all text-center" style="text-decoration:none;">
+              RETURN TO FACILITY →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ALREADY VERIFIED ── -->
+    <div id="v-already" style="display:none;">
+      <div class="border-2 border-p-teal text-center bg-p-teal/5 p-8">
+        <p class="font-display text-p-teal text-lg tracking-widest mb-2">✓ ALREADY VERIFIED</p>
+        <p class="font-comic text-p-dim text-sm mb-4">Your pledge is verified and your avatar is entered in the Character Lottery.</p>
+        <div class="inline-block border border-p-unlock/30 bg-p-unlock/10 px-6 py-3 mb-6">
+          <span class="font-display text-p-unlock text-xs tracking-widest">★ LOTTERY ENTRY ACTIVE</span>
+        </div>
+        <div>
+          <a href="/earlybird" class="inline-block px-6 py-3 border border-p-accent text-p-accent font-display text-xs tracking-widest hover:bg-p-accent/10 transition-all text-center" style="text-decoration:none;">
+            VIEW MY STATUS →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <p class="font-ui text-p-dim/30 text-xs tracking-widest text-center mt-12">
+      PANOPTICON PLEDGE VERIFICATION · THE 63RD · ALL TRANSACTIONS LOGGED
+    </p>
+  </div>
+</Layout>
+
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+ * PLEDGE VERIFICATION — with lottery entry confirmation
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+const CONFIG = {
+  firebase: {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: ""
+  }
+};
+
+// ── DB LAYER ──
+let db = null;
+let useFirebase = false;
+
+function isFirebaseConfigured() {
+  return CONFIG.firebase.apiKey && CONFIG.firebase.apiKey.length > 5;
+}
+
+async function initDB() {
+  if (isFirebaseConfigured()) {
+    try {
+      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
+      const { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, orderBy } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+      const app = initializeApp(CONFIG.firebase);
+      db = {
+        firestore: getFirestore(app),
+        _m: { collection, addDoc, getDocs, query, where, updateDoc, doc, orderBy }
+      };
+      useFirebase = true;
+    } catch (e) {
+      useFirebase = false;
+    }
+  }
+}
+
+async function findRegistration(token, email) {
+  if (useFirebase) {
+    const { collection, getDocs, query, where } = db._m;
+    const q = query(
+      collection(db.firestore, 'earlybird_registrations'),
+      where('token', '==', token.toUpperCase()),
+      where('email', '==', email.toLowerCase())
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    const d = snap.docs[0];
+    return { id: d.id, ...d.data() };
+  }
+  const data = JSON.parse(localStorage.getItem('eb_registrations') || '[]');
+  return data.find(r => r.token === token.toUpperCase() && r.email === email.toLowerCase()) || null;
+}
+
+async function updateRegistration(id, updates) {
+  if (useFirebase) {
+    const { doc, updateDoc } = db._m;
+    await updateDoc(doc(db.firestore, 'earlybird_registrations', id), updates);
+    return;
+  }
+  const data = JSON.parse(localStorage.getItem('eb_registrations') || '[]');
+  const idx = data.findIndex(r => r.id === id);
+  if (idx >= 0) {
+    Object.assign(data[idx], updates);
+    localStorage.setItem('eb_registrations', JSON.stringify(data));
+  }
+}
+
+// ── TIER DISPLAY ──
+const TIERS = {
+  gold:      { label: 'GOLD',      color: '#f59e0b' },
+  silver:    { label: 'SILVER',    color: '#94a3b8' },
+  bronze:    { label: 'BRONZE',    color: '#d97706' },
+  supporter: { label: 'SUPPORTER', color: '#1ae0c2' },
+};
+
+function tierHTML(tier) {
+  const t = TIERS[tier] || TIERS.supporter;
+  return `<span style="color:${t.color};">${t.label}</span>`;
+}
+
+function setStatus(msg, color = '#1ae0c2') {
+  const dot = document.getElementById('v-status-dot');
+  const text = document.getElementById('v-status-text');
+  if (dot) dot.style.backgroundColor = color;
+  if (text) { text.textContent = msg; text.style.color = color; }
+}
+
+// ── INIT ──
+let currentReg = null;
+
+(async function init() {
+  await initDB();
+
+  // Auto-fill from localStorage — prefer the avatar token, fall back to EB token
+  const savedToken = localStorage.getItem('panopticon_inmate_tok') || localStorage.getItem('panopticon_eb_token');
+  const savedEmail = localStorage.getItem('panopticon_eb_email');
+  if (savedToken) document.getElementById('v-token').value = savedToken;
+  if (savedEmail) document.getElementById('v-email').value = savedEmail;
+
+  // Lookup handler
+  document.getElementById('v-lookup-btn')?.addEventListener('click', async () => {
+    const token = document.getElementById('v-token').value.trim().toUpperCase();
+    const email = document.getElementById('v-email').value.trim().toLowerCase();
+    const errEl = document.getElementById('v-lookup-error');
+
+    if (!token || !email) {
+      errEl.textContent = '⊗ ENTER BOTH YOUR TOKEN AND EMAIL';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+
+    const reg = await findRegistration(token, email);
+    if (!reg) {
+      errEl.textContent = '⊗ NO REGISTRATION FOUND. DOUBLE-CHECK YOUR TOKEN AND EMAIL.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    currentReg = reg;
+
+    if (reg.pledgeVerified) {
+      document.getElementById('v-step1').style.display = 'none';
+      document.getElementById('v-already').style.display = 'block';
+      setStatus('✓ PLEDGE ALREADY VERIFIED · LOTTERY ENTRY ACTIVE', '#1ae0c2');
+      return;
+    }
+
+    // Show step 2
+    document.getElementById('v-step1').style.display = 'none';
+    document.getElementById('v-step2').style.display = 'block';
+    setStatus('REGISTRATION LOCATED · ENTER BACKER INFO', '#388cff');
+
+    if (reg.avatarThumb) document.getElementById('v-avatar').src = reg.avatarThumb;
+    document.getElementById('v-name').textContent = reg.name || '—';
+    document.getElementById('v-reg-token').textContent = reg.token;
+    document.getElementById('v-tier-badge').innerHTML = tierHTML(reg.tier);
+  });
+
+  // Back button
+  document.getElementById('v-back-btn')?.addEventListener('click', () => {
+    document.getElementById('v-step1').style.display = 'block';
+    document.getElementById('v-step2').style.display = 'none';
+    setStatus('VERIFICATION SYSTEM ONLINE · AWAITING INPUT...', '#1ae0c2');
+  });
+
+  // Submit verification
+  document.getElementById('v-submit-btn')?.addEventListener('click', async () => {
+    if (!currentReg) return;
+
+    const backerName = document.getElementById('v-backer-name').value.trim();
+    const backerEmail = document.getElementById('v-backer-email').value.trim();
+    const pledgeAmount = document.getElementById('v-pledge-amount').value.trim();
+    const errEl = document.getElementById('v-submit-error');
+
+    if (!backerName || !backerEmail) {
+      errEl.textContent = '⊗ ENTER YOUR KICKSTARTER BACKER NAME AND EMAIL';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+
+    // Handle screenshot
+    let screenshotData = '';
+    const screenshotFile = document.getElementById('v-screenshot')?.files?.[0];
+    if (screenshotFile) {
+      if (useFirebase) {
+        try {
+          const { getStorage, ref, uploadBytes, getDownloadURL } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js');
+          const storage = getStorage();
+          const storageRef = ref(storage, `screenshots/${currentReg.token}_${screenshotFile.name}`);
+          await uploadBytes(storageRef, screenshotFile);
+          screenshotData = await getDownloadURL(storageRef);
+        } catch (e) { console.warn('Screenshot upload failed:', e); }
+      } else {
+        screenshotData = await new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(screenshotFile);
+        });
+      }
+    }
+
+    const btn = document.getElementById('v-submit-btn');
+    btn.textContent = 'VERIFYING...';
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+
+    await updateRegistration(currentReg.id, {
+      pledgeVerified: true,
+      backerName,
+      backerEmail,
+      pledgeAmount,
+      screenshotUrl: screenshotData,
+      verifiedAt: new Date().toISOString(),
+      lotteryEligible: true,  // Verified = entered in lottery
+    });
+
+    // Show success
+    document.getElementById('v-step2').style.display = 'none';
+    document.getElementById('v-success').style.display = 'block';
+    setStatus('✓ PLEDGE VERIFIED · LOTTERY ENTRY CONFIRMED', '#8c40ff');
+  });
+})();
+</script>

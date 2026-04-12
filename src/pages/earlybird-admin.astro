@@ -1,0 +1,538 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="ADMIN — CAMPAIGN HQ">
+  <div class="max-w-7xl mx-auto px-4 py-12">
+
+    <!-- ── Page header ── -->
+    <div class="mb-8 border-b border-p-red/20 pb-6">
+      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">THE 63RD — RESTRICTED ACCESS</p>
+      <h1 class="font-display text-2xl md:text-3xl text-p-red tracking-wide">CAMPAIGN ADMIN DASHBOARD</h1>
+      <p class="font-ui text-p-dim text-sm mt-2 max-w-xl">
+        VIEW REGISTRATIONS · MATCH PLEDGES · DRAW LOTTERY WINNER · EXPORT DATA
+      </p>
+      <div class="w-16 h-px bg-p-red mt-4"></div>
+    </div>
+
+    <!-- ── Admin Login ── -->
+    <div id="admin-login" class="max-w-md mx-auto">
+      <div class="border-2 border-p-red/40">
+        <div class="bg-p-canvas px-6 py-4 border-b border-p-red/20">
+          <p class="font-display text-xs tracking-widest text-p-red">ADMIN AUTHENTICATION REQUIRED</p>
+        </div>
+        <div class="bg-p-panel px-6 py-6">
+          <div>
+            <label class="font-ui text-p-dim text-[10px] tracking-widest block mb-2">PASSWORD</label>
+            <input type="password" id="admin-pass"
+              class="w-full bg-p-canvas border border-p-dim/30 text-p-text font-ui text-sm px-4 py-3 focus:border-p-red focus:outline-none transition-colors"
+              placeholder="Enter admin password" />
+          </div>
+          <div id="admin-login-error" class="mt-3 p-3 border border-p-red/40 bg-p-red/10 text-p-red font-ui text-xs tracking-widest" style="display:none;"></div>
+          <button id="admin-login-btn"
+            class="mt-4 w-full py-3 border-2 border-p-red text-p-red font-display text-xs tracking-widest hover:bg-p-red/10 transition-all cursor-pointer bg-transparent">
+            AUTHENTICATE →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         DASHBOARD (hidden until auth)
+    ══════════════════════════════════════════════ -->
+    <div id="admin-dashboard" style="display:none;">
+
+      <!-- Phase indicator -->
+      <div class="bg-p-panel border border-p-accent/30 p-3 mb-6 flex items-center gap-3">
+        <span id="admin-phase-dot" class="w-2 h-2 rounded-full bg-p-accent animate-pulse flex-shrink-0"></span>
+        <span id="admin-phase-text" class="font-ui text-p-accent text-xs tracking-widest">—</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-8">
+        <div class="bg-p-panel border border-p-accent/20 p-4 text-center">
+          <div class="font-display text-2xl text-p-accent" id="stat-total">0</div>
+          <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">TOTAL</div>
+        </div>
+        <div class="bg-p-panel border border-p-teal/20 p-4 text-center">
+          <div class="font-display text-2xl text-p-teal" id="stat-verified">0</div>
+          <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">VERIFIED</div>
+        </div>
+        <div class="bg-p-panel border border-[#f59e0b]/20 p-4 text-center">
+          <div class="font-display text-2xl text-[#f59e0b]" id="stat-gold">0</div>
+          <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">GOLD</div>
+        </div>
+        <div class="bg-p-panel border border-p-dim/20 p-4 text-center">
+          <div class="font-display text-2xl text-p-dim" id="stat-silver">0</div>
+          <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">SILVER</div>
+        </div>
+        <div class="bg-p-panel border border-[#b45309]/20 p-4 text-center">
+          <div class="font-display text-2xl text-[#d97706]" id="stat-bronze">0</div>
+          <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">BRONZE</div>
+        </div>
+        <div class="bg-p-panel border border-p-unlock/20 p-4 text-center">
+          <div class="font-display text-2xl text-p-unlock" id="stat-lottery">0</div>
+          <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">IN LOTTERY</div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           CHARACTER LOTTERY SECTION
+      ══════════════════════════════════════════════ -->
+      <div class="border-2 border-p-unlock/40 mb-8">
+        <div class="bg-p-canvas px-6 py-4 border-b border-p-unlock/20 flex items-center justify-between">
+          <p class="font-display text-sm tracking-widest text-p-unlock">★ CHARACTER LOTTERY</p>
+          <span class="font-ui text-p-dim text-[10px] tracking-widest" id="lottery-eligible-count">0 ELIGIBLE ENTRIES</span>
+        </div>
+        <div class="bg-p-panel p-6">
+
+          <!-- Lottery not yet drawn -->
+          <div id="lottery-ready">
+            <p class="font-comic text-p-dim text-sm mb-4">Draw a random winner from all verified backers. The winner's avatar will be drawn into the next issue of Panopticon.</p>
+            <div class="flex gap-3 items-center">
+              <button id="lottery-draw-btn"
+                class="px-8 py-3 border-2 border-p-unlock text-p-unlock font-display text-sm tracking-widest hover:bg-p-unlock/10 transition-all cursor-pointer bg-transparent">
+                ★ DRAW WINNER
+              </button>
+              <p class="font-ui text-p-dim text-[10px] tracking-widest">IRREVERSIBLE — CHOOSE CAREFULLY</p>
+            </div>
+          </div>
+
+          <!-- Lottery drawing animation -->
+          <div id="lottery-drawing" style="display:none;" class="text-center py-8">
+            <div class="flex justify-center gap-2 mb-4" id="lottery-slot">
+              <!-- Avatars will cycle here -->
+            </div>
+            <p class="font-display text-p-unlock text-sm tracking-widest animate-pulse">SELECTING WINNER...</p>
+          </div>
+
+          <!-- Lottery winner revealed -->
+          <div id="lottery-winner" style="display:none;" class="text-center py-4">
+            <div class="w-24 h-24 border-4 border-p-unlock mx-auto mb-4 overflow-hidden" style="box-shadow: 0 0 30px rgba(140, 64, 255, 0.4);">
+              <img id="winner-avatar" src="" alt="Winner" class="w-full h-full object-cover" />
+            </div>
+            <p class="font-display text-lg tracking-widest text-p-unlock mb-1" id="winner-name">—</p>
+            <p class="font-ui text-p-dim text-xs tracking-widest mb-1" id="winner-email">—</p>
+            <p class="font-ui text-p-dim text-xs tracking-widest" id="winner-token">—</p>
+            <div class="inline-block border border-p-unlock/40 bg-p-unlock/10 px-6 py-2 mt-4">
+              <span class="font-display text-p-unlock text-xs tracking-widest">★ LOTTERY WINNER ★</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
+           REGISTRATIONS TABLE
+      ══════════════════════════════════════════════ -->
+      <div class="border border-p-dim/20">
+        <div class="bg-p-canvas px-6 py-4 border-b border-p-dim/20">
+          <p class="font-display text-xs tracking-widest text-p-text">ALL REGISTRATIONS</p>
+        </div>
+
+        <div class="px-4 py-4 bg-p-panel border-b border-p-dim/20">
+          <div class="flex flex-wrap gap-3">
+            <input type="text" id="admin-search"
+              class="flex-1 min-w-[200px] bg-p-canvas border border-p-dim/30 text-p-text font-ui text-sm px-4 py-2 focus:border-p-accent focus:outline-none transition-colors"
+              placeholder="Search name, email, token..." />
+            <select id="admin-tier-filter"
+              class="bg-p-canvas border border-p-dim/30 text-p-text font-ui text-sm px-3 py-2 focus:border-p-accent focus:outline-none">
+              <option value="all">All Tiers</option>
+              <option value="gold">Gold</option>
+              <option value="silver">Silver</option>
+              <option value="bronze">Bronze</option>
+              <option value="supporter">Supporter</option>
+            </select>
+            <select id="admin-verify-filter"
+              class="bg-p-canvas border border-p-dim/30 text-p-text font-ui text-sm px-3 py-2 focus:border-p-accent focus:outline-none">
+              <option value="all">All Status</option>
+              <option value="verified">Verified</option>
+              <option value="unverified">Unverified</option>
+            </select>
+            <button id="admin-export-btn"
+              class="px-4 py-2 border border-p-accent/40 text-p-accent font-ui text-xs tracking-widest hover:bg-p-accent/10 transition-all cursor-pointer bg-transparent">
+              EXPORT CSV
+            </button>
+            <button id="admin-refresh-btn"
+              class="px-4 py-2 border border-p-dim/40 text-p-dim font-ui text-xs tracking-widest hover:border-p-text hover:text-p-text transition-all cursor-pointer bg-transparent">
+              REFRESH
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-p-canvas border-b border-p-dim/20">
+                <th class="px-4 py-3 text-left font-ui text-p-dim text-[10px] tracking-widest">AVATAR</th>
+                <th class="px-4 py-3 text-left font-ui text-p-dim text-[10px] tracking-widest">INMATE</th>
+                <th class="px-4 py-3 text-left font-ui text-p-dim text-[10px] tracking-widest">EMAIL</th>
+                <th class="px-4 py-3 text-left font-ui text-p-dim text-[10px] tracking-widest">TOKEN</th>
+                <th class="px-4 py-3 text-left font-ui text-p-dim text-[10px] tracking-widest">TIER</th>
+                <th class="px-4 py-3 text-left font-ui text-p-dim text-[10px] tracking-widest">REGISTERED</th>
+                <th class="px-4 py-3 text-left font-ui text-p-dim text-[10px] tracking-widest">PLEDGE</th>
+                <th class="px-4 py-3 text-left font-ui text-p-dim text-[10px] tracking-widest">BACKER INFO</th>
+                <th class="px-4 py-3 text-left font-ui text-p-dim text-[10px] tracking-widest">LOTTERY</th>
+              </tr>
+            </thead>
+            <tbody id="admin-tbody" class="font-ui text-sm">
+            </tbody>
+          </table>
+        </div>
+        <p class="font-ui text-p-dim text-xs tracking-widest px-4 py-3" id="admin-count"></p>
+      </div>
+    </div>
+
+    <p class="font-ui text-p-dim/30 text-xs tracking-widest text-center mt-12">
+      PANOPTICON ADMIN · THE 63RD · RESTRICTED ACCESS
+    </p>
+  </div>
+</Layout>
+
+
+<style>
+  table td { border-bottom: 1px solid rgba(92, 87, 111, 0.15); }
+  table tr:hover td { background: rgba(255,255,255,0.02); }
+  .avatar-thumb-sm {
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(26, 224, 194, 0.4);
+    object-fit: cover;
+  }
+  @keyframes lottery-spin {
+    0% { opacity: 0; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.8); }
+  }
+  .lottery-avatar-slot {
+    width: 64px;
+    height: 64px;
+    border: 2px solid rgba(140, 64, 255, 0.4);
+    object-fit: cover;
+    animation: lottery-spin 0.3s ease-in-out;
+  }
+  @keyframes winner-reveal {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .winner-reveal { animation: winner-reveal 0.5s ease-out; }
+</style>
+
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+ * ADMIN DASHBOARD — with character lottery draw
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+const ADMIN_PASSWORD = 'panopticon63';
+
+const CONFIG = {
+  launchDate:      '2026-05-15T12:00:00',
+  campaignEndDate: '2026-06-14T12:00:00',
+  firebase: {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: ""
+  }
+};
+
+// ── PHASE ──
+function getPhase() {
+  const now = Date.now();
+  const launch = new Date(CONFIG.launchDate).getTime();
+  const end = new Date(CONFIG.campaignEndDate).getTime();
+  if (now < launch) return 'pre-launch';
+  const h = (now - launch) / 3600000;
+  if (h <= 24) return 'gold-window';
+  if (h <= 48) return 'silver-window';
+  if (h <= 72) return 'bronze-window';
+  if (now <= end) return 'active';
+  return 'ended';
+}
+
+const PHASE_LABELS = {
+  'pre-launch': ['PRE-LAUNCH · REGISTRATION OPEN', '#f59e0b'],
+  'gold-window': ['CAMPAIGN LIVE · GOLD WINDOW', '#f59e0b'],
+  'silver-window': ['CAMPAIGN LIVE · SILVER WINDOW', '#94a3b8'],
+  'bronze-window': ['CAMPAIGN LIVE · BRONZE WINDOW', '#d97706'],
+  'active': ['CAMPAIGN LIVE · SUPPORTER TIER', '#1ae0c2'],
+  'ended': ['CAMPAIGN ENDED', '#5c576f'],
+};
+
+// ── DB LAYER ──
+let db = null;
+let useFirebase = false;
+
+function isFirebaseConfigured() {
+  return CONFIG.firebase.apiKey && CONFIG.firebase.apiKey.length > 5;
+}
+
+async function initDB() {
+  if (isFirebaseConfigured()) {
+    try {
+      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
+      const { getFirestore, collection, getDocs, query, orderBy, updateDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+      const app = initializeApp(CONFIG.firebase);
+      db = {
+        firestore: getFirestore(app),
+        _m: { collection, getDocs, query, orderBy, updateDoc, doc }
+      };
+      useFirebase = true;
+    } catch (e) {
+      useFirebase = false;
+    }
+  }
+}
+
+async function getAllRegistrations() {
+  if (useFirebase) {
+    const { collection, getDocs, orderBy, query } = db._m;
+    const q = query(collection(db.firestore, 'earlybird_registrations'), orderBy('registeredAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  const data = JSON.parse(localStorage.getItem('eb_registrations') || '[]');
+  return data.sort((a, b) => new Date(b.registeredAt) - new Date(a.registeredAt));
+}
+
+async function updateRegistration(id, updates) {
+  if (useFirebase) {
+    const { doc, updateDoc } = db._m;
+    await updateDoc(doc(db.firestore, 'earlybird_registrations', id), updates);
+    return;
+  }
+  const data = JSON.parse(localStorage.getItem('eb_registrations') || '[]');
+  const idx = data.findIndex(r => r.id === id);
+  if (idx >= 0) {
+    Object.assign(data[idx], updates);
+    localStorage.setItem('eb_registrations', JSON.stringify(data));
+  }
+}
+
+// ── TIER DISPLAY ──
+const TIERS = {
+  gold:      { label: 'GOLD',      color: '#f59e0b' },
+  silver:    { label: 'SILVER',    color: '#94a3b8' },
+  bronze:    { label: 'BRONZE',    color: '#d97706' },
+  supporter: { label: 'SUPPORTER', color: '#1ae0c2' },
+};
+
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+// ── DASHBOARD ──
+let allRegs = [];
+
+async function refresh() {
+  allRegs = await getAllRegistrations();
+  updateStats();
+  renderTable();
+  updateLottery();
+}
+
+function updateStats() {
+  const verified = allRegs.filter(r => r.pledgeVerified);
+  const lottery = allRegs.filter(r => r.lotteryEligible || r.pledgeVerified);
+
+  document.getElementById('stat-total').textContent = allRegs.length;
+  document.getElementById('stat-verified').textContent = verified.length;
+  document.getElementById('stat-gold').textContent = allRegs.filter(r => r.tier === 'gold').length;
+  document.getElementById('stat-silver').textContent = allRegs.filter(r => r.tier === 'silver').length;
+  document.getElementById('stat-bronze').textContent = allRegs.filter(r => r.tier === 'bronze').length;
+  document.getElementById('stat-lottery').textContent = lottery.length;
+}
+
+function renderTable() {
+  const search = document.getElementById('admin-search').value.toLowerCase();
+  const tierFilter = document.getElementById('admin-tier-filter').value;
+  const verifyFilter = document.getElementById('admin-verify-filter').value;
+
+  let filtered = allRegs.filter(r => {
+    if (tierFilter !== 'all' && r.tier !== tierFilter) return false;
+    if (verifyFilter === 'verified' && !r.pledgeVerified) return false;
+    if (verifyFilter === 'unverified' && r.pledgeVerified) return false;
+    if (search) {
+      const hay = `${r.name} ${r.email} ${r.token} ${r.inmateId} ${r.backerName || ''} ${r.backerEmail || ''}`.toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  const tbody = document.getElementById('admin-tbody');
+  tbody.innerHTML = filtered.map(r => {
+    const t = TIERS[r.tier] || TIERS.supporter;
+    const isWinner = r.lotteryWinner;
+    return `<tr ${isWinner ? 'style="background:rgba(140,64,255,0.08);"' : ''}>
+      <td class="px-4 py-3">${r.avatarThumb ? `<img src="${r.avatarThumb}" class="avatar-thumb-sm" alt="">` : '<span class="text-p-dim">—</span>'}</td>
+      <td class="px-4 py-3">
+        <div class="text-p-text">${esc(r.name)}</div>
+        <div class="text-p-dim text-xs">${esc(r.inmateId || '')}</div>
+      </td>
+      <td class="px-4 py-3 text-p-text">${esc(r.email)}</td>
+      <td class="px-4 py-3 font-display text-p-accent tracking-widest text-xs">${esc(r.token)}</td>
+      <td class="px-4 py-3"><span style="color:${t.color};" class="font-display text-xs tracking-widest">${t.label}</span></td>
+      <td class="px-4 py-3 text-p-dim text-xs">${new Date(r.registeredAt).toLocaleDateString()} ${new Date(r.registeredAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</td>
+      <td class="px-4 py-3">${r.pledgeVerified
+        ? '<span class="text-p-teal font-display text-xs tracking-widest">✓ VERIFIED</span>'
+        : '<span class="text-p-dim font-ui text-xs">PENDING</span>'}</td>
+      <td class="px-4 py-3">${r.pledgeVerified
+        ? `<div class="text-p-text text-xs">${esc(r.backerName || '—')}</div>
+           <div class="text-p-dim text-xs">${esc(r.backerEmail || '')}</div>
+           ${r.pledgeAmount ? `<div class="text-p-accent text-xs">$${esc(r.pledgeAmount)}</div>` : ''}
+           ${r.screenshotUrl ? `<a href="${r.screenshotUrl}" target="_blank" class="text-p-teal text-xs" style="text-decoration:underline;">Screenshot</a>` : ''}`
+        : '<span class="text-p-dim text-xs">—</span>'}</td>
+      <td class="px-4 py-3">${isWinner
+        ? '<span style="color:#8c40ff;" class="font-display text-xs tracking-widest">★ WINNER</span>'
+        : (r.pledgeVerified || r.lotteryEligible)
+          ? '<span style="color:#8c40ff;" class="font-ui text-xs">Entered</span>'
+          : '<span class="text-p-dim text-xs">—</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('admin-count').textContent = `Showing ${filtered.length} of ${allRegs.length} registrations`;
+}
+
+// ── LOTTERY ──
+function updateLottery() {
+  const eligible = allRegs.filter(r => r.lotteryEligible || r.pledgeVerified);
+  const winner = allRegs.find(r => r.lotteryWinner);
+
+  document.getElementById('lottery-eligible-count').textContent = `${eligible.length} ELIGIBLE ENTRIES`;
+
+  if (winner) {
+    // Already drawn
+    document.getElementById('lottery-ready').style.display = 'none';
+    document.getElementById('lottery-winner').style.display = 'block';
+    if (winner.avatarThumb) document.getElementById('winner-avatar').src = winner.avatarThumb;
+    document.getElementById('winner-name').textContent = winner.name;
+    document.getElementById('winner-email').textContent = winner.email;
+    document.getElementById('winner-token').textContent = winner.token;
+  }
+}
+
+async function drawLotteryWinner() {
+  const eligible = allRegs.filter(r => r.lotteryEligible || r.pledgeVerified);
+  if (eligible.length === 0) {
+    alert('No eligible entries yet. Backers must verify their pledge to enter the lottery.');
+    return;
+  }
+
+  if (!confirm(`Draw a winner from ${eligible.length} eligible entries? This cannot be undone.`)) return;
+
+  // Animation phase
+  document.getElementById('lottery-ready').style.display = 'none';
+  document.getElementById('lottery-drawing').style.display = 'block';
+
+  const slot = document.getElementById('lottery-slot');
+
+  // Cycle through random avatars for 3 seconds
+  let cycles = 0;
+  const maxCycles = 15;
+  await new Promise(resolve => {
+    const interval = setInterval(() => {
+      const rand = eligible[Math.floor(Math.random() * eligible.length)];
+      slot.innerHTML = rand.avatarThumb
+        ? `<img src="${rand.avatarThumb}" class="lottery-avatar-slot" alt="">`
+        : `<div class="lottery-avatar-slot flex items-center justify-center bg-p-canvas"><span class="font-display text-p-unlock text-lg">?</span></div>`;
+      cycles++;
+      if (cycles >= maxCycles) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 200);
+  });
+
+  // Pick actual winner
+  const winnerIdx = Math.floor(Math.random() * eligible.length);
+  const winner = eligible[winnerIdx];
+
+  // Update in database
+  await updateRegistration(winner.id, { lotteryWinner: true });
+
+  // Pause, then reveal
+  await new Promise(r => setTimeout(r, 500));
+
+  document.getElementById('lottery-drawing').style.display = 'none';
+  document.getElementById('lottery-winner').style.display = 'block';
+  document.getElementById('lottery-winner').classList.add('winner-reveal');
+
+  if (winner.avatarThumb) document.getElementById('winner-avatar').src = winner.avatarThumb;
+  document.getElementById('winner-name').textContent = winner.name;
+  document.getElementById('winner-email').textContent = winner.email;
+  document.getElementById('winner-token').textContent = winner.token;
+
+  // Refresh table
+  await refresh();
+}
+
+function exportCSV() {
+  const rows = [['Name', 'Inmate ID', 'Email', 'Token', 'Tier', 'Registered', 'Pledge Verified', 'Backer Name', 'Backer Email', 'Pledge Amount', 'Verified At', 'Lottery Eligible', 'Lottery Winner']];
+  allRegs.forEach(r => {
+    rows.push([
+      r.name, r.inmateId || '', r.email, r.token, r.tier,
+      r.registeredAt, r.pledgeVerified ? 'Yes' : 'No',
+      r.backerName || '', r.backerEmail || '',
+      r.pledgeAmount || '', r.verifiedAt || '',
+      (r.lotteryEligible || r.pledgeVerified) ? 'Yes' : 'No',
+      r.lotteryWinner ? 'Yes' : 'No'
+    ]);
+  });
+  const csv = rows.map(row => row.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `panopticon-campaign-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── INIT ──
+(async function init() {
+  await initDB();
+
+  // Login
+  const loginBtn = document.getElementById('admin-login-btn');
+  const passInput = document.getElementById('admin-pass');
+
+  function doLogin() {
+    if (passInput.value === ADMIN_PASSWORD) {
+      document.getElementById('admin-login').style.display = 'none';
+      document.getElementById('admin-dashboard').style.display = 'block';
+
+      // Set phase
+      const phase = getPhase();
+      const [label, color] = PHASE_LABELS[phase] || PHASE_LABELS['active'];
+      document.getElementById('admin-phase-dot').style.backgroundColor = color;
+      document.getElementById('admin-phase-text').textContent = label;
+      document.getElementById('admin-phase-text').style.color = color;
+
+      refresh();
+    } else {
+      const err = document.getElementById('admin-login-error');
+      err.textContent = '⊗ ACCESS DENIED';
+      err.style.display = 'block';
+    }
+  }
+
+  loginBtn?.addEventListener('click', doLogin);
+  passInput?.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+
+  // Filters
+  document.getElementById('admin-search')?.addEventListener('input', renderTable);
+  document.getElementById('admin-tier-filter')?.addEventListener('change', renderTable);
+  document.getElementById('admin-verify-filter')?.addEventListener('change', renderTable);
+
+  // Actions
+  document.getElementById('admin-export-btn')?.addEventListener('click', exportCSV);
+  document.getElementById('admin-refresh-btn')?.addEventListener('click', refresh);
+  document.getElementById('lottery-draw-btn')?.addEventListener('click', drawLotteryWinner);
+})();
+</script>
