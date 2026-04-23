@@ -1888,12 +1888,17 @@ import Layout from '../layouts/Layout.astro';
       const cctx = ctx;
 
       // LSB Steganography — encode JSON into red-channel LSBs
+      // v2: Each data bit is written to REDUNDANCY consecutive pixels.
+      //     The scanner uses majority voting to recover the correct bit,
+      //     making the encoding resistant to compression artifacts on
+      //     Samsung/mobile browsers that corrupt single-bit LSB values.
+      const REDUNDANCY = 5;
       const tok = Array.from({length: 8}, () => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)]).join('');
       const payload = JSON.stringify({
         name: charName,
         id: idCode.toUpperCase(),
         build: 'PANOPTICON',
-        v: '1',
+        v: '2',
         tok: tok
       }) + '|||END|||';
 
@@ -1901,35 +1906,51 @@ import Layout from '../layouts/Layout.astro';
       const bytes = new TextEncoder().encode(payload);
       let bitIdx = 0;
       const totalBits = bytes.length * 8;
-      for (let i = 0; i < imgData.data.length && bitIdx < totalBits; i += 4) {
-        const byteVal = bytes[Math.floor(bitIdx / 8)];
-        const bit = (byteVal >> (7 - (bitIdx % 8))) & 1;
-        imgData.data[i] = (imgData.data[i] & 0xFE) | bit; // red channel LSB
-        bitIdx++;
+      let pixelIdx = 0;
+      for (let b = 0; b < totalBits; b++) {
+        const byteVal = bytes[Math.floor(b / 8)];
+        const bit = (byteVal >> (7 - (b % 8))) & 1;
+        // Write same bit to REDUNDANCY consecutive pixels
+        for (let r = 0; r < REDUNDANCY; r++) {
+          const i = pixelIdx * 4; // RGBA index
+          if (i >= imgData.data.length) break;
+          imgData.data[i] = (imgData.data[i] & 0xFE) | bit; // red channel LSB
+          pixelIdx++;
+        }
       }
       cctx.putImageData(imgData, 0, 0);
 
-      // Download — use different approach for mobile vs desktop
+      // Download — try direct download first (preserves PNG losslessly),
+      // fall back to Web Share API, then fallback save
       const blob = await new Promise(resolve => cropped.toBlob(resolve, 'image/png'));
       const safeName = charName.replace(/\s+/g, '_').replace(/[\/:\\]/g, '-');
       const filename = `${safeName}${idCode.toUpperCase()}.png`;
 
       if (isMobile) {
-        // Mobile: try Web Share API first (works on iOS Safari + Android Chrome)
-        if (navigator.share && navigator.canShare) {
-          const file = new File([blob], filename, { type: 'image/png' });
-          if (navigator.canShare({ files: [file] })) {
-            try {
-              await navigator.share({ files: [file], title: filename });
-            } catch(e) {
-              // User cancelled share — that's fine
+        // Mobile: try direct <a download> first — most Android browsers support it
+        // and it preserves the PNG losslessly unlike Web Share API
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // After a short delay, also offer Web Share as secondary option
+        // (in case <a download> was blocked by the browser)
+        setTimeout(async () => {
+          if (navigator.share && navigator.canShare) {
+            const file = new File([blob], filename, { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+              try {
+                await navigator.share({ files: [file], title: filename });
+              } catch(e) { /* User cancelled — fine */ }
             }
-          } else {
-            mobileFallbackSave(blob, filename);
           }
-        } else {
-          mobileFallbackSave(blob, filename);
-        }
+          URL.revokeObjectURL(url);
+        }, 1500);
       } else {
         // Desktop: standard download
         const url = URL.createObjectURL(blob);

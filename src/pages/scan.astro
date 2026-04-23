@@ -262,7 +262,8 @@ import Layout from '../layouts/Layout.astro';
    * ────────────────────────────────────────────────────────────────────────── */
 
   const TERMINATOR      = '|||END|||';
-  const MAX_SCAN_PIXELS = 16000;  // covers payloads up to ~2000 chars
+  const MAX_SCAN_PIXELS = 80000;  // increased for v2 redundant encoding (5x pixels)
+  const REDUNDANCY      = 5;      // v2 encoding: each bit stored in 5 pixels
 
   const uploadZone   = document.getElementById('upload-zone');
   const fileInput    = document.getElementById('file-input');
@@ -308,7 +309,7 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
-  /* ── LSB decode ── */
+  /* ── LSB decode (supports v1 single-bit and v2 redundant encoding) ── */
   async function lsbDecode(file) {
     return new Promise((resolve) => {
       const img = new Image();
@@ -320,49 +321,76 @@ import Layout from '../layouts/Layout.astro';
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         ctx.drawImage(img, 0, 0);
 
-        // Only read as many rows as needed to cover MAX_SCAN_PIXELS
+        // Read enough rows for v2 encoding (5x more pixels needed)
         const rowsToRead = Math.min(
           img.naturalHeight,
           Math.ceil(MAX_SCAN_PIXELS / img.naturalWidth) + 1
         );
         const imageData = ctx.getImageData(0, 0, img.naturalWidth, rowsToRead);
         const data = imageData.data; // flat RGBA
+        const pixelCount = Math.min(img.naturalWidth * rowsToRead, MAX_SCAN_PIXELS);
 
-        // Extract red-channel LSBs
-        const bits = [];
-        const pixelLimit = Math.min(img.naturalWidth * rowsToRead, MAX_SCAN_PIXELS);
-        for (let i = 0; i < pixelLimit; i++) {
-          bits.push(data[i * 4] & 1);   // red channel = data[i*4]
+        // Extract all red-channel LSBs
+        const rawBits = [];
+        for (let i = 0; i < pixelCount; i++) {
+          rawBits.push(data[i * 4] & 1);
         }
 
-        // Pack bits → bytes, decode UTF-8 incrementally
-        const bytes = [];
-        for (let i = 0; i + 7 < bits.length; i += 8) {
-          let byte = 0;
-          for (let b = 0; b < 8; b++) byte = (byte << 1) | bits[i + b];
-          bytes.push(byte);
-
-          // Check for terminator every 16 bytes (avoid frequent TextDecoder calls)
-          if (bytes.length % 16 === 0 || i + 16 >= bits.length) {
-            let text;
-            try { text = new TextDecoder('utf-8', { fatal: false }).decode(new Uint8Array(bytes)); }
-            catch { continue; }
-            const endIdx = text.indexOf(TERMINATOR);
-            if (endIdx !== -1) {
-              const payload = text.substring(0, endIdx);
-              try { resolve(JSON.parse(payload)); }
-              catch { resolve({ _raw: payload }); }
-              URL.revokeObjectURL(objectUrl);
-              return;
-            }
-          }
+        // Try v2 decode first (redundant encoding with majority voting)
+        const v2Result = decodeBits(rawBits, REDUNDANCY);
+        if (v2Result) {
+          URL.revokeObjectURL(objectUrl);
+          resolve(v2Result);
+          return;
         }
+
+        // Fall back to v1 decode (legacy single-bit encoding)
+        const v1Result = decodeBits(rawBits, 1);
+        if (v1Result) {
+          URL.revokeObjectURL(objectUrl);
+          resolve(v1Result);
+          return;
+        }
+
         resolve(null);
         URL.revokeObjectURL(objectUrl);
       };
       img.onerror = () => { resolve(null); URL.revokeObjectURL(objectUrl); };
       img.src = objectUrl;
     });
+  }
+
+  /* ── Decode bits with given redundancy level (1 = legacy, 5 = v2) ── */
+  function decodeBits(rawBits, redundancy) {
+    // Reduce raw bits to data bits using majority vote
+    const dataBits = [];
+    for (let i = 0; i + redundancy - 1 < rawBits.length; i += redundancy) {
+      let ones = 0;
+      for (let r = 0; r < redundancy; r++) ones += rawBits[i + r];
+      dataBits.push(ones > redundancy / 2 ? 1 : 0);
+    }
+
+    // Pack bits → bytes, decode UTF-8 incrementally
+    const bytes = [];
+    for (let i = 0; i + 7 < dataBits.length; i += 8) {
+      let byte = 0;
+      for (let b = 0; b < 8; b++) byte = (byte << 1) | dataBits[i + b];
+      bytes.push(byte);
+
+      // Check for terminator every 16 bytes
+      if (bytes.length % 16 === 0 || i + 16 >= dataBits.length) {
+        let text;
+        try { text = new TextDecoder('utf-8', { fatal: false }).decode(new Uint8Array(bytes)); }
+        catch { continue; }
+        const endIdx = text.indexOf(TERMINATOR);
+        if (endIdx !== -1) {
+          const payload = text.substring(0, endIdx);
+          try { return JSON.parse(payload); }
+          catch { return { _raw: payload }; }
+        }
+      }
+    }
+    return null;
   }
 
   /* ── Scan beam animation (N sweeps) ── */
