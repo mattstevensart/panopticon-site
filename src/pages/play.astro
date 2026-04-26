@@ -1,0 +1,60 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="PLAY | PANOPTICON">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+
+    <!-- Header -->
+    <div class="mb-6 border-b border-p-accent/20 pb-4">
+      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">THE 63RD — RECREATION YARD</p>
+      <h1 class="font-display text-2xl md:text-3xl text-p-accent tracking-wide">PANOPTICON</h1>
+      <p class="font-comic text-p-dim text-sm mt-2">Survive the facility. Play directly in your browser.</p>
+      <div class="w-16 h-px bg-p-accent mt-4"></div>
+    </div>
+
+    <!-- Game embed -->
+    <div class="relative border-2 border-p-accent/40 bg-black" style="aspect-ratio: 16/9; max-height: 80vh;">
+
+      <!-- Loading state -->
+      <div id="game-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-black z-10">
+        <div class="w-8 h-8 border-2 border-p-accent border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="font-display text-p-accent text-xs tracking-widest">LOADING GAME...</p>
+      </div>
+
+      <iframe
+        id="game-frame"
+        src="/game/index.html"
+        class="w-full h-full border-0"
+        title="Panopticon Game"
+        allow="fullscreen; autoplay"
+        allowfullscreen
+        onload="document.getElementById('game-loading').style.display='none'"
+      ></iframe>
+    </div>
+
+    <!-- Controls -->
+    <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="font-ui text-p-dim text-xs tracking-widest">BEST ON DESKTOP · USE KEYBOARD CONTROLS</p>
+      <button id="fullscreen-btn"
+        class="px-6 py-2 border border-p-accent/40 text-p-accent font-display text-xs tracking-widest hover:bg-p-accent/10 transition-all cursor-pointer bg-transparent">
+        FULLSCREEN →
+      </button>
+    </div>
+
+    <p class="font-ui text-p-dim/30 text-xs tracking-widest text-center mt-8">
+      PANOPTICON · THE 63RD · ALL ACTIVITY MONITORED
+    </p>
+  </div>
+</Layout>
+
+<script>
+  document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
+    const frame = document.getElementById('game-frame');
+    if (frame?.requestFullscreen) {
+      frame.requestFullscreen();
+    } else if (frame?.webkitRequestFullscreen) {
+      frame.webkitRequestFullscreen();
+    }
+  });
+</script>
