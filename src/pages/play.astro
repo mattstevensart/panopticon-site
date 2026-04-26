@@ -3,63 +3,107 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="PLAY | PANOPTICON">
-  <div class="max-w-4xl mx-auto px-4 py-12">
 
-    <!-- Header -->
-    <div class="mb-8 border-b border-p-accent/20 pb-6">
-      <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">THE 63RD — RECREATION YARD</p>
-      <h1 class="font-display text-2xl md:text-3xl text-p-accent tracking-wide">PANOPTICON: THE GAME</h1>
-      <p class="font-comic text-p-dim text-sm mt-2">Navigate the prison. Survive the facility. Play in your browser.</p>
-      <div class="w-16 h-px bg-p-accent mt-4"></div>
+  <!-- Full-bleed hero -->
+  <div class="relative w-full" style="min-height: 80vh;">
+
+    <!-- Background image -->
+    <div class="absolute inset-0">
+      <img src="/images/game-hero.jpg" alt="" class="w-full h-full object-cover" />
+      <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(10,10,15,0.3) 0%, rgba(10,10,15,0.5) 40%, rgba(10,10,15,0.85) 80%, rgb(10,10,15) 100%);"></div>
     </div>
 
-    <!-- Itch.io embed widget -->
-    <div class="flex justify-center mb-8">
-      <iframe
-        src="https://itch.io/embed/4384423?dark=true"
-        width="552"
-        height="167"
-        frameborder="0"
-        title="Panopticon Game on Itch.io"
-        style="border: 2px solid rgba(56, 140, 255, 0.3);"
-      ></iframe>
-    </div>
+    <!-- Hero content -->
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-4" style="min-height: 80vh;">
 
-    <!-- Play button -->
-    <div class="text-center mb-10">
+      <p class="font-ui text-p-dim text-xs tracking-[0.5em] mb-4">THE 63RD — RECREATION YARD</p>
+
+      <h1 class="font-display text-4xl md:text-6xl tracking-wider mb-2" style="color: rgb(230, 40, 30);">
+        PAN<span style="color: rgb(56, 140, 255);">⊕</span>PTICON
+      </h1>
+      <p class="font-display text-lg md:text-xl tracking-[0.3em] text-p-text mb-8">THE GAME</p>
+
+      <p class="font-comic text-p-dim text-sm md:text-base max-w-lg mb-10 leading-relaxed">
+        Navigate the strict codes of your prison and your fellow inmates while attempting to escape.
+      </p>
+
       <a href="https://panopticon-comic.itch.io/panopticon"
         target="_blank"
-        class="inline-block px-12 py-5 border-3 border-p-accent bg-p-accent/20 text-p-accent font-display text-lg tracking-widest hover:bg-p-accent/30 transition-all"
-        style="text-decoration: none; border-width: 3px; box-shadow: 0 0 25px rgba(56, 140, 255, 0.3), 0 0 50px rgba(56, 140, 255, 0.1); animation: play-pulse 2s ease-in-out infinite;">
+        class="play-btn inline-block px-14 py-5 font-display text-lg tracking-widest transition-all"
+        style="text-decoration: none; border-width: 3px;">
         PLAY NOW →
       </a>
-      <p class="font-ui text-p-dim text-xs tracking-widest mt-4">OPENS ON ITCH.IO · BEST ON DESKTOP</p>
+
+      <p class="font-ui text-p-dim/50 text-xs tracking-widest mt-6">PLAYS IN BROWSER · BEST ON DESKTOP</p>
+
+      <!-- Scroll indicator -->
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
+        <svg class="w-5 h-5 text-p-dim/40 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- About section -->
+  <div class="max-w-4xl mx-auto px-4 py-16">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+      <div class="border border-p-dim/20 bg-p-panel p-6">
+        <p class="font-display text-xs tracking-widest text-p-accent mb-4">ABOUT THE GAME</p>
+        <p class="font-comic text-p-dim text-sm leading-relaxed">
+          A companion game built to mirror the world of the Panopticon graphic novel — a dark, atmospheric sci-fi story about survival inside a prison guarded by a blacked out central tower. Environments, characters, and scenarios connect directly to the comic.
+        </p>
+      </div>
+      <div class="border border-p-dim/20 bg-p-panel p-6">
+        <p class="font-display text-xs tracking-widest text-p-accent mb-4">FEATURES</p>
+        <div class="space-y-3 font-comic text-p-dim text-sm">
+          <p><span class="text-p-teal">●</span> &nbsp;Explore the prison environment</p>
+          <p><span class="text-p-teal">●</span> &nbsp;Interact with fellow inmates</p>
+          <p><span class="text-p-teal">●</span> &nbsp;Scenarios from the graphic novel</p>
+          <p><span class="text-p-teal">●</span> &nbsp;Made by artist &amp; creator Matt Stevens</p>
+        </div>
+      </div>
     </div>
 
-    <!-- Game info -->
-    <div class="border border-p-dim/20 bg-p-panel p-6">
-      <p class="font-display text-xs tracking-widest text-p-text mb-4">ABOUT THE GAME</p>
-      <p class="font-comic text-p-dim text-sm leading-relaxed mb-4">
-        A mobile game built to mirror the world of the Panopticon graphic novel — a dark, atmospheric sci-fi story about survival inside a prison guarded by a blacked out central tower.
-      </p>
-      <p class="font-comic text-p-dim text-sm leading-relaxed">
-        Environments, characters, and scenarios connect directly to the comic's story and world. Made by artist and creator Matt Stevens.
-      </p>
+    <!-- CTA -->
+    <div class="text-center border-t border-p-dim/20 pt-10">
+      <p class="font-comic text-p-dim text-sm mb-6">Haven't read the comic yet?</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/read" class="inline-block px-8 py-3 border-2 border-p-accent text-p-accent font-display text-xs tracking-widest hover:bg-p-accent/10 transition-all text-center" style="text-decoration:none;">
+          READ THE COMIC →
+        </a>
+        <a href="/avatar" class="inline-block px-8 py-3 border-2 border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all text-center" style="text-decoration:none;">
+          CREATE YOUR AVATAR →
+        </a>
+      </div>
     </div>
 
-    <p class="font-ui text-p-dim/30 text-xs tracking-widest text-center mt-10">
+    <p class="font-ui text-p-dim/30 text-xs tracking-widest text-center mt-12">
       PANOPTICON · THE 63RD · ALL ACTIVITY MONITORED
     </p>
   </div>
 </Layout>
 
 <style>
+  .play-btn {
+    background: rgba(230, 40, 30, 0.15);
+    border: 3px solid rgb(230, 40, 30);
+    color: rgb(230, 40, 30);
+    animation: play-pulse 2.5s ease-in-out infinite;
+  }
+  .play-btn:hover {
+    background: rgba(230, 40, 30, 0.3);
+    color: rgb(255, 80, 70);
+    border-color: rgb(255, 80, 70);
+    transform: scale(1.03);
+  }
   @keyframes play-pulse {
     0%, 100% {
-      box-shadow: 0 0 25px rgba(56, 140, 255, 0.3), 0 0 50px rgba(56, 140, 255, 0.1);
+      box-shadow: 0 0 20px rgba(230, 40, 30, 0.25), 0 0 40px rgba(230, 40, 30, 0.1);
     }
     50% {
-      box-shadow: 0 0 40px rgba(56, 140, 255, 0.5), 0 0 80px rgba(56, 140, 255, 0.2);
+      box-shadow: 0 0 35px rgba(230, 40, 30, 0.45), 0 0 70px rgba(230, 40, 30, 0.2), 0 0 100px rgba(230, 40, 30, 0.08);
     }
   }
 </style>
