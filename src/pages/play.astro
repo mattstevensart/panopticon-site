@@ -3,58 +3,63 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="PLAY | PANOPTICON">
-  <div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="max-w-4xl mx-auto px-4 py-12">
 
     <!-- Header -->
-    <div class="mb-6 border-b border-p-accent/20 pb-4">
+    <div class="mb-8 border-b border-p-accent/20 pb-6">
       <p class="font-ui text-p-dim text-xs tracking-[0.4em] mb-2">THE 63RD — RECREATION YARD</p>
-      <h1 class="font-display text-2xl md:text-3xl text-p-accent tracking-wide">PANOPTICON</h1>
-      <p class="font-comic text-p-dim text-sm mt-2">Survive the facility. Play directly in your browser.</p>
+      <h1 class="font-display text-2xl md:text-3xl text-p-accent tracking-wide">PANOPTICON: THE GAME</h1>
+      <p class="font-comic text-p-dim text-sm mt-2">Navigate the prison. Survive the facility. Play in your browser.</p>
       <div class="w-16 h-px bg-p-accent mt-4"></div>
     </div>
 
-    <!-- Game embed -->
-    <div class="relative border-2 border-p-accent/40 bg-black" style="aspect-ratio: 16/9; max-height: 80vh;">
-
-      <!-- Loading state -->
-      <div id="game-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-black z-10">
-        <div class="w-8 h-8 border-2 border-p-accent border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="font-display text-p-accent text-xs tracking-widest">LOADING GAME...</p>
-      </div>
-
+    <!-- Itch.io embed widget -->
+    <div class="flex justify-center mb-8">
       <iframe
-        id="game-frame"
-        src="https://panopticon-comic.itch.io/panopticon"
-        class="w-full h-full border-0"
-        title="Panopticon Game"
-        allow="fullscreen; autoplay; cross-origin-isolated"
-        allowfullscreen
-        onload="document.getElementById('game-loading').style.display='none'"
+        src="https://itch.io/embed/4384423?dark=true"
+        width="552"
+        height="167"
+        frameborder="0"
+        title="Panopticon Game on Itch.io"
+        style="border: 2px solid rgba(56, 140, 255, 0.3);"
       ></iframe>
     </div>
 
-    <!-- Controls -->
-    <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <p class="font-ui text-p-dim text-xs tracking-widest">BEST ON DESKTOP · USE KEYBOARD CONTROLS</p>
-      <button id="fullscreen-btn"
-        class="px-6 py-2 border border-p-accent/40 text-p-accent font-display text-xs tracking-widest hover:bg-p-accent/10 transition-all cursor-pointer bg-transparent">
-        FULLSCREEN →
-      </button>
+    <!-- Play button -->
+    <div class="text-center mb-10">
+      <a href="https://panopticon-comic.itch.io/panopticon"
+        target="_blank"
+        class="inline-block px-12 py-5 border-3 border-p-accent bg-p-accent/20 text-p-accent font-display text-lg tracking-widest hover:bg-p-accent/30 transition-all"
+        style="text-decoration: none; border-width: 3px; box-shadow: 0 0 25px rgba(56, 140, 255, 0.3), 0 0 50px rgba(56, 140, 255, 0.1); animation: play-pulse 2s ease-in-out infinite;">
+        PLAY NOW →
+      </a>
+      <p class="font-ui text-p-dim text-xs tracking-widest mt-4">OPENS ON ITCH.IO · BEST ON DESKTOP</p>
     </div>
 
-    <p class="font-ui text-p-dim/30 text-xs tracking-widest text-center mt-8">
+    <!-- Game info -->
+    <div class="border border-p-dim/20 bg-p-panel p-6">
+      <p class="font-display text-xs tracking-widest text-p-text mb-4">ABOUT THE GAME</p>
+      <p class="font-comic text-p-dim text-sm leading-relaxed mb-4">
+        A mobile game built to mirror the world of the Panopticon graphic novel — a dark, atmospheric sci-fi story about survival inside a prison guarded by a blacked out central tower.
+      </p>
+      <p class="font-comic text-p-dim text-sm leading-relaxed">
+        Environments, characters, and scenarios connect directly to the comic's story and world. Made by artist and creator Matt Stevens.
+      </p>
+    </div>
+
+    <p class="font-ui text-p-dim/30 text-xs tracking-widest text-center mt-10">
       PANOPTICON · THE 63RD · ALL ACTIVITY MONITORED
     </p>
   </div>
 </Layout>
 
-<script>
-  document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
-    const frame = document.getElementById('game-frame');
-    if (frame?.requestFullscreen) {
-      frame.requestFullscreen();
-    } else if (frame?.webkitRequestFullscreen) {
-      frame.webkitRequestFullscreen();
+<style>
+  @keyframes play-pulse {
+    0%, 100% {
+      box-shadow: 0 0 25px rgba(56, 140, 255, 0.3), 0 0 50px rgba(56, 140, 255, 0.1);
     }
-  });
-</script>
+    50% {
+      box-shadow: 0 0 40px rgba(56, 140, 255, 0.5), 0 0 80px rgba(56, 140, 255, 0.2);
+    }
+  }
+</style>
