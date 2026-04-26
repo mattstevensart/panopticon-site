@@ -829,11 +829,24 @@ import Layout from '../layouts/Layout.astro';
     async function registerInFirebase(email, name, inmateId, token, avatarThumb) {
       if (!fbReady) return;
       try {
-        // Check for duplicate email
         const { collection, getDocs, query, where, addDoc } = fbDb;
+        const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+        // Check if email exists — update avatar if so, otherwise create new
         const q = query(collection(fbDb.fs, 'earlybird_registrations'), where('email', '==', email.toLowerCase()));
         const snap = await getDocs(q);
-        if (!snap.empty) { console.log('Already registered in Firebase'); return; }
+        if (!snap.empty) {
+          const existing = snap.docs[0];
+          await updateDoc(doc(fbDb.fs, 'earlybird_registrations', existing.id), {
+            name: name || existing.data().name,
+            inmateId: inmateId || existing.data().inmateId,
+            token: token || existing.data().token,
+            avatarThumb: avatarThumb || existing.data().avatarThumb,
+          });
+          localStorage.setItem('panopticon_eb_token', token || inmateId || '');
+          localStorage.setItem('panopticon_eb_email', email.toLowerCase());
+          console.log('✅ Updated existing registration');
+          return;
+        }
         await addDoc(collection(fbDb.fs, 'earlybird_registrations'), {
           name: name || '',
           inmateId: inmateId || token || '',
