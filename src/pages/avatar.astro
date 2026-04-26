@@ -230,9 +230,9 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- Post-save message box (hidden initially) -->
-    <div id="post-save-box" style="position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); width: 460px; background: rgb(23, 23, 33); border: 3px solid rgb(26, 224, 194); padding: 28px 32px; z-index: 2000; font-family: 'Exo 2'; max-width: 92vw; box-shadow: 0 0 30px rgba(26, 224, 194, 0.3), 0 0 60px rgba(26, 224, 194, 0.1);">
-      <div id="post-save-text" style="color: rgb(214, 214, 224); font-size: 15px; line-height: 2; margin-bottom: 20px; white-space: pre-wrap; font-family: 'Electrolize';"></div>
-      <a id="scan-btn" href="/scan" style="display: inline-block; padding: 12px 20px; background: rgb(56, 140, 255); border: 2px solid rgb(56, 140, 255); color: rgb(10, 10, 15); font-family: 'Electrolize'; font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none; letter-spacing: 1px;">SCAN INTO PANOPTICON →</a>
+    <div id="post-save-box" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 520px; background: rgb(23, 23, 33); border: 3px solid rgb(26, 224, 194); padding: 36px 40px; z-index: 2000; font-family: 'Exo 2'; max-width: 92vw; box-shadow: 0 0 40px rgba(26, 224, 194, 0.4), 0 0 80px rgba(26, 224, 194, 0.15); text-align: center;">
+      <div id="post-save-text" style="color: rgb(214, 214, 224); font-size: 16px; line-height: 2.2; margin-bottom: 28px; white-space: pre-wrap; font-family: 'Electrolize';"></div>
+      <a id="scan-btn" href="/scan" style="display: inline-block; padding: 18px 40px; background: rgb(56, 140, 255); border: 3px solid rgb(56, 140, 255); color: rgb(10, 10, 15); font-family: 'Electrolize'; font-size: 18px; font-weight: bold; cursor: pointer; text-decoration: none; letter-spacing: 2px; text-align: center; box-shadow: 0 0 20px rgba(56, 140, 255, 0.4), 0 0 40px rgba(56, 140, 255, 0.15); animation: scan-btn-pulse 2s ease-in-out infinite;">SCAN INTO PANOPTICON →</a>
     </div>
   </div>
 
@@ -639,6 +639,24 @@ import Layout from '../layouts/Layout.astro';
       background: rgb(26, 80, 40);
       color: rgb(130, 255, 160);
       border-color: rgb(130, 255, 160);
+    }
+
+    .action-button-glow.glow-done {
+      animation: none !important;
+      background: rgb(20, 40, 25);
+      border-color: rgb(40, 140, 60);
+      color: rgb(40, 140, 60);
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    @keyframes scan-btn-pulse {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(56, 140, 255, 0.4), 0 0 40px rgba(56, 140, 255, 0.15);
+      }
+      50% {
+        box-shadow: 0 0 35px rgba(56, 140, 255, 0.6), 0 0 70px rgba(56, 140, 255, 0.25);
+      }
     }
 
     #name-modal {
@@ -1789,6 +1807,12 @@ import Layout from '../layouts/Layout.astro';
     }
 
     async function savePng() {
+      // Stop glow on Save PNG button after click
+      const saveEl = document.getElementById('save-btn');
+      if (saveEl) { saveEl.classList.add('glow-done'); saveEl.textContent = '✓ SAVED'; }
+      const mSaveEl = document.getElementById('mobile-save-btn');
+      if (mSaveEl) { mSaveEl.classList.add('glow-done'); mSaveEl.textContent = '✓ SAVED'; }
+
       // Camera flash
       const flash = document.createElement('div');
       flash.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:white;z-index:9999;opacity:0;transition:opacity 0.05s;';
