@@ -17,9 +17,6 @@ import Layout from '../layouts/Layout.astro';
           <button id="landing-new-btn" style="width: 280px; padding: 14px 24px; background: rgb(26, 224, 194); border: 2px solid rgb(26, 224, 194); color: rgb(10, 10, 15); font-family: 'Electrolize'; font-size: 14px; font-weight: bold; cursor: pointer; letter-spacing: 2px; transition: all 0.2s;">
             CREATE ANOTHER AVATAR →
           </button>
-          <button id="landing-continue-btn" style="width: 280px; padding: 14px 24px; background: transparent; border: 2px solid rgb(92, 87, 111); color: rgb(214, 214, 224); font-family: 'Electrolize'; font-size: 13px; cursor: pointer; letter-spacing: 1px; transition: all 0.2s;">
-            MODIFY CURRENT AVATAR
-          </button>
         </div>
       </div>
     </div>
@@ -938,12 +935,6 @@ import Layout from '../layouts/Layout.astro';
           launchCreator();
         });
 
-        // "Modify current avatar" — keep state, open creator
-        document.getElementById('landing-continue-btn')?.addEventListener('click', () => {
-          if (landing) landing.style.display = 'none';
-          if (creator) creator.style.display = 'block';
-          launchCreator();
-        });
 
         return;
       }
