@@ -753,6 +753,21 @@ import Layout from '../layouts/Layout.astro';
       border-bottom-color: rgb(26, 224, 194);
     }
 
+    .mobile-cat-btn.next-up {
+      animation: mobile-cat-pulse 1.2s ease-in-out 3;
+    }
+
+    @keyframes mobile-cat-pulse {
+      0%, 100% {
+        background: rgb(51, 51, 66);
+        box-shadow: none;
+      }
+      50% {
+        background: rgb(30, 80, 160);
+        box-shadow: 0 0 12px rgba(56, 140, 255, 0.5);
+      }
+    }
+
     .mobile-cat-btn.locked {
       opacity: 0.35;
       cursor: not-allowed;
@@ -1381,6 +1396,24 @@ import Layout from '../layouts/Layout.astro';
       return items;
     }
 
+    function findNextCategory(currentIdx) {
+      // Find the next category that is unlocked and doesn't have a selection yet
+      for (let i = currentIdx + 1; i < CATEGORIES.length; i++) {
+        const cat = CATEGORIES[i];
+        if (cat.unlockStage <= currentUnlockStage && !selections[cat.folder]) {
+          return i;
+        }
+      }
+      // Wrap around and check from beginning
+      for (let i = 0; i < currentIdx; i++) {
+        const cat = CATEGORIES[i];
+        if (cat.unlockStage <= currentUnlockStage && !selections[cat.folder]) {
+          return i;
+        }
+      }
+      return null; // All categories have selections
+    }
+
     function toggleSelection(catIdx, item) {
       const cat = CATEGORIES[catIdx];
       const folder = cat.folder;
@@ -1409,6 +1442,32 @@ import Layout from '../layouts/Layout.astro';
       }
 
       renderCanvas();
+
+      // Auto-advance to next unlocked category on mobile after selection
+      if (selections[folder]) {
+        const nextIdx = findNextCategory(catIdx);
+        if (nextIdx !== null) {
+          setTimeout(() => {
+            selectCategory(nextIdx);
+            syncMobileItems();
+            // Update mobile active state
+            const mobileContainer = document.getElementById('mobile-categories');
+            if (mobileContainer) {
+              const mobileBtns = mobileContainer.querySelectorAll('.mobile-cat-btn');
+              mobileBtns.forEach(b => b.classList.remove('active', 'next-up'));
+              if (mobileBtns[nextIdx]) {
+                mobileBtns[nextIdx].classList.add('active');
+                // Scroll into view
+                mobileBtns[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                // Pulse the button
+                mobileBtns[nextIdx].classList.add('next-up');
+                mobileBtns[nextIdx].addEventListener('animationend', () => mobileBtns[nextIdx].classList.remove('next-up'), { once: true });
+              }
+            }
+          }, 300);
+          return;
+        }
+      }
       selectCategory(catIdx);
     }
 
