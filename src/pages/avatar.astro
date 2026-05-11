@@ -813,7 +813,7 @@ import Layout from '../layouts/Layout.astro';
     initFirebase();
 
     function calculateTier() {
-      const launch = new Date('2026-05-15T12:00:00').getTime();
+      const launch = new Date('2026-05-14T12:00:00').getTime();
       const now = Date.now();
       if (now < launch) return 'gold';
       const h = (now - launch) / 3600000;
