@@ -153,6 +153,77 @@ import Layout from '../layouts/Layout.astro';
       </div>
 
       <!-- ══════════════════════════════════════════════
+           KICKSTARTER BACKER MATCHING
+      ══════════════════════════════════════════════ -->
+      <div class="border border-p-accent/30 mb-8">
+        <div class="bg-p-canvas px-6 py-4 border-b border-p-accent/20">
+          <p class="font-display text-sm tracking-widest text-p-accent">KICKSTARTER BACKER MATCHING</p>
+        </div>
+        <div class="bg-p-panel p-6">
+          <p class="font-comic text-p-dim text-sm mb-4">Upload your Kickstarter backer report CSV to auto-match backers with site registrations by email. Download the backer report from your Kickstarter dashboard under "Backer Report."</p>
+
+          <div class="flex flex-wrap gap-3 mb-4 items-center">
+            <label class="px-6 py-2 border border-p-accent text-p-accent font-display text-xs tracking-widest hover:bg-p-accent/10 transition-all cursor-pointer">
+              UPLOAD BACKER CSV
+              <input type="file" id="backer-csv-input" accept=".csv" class="hidden" />
+            </label>
+            <span id="backer-file-name" class="font-ui text-p-dim text-xs tracking-widest"></span>
+          </div>
+
+          <!-- Match results (hidden until CSV processed) -->
+          <div id="match-results" style="display:none;">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+              <div class="bg-p-canvas border border-p-teal/20 p-3 text-center">
+                <div class="font-display text-2xl text-p-teal" id="match-matched">0</div>
+                <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">MATCHED</div>
+              </div>
+              <div class="bg-p-canvas border border-p-red/20 p-3 text-center">
+                <div class="font-display text-2xl text-p-red" id="match-unmatched-backers">0</div>
+                <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">BACKERS NO AVATAR</div>
+              </div>
+              <div class="bg-p-canvas border border-[#f59e0b]/20 p-3 text-center">
+                <div class="font-display text-2xl text-[#f59e0b]" id="match-unmatched-regs">0</div>
+                <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">AVATARS NO PLEDGE</div>
+              </div>
+              <div class="bg-p-canvas border border-p-accent/20 p-3 text-center">
+                <div class="font-display text-2xl text-p-accent" id="match-total-backers">0</div>
+                <div class="font-ui text-p-dim text-[10px] tracking-widest mt-1">TOTAL BACKERS</div>
+              </div>
+            </div>
+
+            <div class="flex gap-3 mb-4">
+              <button id="match-export-btn"
+                class="px-6 py-2 border border-p-accent text-p-accent font-display text-xs tracking-widest hover:bg-p-accent/10 transition-all cursor-pointer bg-transparent">
+                EXPORT MATCHED REPORT (CSV)
+              </button>
+              <button id="match-auto-verify-btn"
+                class="px-6 py-2 border border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all cursor-pointer bg-transparent">
+                AUTO-VERIFY ALL MATCHED
+              </button>
+            </div>
+
+            <!-- Match table -->
+            <div class="overflow-x-auto border border-p-dim/20">
+              <table class="w-full">
+                <thead>
+                  <tr class="bg-p-canvas border-b border-p-dim/20">
+                    <th class="px-3 py-2 text-left font-ui text-p-dim text-[10px] tracking-widest">STATUS</th>
+                    <th class="px-3 py-2 text-left font-ui text-p-dim text-[10px] tracking-widest">BACKER NAME</th>
+                    <th class="px-3 py-2 text-left font-ui text-p-dim text-[10px] tracking-widest">BACKER EMAIL</th>
+                    <th class="px-3 py-2 text-left font-ui text-p-dim text-[10px] tracking-widest">PLEDGE</th>
+                    <th class="px-3 py-2 text-left font-ui text-p-dim text-[10px] tracking-widest">SITE NAME</th>
+                    <th class="px-3 py-2 text-left font-ui text-p-dim text-[10px] tracking-widest">TOKEN</th>
+                    <th class="px-3 py-2 text-left font-ui text-p-dim text-[10px] tracking-widest">TIER</th>
+                  </tr>
+                </thead>
+                <tbody id="match-tbody" class="font-ui text-sm"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
            REGISTRATIONS TABLE
       ══════════════════════════════════════════════ -->
       <div class="border border-p-dim/20">
@@ -564,6 +635,202 @@ function exportCSV() {
   document.getElementById('admin-export-btn')?.addEventListener('click', exportCSV);
   document.getElementById('admin-refresh-btn')?.addEventListener('click', refresh);
   document.getElementById('lottery-draw-btn')?.addEventListener('click', drawLotteryWinner);
+
+  // ── KICKSTARTER BACKER MATCHING ──
+  let matchResults = [];
+
+  document.getElementById('backer-csv-input')?.addEventListener('change', handleBackerCSV);
+  document.getElementById('match-export-btn')?.addEventListener('click', exportMatchReport);
+  document.getElementById('match-auto-verify-btn')?.addEventListener('click', autoVerifyMatched);
+
+  async function handleBackerCSV(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    document.getElementById('backer-file-name').textContent = file.name;
+
+    const text = await file.text();
+    const backers = parseCSV(text);
+
+    if (backers.length === 0) {
+      alert('Could not parse any backers from that CSV. Make sure it has an Email column.');
+      return;
+    }
+
+    // Make sure we have fresh registration data
+    if (allRegs.length === 0) await refresh();
+
+    // Build email lookup map from registrations
+    const regByEmail = {};
+    allRegs.forEach(r => {
+      if (r.email) regByEmail[r.email.toLowerCase().trim()] = r;
+    });
+
+    // Match backers to registrations
+    matchResults = [];
+    let matched = 0, unmatchedBackers = 0;
+    const matchedEmails = new Set();
+
+    backers.forEach(backer => {
+      const backerEmail = (backer.email || '').toLowerCase().trim();
+      const reg = regByEmail[backerEmail];
+
+      if (reg) {
+        matched++;
+        matchedEmails.add(backerEmail);
+        matchResults.push({
+          status: 'matched',
+          backerName: backer.name || '',
+          backerEmail: backerEmail,
+          pledgeAmount: backer.amount || backer.pledge || '',
+          siteName: reg.name || '',
+          token: reg.token || '',
+          tier: reg.tier || '',
+          regId: reg.id,
+        });
+      } else {
+        unmatchedBackers++;
+        matchResults.push({
+          status: 'no-avatar',
+          backerName: backer.name || '',
+          backerEmail: backerEmail,
+          pledgeAmount: backer.amount || backer.pledge || '',
+          siteName: '',
+          token: '',
+          tier: '',
+          regId: null,
+        });
+      }
+    });
+
+    // Find registrations with no matching backer
+    const unmatchedRegs = allRegs.filter(r => r.email && !matchedEmails.has(r.email.toLowerCase().trim()));
+    unmatchedRegs.forEach(r => {
+      matchResults.push({
+        status: 'no-pledge',
+        backerName: '',
+        backerEmail: '',
+        pledgeAmount: '',
+        siteName: r.name || '',
+        token: r.token || '',
+        tier: r.tier || '',
+        regId: r.id,
+      });
+    });
+
+    // Sort: matched first, then no-avatar, then no-pledge
+    const order = { 'matched': 0, 'no-avatar': 1, 'no-pledge': 2 };
+    matchResults.sort((a, b) => order[a.status] - order[b.status]);
+
+    // Update stats
+    document.getElementById('match-matched').textContent = matched;
+    document.getElementById('match-unmatched-backers').textContent = unmatchedBackers;
+    document.getElementById('match-unmatched-regs').textContent = unmatchedRegs.length;
+    document.getElementById('match-total-backers').textContent = backers.length;
+
+    // Render table
+    const tbody = document.getElementById('match-tbody');
+    const TIERS_LOCAL = { gold: { label: 'GOLD', color: '#f59e0b' }, silver: { label: 'SILVER', color: '#94a3b8' }, bronze: { label: 'BRONZE', color: '#d97706' }, supporter: { label: 'SUPPORTER', color: '#1ae0c2' } };
+    tbody.innerHTML = matchResults.map(r => {
+      const statusLabel = r.status === 'matched'
+        ? '<span class="text-p-teal font-display text-xs tracking-widest">✓ MATCHED</span>'
+        : r.status === 'no-avatar'
+        ? '<span class="text-p-red font-ui text-xs">NO AVATAR</span>'
+        : '<span style="color:#f59e0b;" class="font-ui text-xs">NO PLEDGE</span>';
+      const t = TIERS_LOCAL[r.tier] || { label: '', color: '' };
+      return `<tr style="${r.status === 'matched' ? 'background:rgba(26,224,194,0.04);' : ''}">
+        <td class="px-3 py-2">${statusLabel}</td>
+        <td class="px-3 py-2 text-p-text">${esc(r.backerName)}</td>
+        <td class="px-3 py-2 text-p-text">${esc(r.backerEmail)}</td>
+        <td class="px-3 py-2 text-p-accent">${esc(r.pledgeAmount)}</td>
+        <td class="px-3 py-2 text-p-text">${esc(r.siteName)}</td>
+        <td class="px-3 py-2 font-display text-p-accent tracking-widest text-xs">${esc(r.token)}</td>
+        <td class="px-3 py-2"><span style="color:${t.color};" class="font-display text-xs tracking-widest">${t.label}</span></td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('match-results').style.display = 'block';
+  }
+
+  function parseCSV(text) {
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+    if (lines.length < 2) return [];
+    // Parse header — normalize column names
+    const header = parseCSVRow(lines[0]).map(h => h.toLowerCase().trim());
+    const emailIdx = header.findIndex(h => h.includes('email'));
+    const nameIdx = header.findIndex(h => h.includes('backer name') || h.includes('name'));
+    const amountIdx = header.findIndex(h => h.includes('amount') || h.includes('pledge'));
+    if (emailIdx === -1) return [];
+
+    const results = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = parseCSVRow(lines[i]);
+      if (!cols[emailIdx]) continue;
+      results.push({
+        email: cols[emailIdx] || '',
+        name: nameIdx >= 0 ? (cols[nameIdx] || '') : '',
+        amount: amountIdx >= 0 ? (cols[amountIdx] || '') : '',
+      });
+    }
+    return results;
+  }
+
+  function parseCSVRow(row) {
+    const cols = [];
+    let current = '', inQuotes = false;
+    for (let i = 0; i < row.length; i++) {
+      const ch = row[i];
+      if (ch === '"') { inQuotes = !inQuotes; continue; }
+      if (ch === ',' && !inQuotes) { cols.push(current.trim()); current = ''; continue; }
+      current += ch;
+    }
+    cols.push(current.trim());
+    return cols;
+  }
+
+  function exportMatchReport() {
+    const rows = [['Status', 'Backer Name', 'Backer Email', 'Pledge Amount', 'Site Name', 'Token', 'Tier']];
+    matchResults.forEach(r => {
+      rows.push([r.status, r.backerName, r.backerEmail, r.pledgeAmount, r.siteName, r.token, r.tier]);
+    });
+    const csv = rows.map(row => row.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `panopticon-backer-match-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function autoVerifyMatched() {
+    const matched = matchResults.filter(r => r.status === 'matched' && r.regId);
+    if (matched.length === 0) { alert('No matched backers to verify.'); return; }
+    if (!confirm(`Auto-verify ${matched.length} matched backers? This will mark them as verified and enter them in the lottery.`)) return;
+
+    const btn = document.getElementById('match-auto-verify-btn');
+    btn.textContent = 'VERIFYING...';
+    btn.disabled = true;
+
+    let count = 0;
+    for (const r of matched) {
+      try {
+        await updateRegistration(r.regId, {
+          pledgeVerified: true,
+          backerName: r.backerName,
+          backerEmail: r.backerEmail,
+          pledgeAmount: r.pledgeAmount,
+          verifiedAt: new Date().toISOString(),
+          lotteryEligible: true,
+        });
+        count++;
+      } catch(e) { console.warn('Failed to verify:', r.regId, e); }
+    }
+
+    btn.textContent = `✓ VERIFIED ${count} BACKERS`;
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = 'AUTO-VERIFY ALL MATCHED'; }, 3000);
+    await refresh();
+  }
 
   // ── AVATAR GALLERY ──
   let avatarUploads = [];
