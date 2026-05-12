@@ -123,6 +123,36 @@ import Layout from '../layouts/Layout.astro';
       </div>
 
       <!-- ══════════════════════════════════════════════
+           AVATAR GALLERY (full-res downloads)
+      ══════════════════════════════════════════════ -->
+      <div class="border border-p-teal/30 mb-8">
+        <div class="bg-p-canvas px-6 py-4 border-b border-p-teal/20 flex items-center justify-between">
+          <p class="font-display text-sm tracking-widest text-p-teal">AVATAR GALLERY</p>
+          <span class="font-ui text-p-dim text-[10px] tracking-widest" id="avatar-count">0 AVATARS</span>
+        </div>
+        <div class="bg-p-panel p-6">
+          <p class="font-comic text-p-dim text-sm mb-4">Full-resolution avatars uploaded by users. Click any avatar to download, or use the bulk download button.</p>
+          <div class="flex gap-3 mb-4">
+            <button id="avatar-load-btn"
+              class="px-6 py-2 border border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all cursor-pointer bg-transparent">
+              LOAD AVATARS
+            </button>
+            <button id="avatar-download-all-btn" style="display:none;"
+              class="px-6 py-2 border border-p-accent text-p-accent font-display text-xs tracking-widest hover:bg-p-accent/10 transition-all cursor-pointer bg-transparent">
+              EXPORT LIST (CSV)
+            </button>
+            <button id="avatar-save-all-btn" style="display:none;"
+              class="px-6 py-2 border border-p-teal text-p-teal font-display text-xs tracking-widest hover:bg-p-teal/10 transition-all cursor-pointer bg-transparent">
+              SAVE ALL IMAGES
+            </button>
+          </div>
+          <div id="avatar-gallery" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+          </div>
+          <p id="avatar-loading" class="font-ui text-p-dim text-xs tracking-widest text-center py-4" style="display:none;">LOADING AVATARS...</p>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════
            REGISTRATIONS TABLE
       ══════════════════════════════════════════════ -->
       <div class="border border-p-dim/20">
@@ -534,5 +564,87 @@ function exportCSV() {
   document.getElementById('admin-export-btn')?.addEventListener('click', exportCSV);
   document.getElementById('admin-refresh-btn')?.addEventListener('click', refresh);
   document.getElementById('lottery-draw-btn')?.addEventListener('click', drawLotteryWinner);
+
+  // ── AVATAR GALLERY ──
+  let avatarUploads = [];
+
+  document.getElementById('avatar-load-btn')?.addEventListener('click', loadAvatars);
+  document.getElementById('avatar-download-all-btn')?.addEventListener('click', exportAvatarCSV);
+  document.getElementById('avatar-save-all-btn')?.addEventListener('click', saveAllImages);
+
+  async function loadAvatars() {
+    if (!useFirebase) {
+      alert('Firebase not configured — avatar gallery requires Firebase.');
+      return;
+    }
+    document.getElementById('avatar-loading').style.display = 'block';
+    document.getElementById('avatar-gallery').innerHTML = '';
+
+    try {
+      const { collection, getDocs, query, orderBy } = db._m;
+      const q = query(collection(db.firestore, 'avatar_uploads'), orderBy('uploadedAt', 'desc'));
+      const snap = await getDocs(q);
+      avatarUploads = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch(e) {
+      console.warn('Failed to load avatars:', e);
+      avatarUploads = [];
+    }
+
+    document.getElementById('avatar-loading').style.display = 'none';
+    document.getElementById('avatar-count').textContent = avatarUploads.length + ' AVATARS';
+
+    if (avatarUploads.length > 0) {
+      document.getElementById('avatar-download-all-btn').style.display = 'inline-block';
+      document.getElementById('avatar-save-all-btn').style.display = 'inline-block';
+    }
+
+    const gallery = document.getElementById('avatar-gallery');
+    const imgSrc = a => a.imageData || a.storageUrl || '';
+    gallery.innerHTML = avatarUploads.map(a => `
+      <a href="${imgSrc(a)}" download="${esc(a.filename || a.token || 'avatar')}.png" title="${esc(a.name || a.token || 'Avatar')}\n${a.token || ''}\n${new Date(a.uploadedAt).toLocaleDateString()}" class="block border border-p-dim/20 hover:border-p-teal/60 transition-all overflow-hidden aspect-square">
+        <img src="${imgSrc(a)}" alt="${esc(a.name || 'Avatar')}" class="w-full h-full object-cover" loading="lazy" />
+      </a>
+    `).join('');
+  }
+
+  async function saveAllImages() {
+    if (avatarUploads.length === 0) return;
+    const btn = document.getElementById('avatar-save-all-btn');
+    btn.textContent = 'SAVING...';
+    btn.disabled = true;
+    // Download each image as a file with a short delay between each
+    for (let i = 0; i < avatarUploads.length; i++) {
+      const a = avatarUploads[i];
+      const src = a.imageData || a.storageUrl || '';
+      if (!src) continue;
+      const link = document.createElement('a');
+      link.href = src;
+      link.download = `${(a.name || a.token || 'avatar').replace(/\s+/g, '_')}_${a.token || i}.png`;
+      link.click();
+      // Small delay so browser doesn't block rapid downloads
+      await new Promise(r => setTimeout(r, 300));
+    }
+    btn.textContent = `✓ SAVED ${avatarUploads.length} IMAGES`;
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = 'SAVE ALL IMAGES'; }, 3000);
+  }
+
+  function exportAvatarCSV() {
+    const rows = [['Name', 'Inmate ID', 'Token', 'Filename', 'Uploaded At']];
+    avatarUploads.forEach(a => {
+      rows.push([
+        a.name || '', a.inmateId || '', a.token || '',
+        a.filename || '', a.uploadedAt || ''
+      ]);
+    });
+    const csv = rows.map(row => row.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `panopticon-avatars-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 })();
 </script>

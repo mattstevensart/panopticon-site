@@ -2087,6 +2087,31 @@ import Layout from '../layouts/Layout.astro';
       const safeName = charName.replace(/\s+/g, '_').replace(/[\/:\\]/g, '-');
       const filename = `${safeName}${idCode.toUpperCase()}.png`;
 
+      // Save medium-res avatar to Firestore (no Storage needed — free tier)
+      // 800×800 is plenty for a printed grid in the back of the comic
+      if (fbReady) {
+        (async () => {
+          try {
+            const medCanvas = document.createElement('canvas');
+            medCanvas.width = 800;
+            medCanvas.height = 800;
+            const medCtx = medCanvas.getContext('2d');
+            medCtx.drawImage(cropped, 0, 0, 800, 800);
+            const medDataUrl = medCanvas.toDataURL('image/png');
+            const { collection, addDoc } = fbDb;
+            await addDoc(collection(fbDb.fs, 'avatar_uploads'), {
+              name: charName?.toUpperCase() || '',
+              inmateId: idCode?.toUpperCase() || '',
+              token: tok,
+              filename: filename,
+              imageData: medDataUrl,
+              uploadedAt: new Date().toISOString(),
+            });
+            console.log('✅ Avatar saved to Firestore');
+          } catch(e) { console.warn('Avatar save failed (non-critical):', e); }
+        })();
+      }
+
       if (isMobile) {
         // Mobile: try direct <a download> first — most Android browsers support it
         // and it preserves the PNG losslessly unlike Web Share API
