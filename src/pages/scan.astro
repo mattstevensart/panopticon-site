@@ -632,4 +632,36 @@ import Layout from '../layouts/Layout.astro';
 
   /* ── Event: scan again button ── */
   scanAgainBtn.addEventListener('click', resetScanner);
+
+  /* ── AUTO-SCAN: if arriving from avatar maker with ?auto=1 ── */
+  (function checkAutoScan() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auto') !== '1') return;
+
+    const dataUrl = localStorage.getItem('panopticon_autoscan_data');
+    if (!dataUrl) return;
+
+    // Convert data URL back to a File object
+    try {
+      const arr = dataUrl.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      const u8arr = new Uint8Array(bstr.length);
+      for (let i = 0; i < bstr.length; i++) u8arr[i] = bstr.charCodeAt(i);
+      const file = new File([u8arr], 'avatar.png', { type: mime });
+
+      // Small delay so user sees the scan page load first
+      setTimeout(() => {
+        setStatus('AUTO-SCAN  ·  AVATAR DETECTED...');
+        runScan(file);
+        // Clean up stored data
+        localStorage.removeItem('panopticon_autoscan_data');
+        // Clean URL without reload
+        history.replaceState(null, '', '/scan/');
+      }, 800);
+    } catch(e) {
+      console.warn('Auto-scan failed:', e);
+      localStorage.removeItem('panopticon_autoscan_data');
+    }
+  })();
 </script>
