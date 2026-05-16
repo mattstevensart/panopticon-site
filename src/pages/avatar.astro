@@ -214,8 +214,8 @@ import Layout from '../layouts/Layout.astro';
         <div style="color: rgb(214, 214, 224); font-family: 'Exo 2', sans-serif; font-size: 14px; line-height: 1.7; margin-bottom: 12px;">
           Enter your email to lock in your avatar and get included on the <span style="color: rgb(26, 224, 194);">thank you page</span> of the book.
         </div>
-        <div style="color: rgb(245, 158, 11); font-family: 'Electrolize'; font-size: 11px; letter-spacing: 1px; margin-bottom: 20px; padding: 8px 12px; border: 1px solid rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.06);">
-          ⚠ WITHOUT AN EMAIL, YOUR CHARACTER WON'T BE INCLUDED IN THE BOOK
+        <div style="color: rgb(26, 224, 194); font-family: 'Electrolize'; font-size: 11px; letter-spacing: 1px; margin-bottom: 20px; padding: 8px 12px; border: 1px solid rgba(26, 224, 194, 0.2); background: rgba(26, 224, 194, 0.04);">
+          YOUR EMAIL GETS YOUR AVATAR IN THE PRINTED BOOK + EXTRA LOOT IN YOUR ORDER
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <input id="email-input" type="email" placeholder="ENTER EMAIL" style="flex: 1; min-width: 200px; padding: 12px 14px; background: rgb(10, 10, 15); border: 2px solid rgb(92, 87, 111); color: rgb(214, 214, 224); font-family: 'Electrolize'; font-size: 14px; letter-spacing: 1px; outline: none;" />
@@ -2352,8 +2352,8 @@ import Layout from '../layouts/Layout.astro';
         skipBtn.onclick = () => {
           if (!skipConfirmed) {
             skipConfirmed = true;
-            skipBtn.textContent = 'ARE YOU SURE? YOUR CHARACTER WON\'T BE IN THE BOOK';
-            skipBtn.style.color = 'rgb(245, 158, 11)';
+            skipBtn.textContent = 'SKIP — YOU CAN ALWAYS COME BACK AND ADD IT LATER';
+            skipBtn.style.color = 'rgb(92, 87, 111)';
             return;
           }
           modal.style.display = 'none';
