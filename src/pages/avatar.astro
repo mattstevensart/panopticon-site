@@ -2099,6 +2099,17 @@ import Layout from '../layouts/Layout.astro';
       const mSaveEl = document.getElementById('mobile-save-btn');
       if (mSaveEl) { mSaveEl.classList.add('glow-done'); mSaveEl.textContent = '✓ SAVED'; }
 
+      // Store avatar thumbnail EARLY so Firebase registration gets the current one
+      try {
+        const canvas = document.getElementById('preview-canvas');
+        const thumbCanvas = document.createElement('canvas');
+        thumbCanvas.width = 240;
+        thumbCanvas.height = 240;
+        const tCtx = thumbCanvas.getContext('2d');
+        tCtx.drawImage(canvas, 0, 0, 240, 240);
+        localStorage.setItem('panopticon_avatar_thumb', thumbCanvas.toDataURL('image/png'));
+      } catch(e) { /* thumbnail generation failed, non-critical */ }
+
       // Camera flash
       const flash = document.createElement('div');
       flash.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:white;z-index:9999;opacity:0;transition:opacity 0.05s;';
